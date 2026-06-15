@@ -59,6 +59,17 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
 3. ✅ SSE layer (`/events/{householdId}` → `queryClient.invalidateQueries`).
    Uses SSE-over-fetch (`@microsoft/fetch-event-source`) because native
    `EventSource` can't send the `Authorization` header the backend requires.
-4. ⏳ Feature parity tab-by-tab (Recipes → Pantry → List → Plan → Profile)
-5. ⏳ PWA shell (manifest, service worker, install prompt, fonts, palette)
+4. ◐ Feature parity tab-by-tab. Faithful port: Poppins/Caprasimo fonts, the
+   `p_*` palette (light+dark), 5-tab bottom nav via React Router.
+   - ✅ Recipes tab: list (fuzzy pantry-ratio sort, tag filters, search),
+     detail (pantry-matched ingredients, add-to-list, "I made this"), edit
+     (form, URL import, tags), big mode (paginated + ingredient highlighting)
+   - ⏳ Pantry → List → Plan → Profile (stub tabs in `PlaceholderPages.tsx`)
+5. ⏳ PWA shell (manifest, service worker, install prompt)
 6. ⏳ Deploy + cutover
+
+### Web-vs-native deviations (Recipes tab)
+
+- Delete is a trash button on the row, not swipe-to-delete.
+- The "import recipe" toolbar uses a URL prompt instead of clipboard paste.
+- Tab icons are placeholder line SVGs (SF Symbols have no web equivalent).
