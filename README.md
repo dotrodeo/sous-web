@@ -52,10 +52,13 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
 - ⏳ **Manual, needs a real browser + your Clerk login:** sign in, then confirm the
   Recipes list renders real household data. (Cannot be done headlessly.)
 
-## Next phases
+## Phases
 
-2. Port remaining models + services into typed query hooks
-3. SSE layer (`/events/{householdId}` → `queryClient.invalidateQueries`)
-4. Feature parity tab-by-tab (Recipes → Pantry → List → Plan → Profile)
-5. PWA shell (manifest, service worker, install prompt, fonts, palette)
-6. Deploy + cutover
+1. ✅ Spike: Clerk auth + Recipes list end-to-end
+2. ✅ Port models + services into typed query/mutation hooks (`src/hooks`)
+3. ✅ SSE layer (`/events/{householdId}` → `queryClient.invalidateQueries`).
+   Uses SSE-over-fetch (`@microsoft/fetch-event-source`) because native
+   `EventSource` can't send the `Authorization` header the backend requires.
+4. ⏳ Feature parity tab-by-tab (Recipes → Pantry → List → Plan → Profile)
+5. ⏳ PWA shell (manifest, service worker, install prompt, fonts, palette)
+6. ⏳ Deploy + cutover

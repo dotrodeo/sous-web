@@ -1,6 +1,13 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 import { RecipesPage } from './RecipesPage'
+import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import './App.css'
+
+/** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
+function HouseholdEventsListener() {
+  useHouseholdEvents()
+  return null
+}
 
 function App() {
   return (
@@ -24,6 +31,7 @@ function App() {
       </SignedOut>
 
       <SignedIn>
+        <HouseholdEventsListener />
         <RecipesPage />
       </SignedIn>
     </div>
