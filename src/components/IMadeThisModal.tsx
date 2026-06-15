@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ThumbsUpIcon, ThumbsDownIcon, RepeatIcon } from './Icons'
 import type { PantryMatchedIngredient } from '../lib/recipeHelper'
 import type { Rating, Recipe, RecipeCompletion } from '../lib/types'
 
@@ -62,7 +63,7 @@ export function IMadeThisModal({ recipe, matched, onClose, onSave }: IMadeThisMo
               onClick={() => toggleRating(1)}
               aria-label="Thumbs up"
             >
-              👍
+              <ThumbsUpIcon size={28} />
             </button>
             <button
               className={`rating-btn${rating === -1 ? ' active' : ''}`}
@@ -70,7 +71,7 @@ export function IMadeThisModal({ recipe, matched, onClose, onSave }: IMadeThisMo
               onClick={() => toggleRating(-1)}
               aria-label="Thumbs down"
             >
-              👎
+              <ThumbsDownIcon size={28} />
             </button>
           </div>
         </div>
@@ -89,7 +90,11 @@ export function IMadeThisModal({ recipe, matched, onClose, onSave }: IMadeThisMo
                       onChange={() => toggleItem(item.id)}
                     />
                     <span>{item.name}</span>
-                    {item.isFavorite && <span className="made-fav" title="Favorite">↻</span>}
+                    {item.isFavorite && (
+                      <span className="made-fav" title="Favorite">
+                        <RepeatIcon size={16} />
+                      </span>
+                    )}
                   </label>
                 )
               })}

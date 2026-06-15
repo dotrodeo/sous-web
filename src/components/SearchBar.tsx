@@ -1,4 +1,4 @@
-import { SearchIcon } from './Icons'
+import { SearchIcon, CloseIcon } from './Icons'
 
 interface SearchBarProps {
   value: string
@@ -19,7 +19,7 @@ export function SearchBar({ value, onChange, placeholder = 'search' }: SearchBar
       />
       {value && (
         <button className="search-clear" type="button" onClick={() => onChange('')} aria-label="Clear search">
-          ×
+          <CloseIcon size={16} />
         </button>
       )}
     </div>

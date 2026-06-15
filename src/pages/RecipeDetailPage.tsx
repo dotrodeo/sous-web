@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Screen } from '../components/Screen'
-import { ChevronLeftIcon } from '../components/Icons'
+import { ChevronLeftIcon, MoreIcon, PlusIcon, CheckIcon, ShoppingCartIcon } from '../components/Icons'
 import { IMadeThisModal } from '../components/IMadeThisModal'
 import { useRecipe, useDeleteRecipe, useCompleteRecipe } from '../hooks/useRecipes'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
@@ -11,10 +11,10 @@ import type { RecipeCompletion } from '../lib/types'
 /** Icon + color for an ingredient's pantry state (DetailView getLeftAdornment). */
 function adornment(match: PantryMatchedIngredient) {
   const item = match.pantryItem
-  if (!item) return { glyph: '+', className: 'ing-add' }
-  if (item.isInStock) return { glyph: '✓', className: 'ing-stock' }
-  if (item.isInShoppingList) return { glyph: '🛒', className: 'ing-list' }
-  return { glyph: '+', className: 'ing-add' }
+  if (!item) return { Icon: PlusIcon, className: 'ing-add' }
+  if (item.isInStock) return { Icon: CheckIcon, className: 'ing-stock' }
+  if (item.isInShoppingList) return { Icon: ShoppingCartIcon, className: 'ing-list' }
+  return { Icon: PlusIcon, className: 'ing-add' }
 }
 
 export function RecipeDetailPage() {
@@ -70,7 +70,7 @@ export function RecipeDetailPage() {
           </button>
           <div className="menu-wrap">
             <button className="icon-btn" type="button" aria-label="Actions" onClick={() => setMenuOpen((o) => !o)}>
-              ⋯
+              <MoreIcon />
             </button>
             {menuOpen && recipe && (
               <>
@@ -121,7 +121,7 @@ export function RecipeDetailPage() {
                       aria-label="Add to shopping list"
                       onClick={() => addToList(m)}
                     >
-                      {a.glyph}
+                      <a.Icon size={16} />
                     </button>
                   </div>
                 )

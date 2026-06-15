@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Screen } from '../components/Screen'
-import { PlusIcon, TrashIcon } from '../components/Icons'
+import { PlusIcon, TrashIcon, CloseIcon } from '../components/Icons'
 import { RecipeTagModal } from '../components/RecipeTagModal'
 import { useRecipe, useUpsertRecipe, useImportRecipe } from '../hooks/useRecipes'
 import type { Recipe, RecipePatch, RecipeTagPatch } from '../lib/types'
@@ -167,7 +167,7 @@ function RecipeForm({ recipeId, isEditing, initial }: RecipeFormProps) {
               <span key={`${t.name}-${i}`} className="tag-pill">
                 {t.name}
                 <button type="button" aria-label={`Remove ${t.name}`} onClick={() => setTags(tags.filter((_, idx) => idx !== i))}>
-                  ×
+                  <CloseIcon size={14} />
                 </button>
               </span>
             ))}

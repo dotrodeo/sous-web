@@ -189,12 +189,12 @@ button.primary {
 }
 
 .search-clear {
+  display: inline-flex;
+  align-items: center;
   border: none;
   background: transparent;
   color: inherit;
-  font-size: 20px;
-  line-height: 1;
-  padding: 0 4px;
+  padding: 0 2px;
 }
 
 /* ── Filter pills ── */
@@ -541,16 +541,21 @@ button.primary {
 }
 
 .rating-btn {
-  font-size: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
   border: none;
-  background: transparent;
-  opacity: 0.4;
-  filter: grayscale(0.4);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  opacity: 0.6;
 }
 
 .rating-btn.active {
   opacity: 1;
-  filter: none;
+  background: rgba(255, 255, 255, 0.36);
 }
 
 .made-items {
@@ -572,6 +577,8 @@ button.primary {
 
 .made-fav {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
   opacity: 0.85;
 }
 
@@ -675,14 +682,15 @@ button.primary {
 }
 
 .tag-pill button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: rgba(255, 255, 255, 0.3);
   color: #fff;
   border-radius: 50%;
   width: 18px;
   height: 18px;
-  line-height: 1;
-  font-size: 14px;
 }
 
 .tag-add {
@@ -801,13 +809,15 @@ button.primary {
 }
 
 .bigmode-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  font-size: 26px;
 }
 
 .bigmode-nav button:disabled {

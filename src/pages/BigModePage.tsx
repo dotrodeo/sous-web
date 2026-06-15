@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useRecipe } from '../hooks/useRecipes'
+import { CloseIcon, ChevronLeftIcon, ChevronRightIcon } from '../components/Icons'
 import { highlight, type HighlightedSegment } from '../lib/instructionHighlighter'
 
 /** Immersive, paginated cooking view with tappable ingredient highlights. */
@@ -36,7 +37,7 @@ export function BigModePage() {
   return (
     <div className="bigmode" onClick={() => setSelected(null)}>
       <button className="bigmode-close" type="button" aria-label="Close" onClick={() => navigate(`/recipes/${recipe.id}`)}>
-        ×
+        <CloseIcon size={28} />
       </button>
 
       <div className="bigmode-body">
@@ -69,14 +70,14 @@ export function BigModePage() {
       )}
 
       <div className="bigmode-nav">
-        <button type="button" disabled={page === 0} onClick={(e) => { e.stopPropagation(); setSelected(null); setPage((p) => Math.max(0, p - 1)) }}>
-          ‹
+        <button type="button" disabled={page === 0} aria-label="Previous step" onClick={(e) => { e.stopPropagation(); setSelected(null); setPage((p) => Math.max(0, p - 1)) }}>
+          <ChevronLeftIcon size={26} />
         </button>
         <span className="bigmode-progress">
           {page + 1} / {total}
         </span>
-        <button type="button" disabled={page >= total - 1} onClick={(e) => { e.stopPropagation(); setSelected(null); setPage((p) => Math.min(total - 1, p + 1)) }}>
-          ›
+        <button type="button" disabled={page >= total - 1} aria-label="Next step" onClick={(e) => { e.stopPropagation(); setSelected(null); setPage((p) => Math.min(total - 1, p + 1)) }}>
+          <ChevronRightIcon size={26} />
         </button>
       </div>
     </div>
