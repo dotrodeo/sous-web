@@ -29,3 +29,9 @@ export function resolveHousehold(user: User | undefined) {
     user.households[0]
   )
 }
+
+/** The current household, derived from the cached user query. */
+export function useActiveHousehold() {
+  const { data } = useUser()
+  return resolveHousehold(data)
+}

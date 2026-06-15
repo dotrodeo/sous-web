@@ -1,4 +1,4 @@
-import { useUser, resolveHousehold } from './hooks/useUser'
+import { useUser, useActiveHousehold } from './hooks/useUser'
 import { useRecipes } from './hooks/useRecipes'
 import type { Recipe } from './lib/types'
 
@@ -15,8 +15,8 @@ function timeSummary(r: Recipe): string {
 
 export function RecipesPage() {
   const userQuery = useUser()
-  const household = resolveHousehold(userQuery.data)
-  const recipesQuery = useRecipes(household?.id)
+  const household = useActiveHousehold()
+  const recipesQuery = useRecipes()
 
   if (userQuery.isLoading) return <p className="status">Loading account…</p>
   if (userQuery.isError)

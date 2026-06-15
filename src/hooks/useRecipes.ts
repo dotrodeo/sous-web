@@ -1,16 +1,90 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi } from '../lib/useApi'
-import type { Recipe } from '../lib/types'
+import { recipeService } from '../lib/services'
+import { useActiveHousehold } from './useUser'
+import type { RecipeCompletion, RecipePatch } from '../lib/types'
 
-/**
- * GET /household/{id}/recipes — mirrors RecipeService.fetchRecipes().
- * Disabled until we know which household to query.
- */
-export function useRecipes(householdId: number | undefined) {
+/** GET /household/{id}/recipes — RecipeService.fetchRecipes(). */
+export function useRecipes() {
   const api = useApi()
+  const household = useActiveHousehold()
   return useQuery({
-    queryKey: ['recipes', householdId],
-    enabled: householdId != null,
-    queryFn: () => api.get<Recipe[]>(`/household/${householdId}/recipes`),
+    queryKey: ['recipes', household?.id],
+    enabled: household != null,
+    queryFn: () => recipeService.list(api, household!.id),
+  })
+}
+
+/** GET /household/{id}/recipes/{id} — RecipeService.fetchRecipe(). */
+export function useRecipe(id: number | undefined) {
+  const api = useApi()
+  const household = useActiveHousehold()
+  return useQuery({
+    queryKey: ['recipe', household?.id, id],
+    enabled: household != null && id != null,
+    queryFn: () => recipeService.get(api, household!.id, id!),
+  })
+}
+
+/** GET /household/{id}/recipes/tags — RecipeService.getAllTags(). */
+export function useRecipeTags() {
+  const api = useApi()
+  const household = useActiveHousehold()
+  return useQuery({
+    queryKey: ['recipeTags', household?.id],
+    enabled: household != null,
+    queryFn: () => recipeService.tags(api, household!.id),
+  })
+}
+
+/** POST /household/{id}/recipes — RecipeService.upsertRecipe(). */
+export function useUpsertRecipe() {
+  const api = useApi()
+  const household = useActiveHousehold()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (patch: RecipePatch) => recipeService.upsert(api, household!.id, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes', household?.id] }),
+  })
+}
+
+/** DELETE /household/{id}/recipes/{id} — RecipeService.deleteRecipe(). */
+export function useDeleteRecipe() {
+  const api = useApi()
+  const household = useActiveHousehold()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => recipeService.remove(api, household!.id, id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recipes', household?.id] }),
+  })
+}
+
+/** POST /household/{id}/recipes/{id}/made — RecipeService.completeRecipe(). */
+export function useCompleteRecipe() {
+  const api = useApi()
+  const household = useActiveHousehold()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      recipeId,
+      completion,
+    }: {
+      recipeId: number
+      completion: RecipeCompletion
+    }) => recipeService.complete(api, household!.id, recipeId, completion),
+    onSuccess: () => {
+      // Completion can mark pantry items finished, so refresh both.
+      qc.invalidateQueries({ queryKey: ['recipes', household?.id] })
+      qc.invalidateQueries({ queryKey: ['pantry', household?.id] })
+    },
+  })
+}
+
+/** GET /household/{id}/recipes/scrape — RecipeService.importRecipe(). */
+export function useImportRecipe() {
+  const api = useApi()
+  const household = useActiveHousehold()
+  return useMutation({
+    mutationFn: (url: string) => recipeService.import(api, household!.id, url),
   })
 }
