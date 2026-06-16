@@ -14,9 +14,10 @@ interface ScreenProps {
 export function Screen({ title, right, search, loading, children }: ScreenProps) {
   return (
     <div className="screen">
+      <div className="screen-deco" aria-hidden />
+      {right && <div className="screen-actions">{right}</div>}
       <header className="screen-header">
         <h1 className="screen-title">{title}</h1>
-        {right && <div className="screen-actions">{right}</div>}
       </header>
       {search}
       <div className="screen-content">

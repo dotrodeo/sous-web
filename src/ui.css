@@ -42,26 +42,48 @@
 
 /* ── Screen ── */
 .screen {
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
+/* Decorative top ellipse (Screen.swift): a wide p_deco ellipse whose bottom
+   arc shows as a gentle downward dome above the title. */
+.screen-deco {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 92px;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.screen-deco::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 40%;
+  transform: translateX(-50%);
+  width: 250%;
+  aspect-ratio: 2.5 / 1.25;
+  border-radius: 50%;
+  background: var(--p-deco);
+}
+
 .screen-header {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
-  position: sticky;
-  top: 0;
-  background: var(--p-background);
-  z-index: 5;
+  padding: 64px 16px 12px;
 }
 
 .screen-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   text-transform: lowercase;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 34px;
   line-height: 1.05;
   margin: 0;
@@ -69,11 +91,29 @@
   overflow-wrap: anywhere;
 }
 
+/* Toolbar actions float in the decorative banner, top-right. */
 .screen-actions {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  z-index: 3;
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
+  gap: 6px;
+}
+
+.screen-actions .icon-btn {
+  background: var(--p-primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* In dark mode the banner is itself p_primary, so contrast the button. */
+@media (prefers-color-scheme: dark) {
+  .screen-actions .icon-btn {
+    background: var(--p-surface);
+    color: var(--p-primary);
+  }
 }
 
 .screen-content {
