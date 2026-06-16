@@ -20,4 +20,6 @@ export {
   ThumbsDown as ThumbsDownIcon,
   Repeat as RepeatIcon,
   Star as StarIcon,
+  CircleSlash as OutOfStockIcon,
+  CalendarClock as ExpiringIcon,
 } from 'lucide-react'
