@@ -93,8 +93,11 @@ On the Debian server (Docker Engine + Compose plugin installed). Name the config
 
 ```bash
 cp .env.deploy.example .env   # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
-docker compose up -d --build
+npm run deploy                # build + (re)start the stack (or: docker compose up -d --build)
 ```
+
+`npm run deploy` wraps `docker compose up -d --build` (auto-detecting `.env` vs
+`.env.deploy`). Companions: `npm run deploy:logs`, `npm run deploy:down`.
 
 This runs the app (`sous_web_app`) and the bundled Cloudflare Tunnel
 (`sous_web_tunnel`). In Cloudflare Zero Trust → Networks → Tunnels: create a
