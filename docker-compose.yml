@@ -1,0 +1,49 @@
+# Self-hosted deploy: static PWA served by nginx, exposed publicly through a
+# Cloudflare Tunnel. Run with:
+#   docker compose --env-file .env.deploy up -d --build
+#
+# Unique project / network / container names avoid clashes with other stacks.
+name: sous-web
+
+services:
+  sous-web:
+    build:
+      context: .
+      args:
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    image: sous-web:latest
+    container_name: sous_web_app
+    restart: unless-stopped
+    expose:
+      - "80"
+    # Optional: localhost-only host port for testing on the server itself.
+    # The public path is the Cloudflare Tunnel, not this port.
+    ports:
+      - "127.0.0.1:8080:80"
+    networks:
+      - sous_web_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Cloudflare Tunnel. In the Zero Trust dashboard, point the public hostname's
+  # ingress at the app over this shared network: http://sous-web:80
+  # Remove this service if you run cloudflared elsewhere.
+  sous-cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: sous_web_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - sous-web
+    networks:
+      - sous_web_net
+
+networks:
+  sous_web_net:
+    name: sous_web_net

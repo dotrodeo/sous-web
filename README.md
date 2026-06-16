@@ -77,7 +77,33 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
    `node scripts/generate-icons.mjs` from a vector source), service worker via
    `vite-plugin-pwa` (autoUpdate) that precaches the app shell only — API/SSE
    responses are never cached, so the app stays online-only.
-6. ⏳ Deploy + cutover (also gives the QR scanner its required HTTPS)
+6. ✅ Deploy: self-hosted via Docker Compose behind a Cloudflare Tunnel (see
+   below). The tunnel provides HTTPS, which the QR scanner requires.
+
+## Deploy (self-hosted: Docker Compose + Cloudflare Tunnel)
+
+A multi-stage `Dockerfile` builds the static bundle and serves it with nginx
+(SPA fallback; `sw.js`/manifest set to `no-cache`). `docker-compose.yml` runs the
+app (`sous_web_app`) and a `cloudflared` tunnel (`sous_web_tunnel`) on a private
+network (`sous_web_net`); the public path is the tunnel, not a host port.
+
+On the Debian server (Docker Engine + Compose plugin installed):
+
+```bash
+cp .env.deploy.example .env.deploy   # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
+docker compose --env-file .env.deploy up -d --build
+```
+
+Cloudflare Zero Trust → Networks → Tunnels: create a tunnel, copy its token into
+`.env.deploy`, and add a public hostname whose ingress points at
+`http://sous-web:80` (reachable over the shared compose network).
+
+Notes:
+- `VITE_*` are **build-time** (Vite inlines them); both are non-secret. Rebuild
+  to change them. `.env.deploy` is gitignored.
+- The service worker is `autoUpdate`; a rebuild + redeploy rolls out to clients.
+- For a local smoke test on the server: `curl http://127.0.0.1:8080/` (the
+  localhost-only port; remove it from compose if undesired).
 
 ### Web-vs-native deviations (Recipes tab)
 
