@@ -1,9 +1,8 @@
 # Self-hosted deploy: static PWA served by nginx, exposed publicly through a
-# Cloudflare Tunnel. Put config in a .env file (Compose auto-loads it, so no
-# --env-file flag is needed and VITE_* are never accidentally blank):
-#   cp .env.deploy.example .env        # then fill it in
-#   docker compose up -d --build                   # app only (host/external tunnel)
-#   docker compose --profile tunnel up -d --build  # app + bundled cloudflared
+# bundled Cloudflare Tunnel. Put config in a .env file (Compose auto-loads it,
+# so no --env-file flag is needed and VITE_* are never accidentally blank):
+#   cp .env.deploy.example .env        # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
+#   docker compose up -d --build
 #
 # Unique project / network / container names avoid clashes with other stacks.
 name: sous-web
@@ -32,18 +31,14 @@ services:
       timeout: 5s
       retries: 3
 
-  # Bundled Cloudflare Tunnel — OPT-IN via the "tunnel" profile:
-  #   docker compose --env-file .env.deploy --profile tunnel up -d --build
-  # In Zero Trust, point the public hostname's ingress at the app over this
-  # shared network: http://sous-web:80
-  # Skip this (omit --profile tunnel) if you run cloudflared on the host; then
-  # point that tunnel at the published port http://127.0.0.1:8080 instead.
+  # Bundled Cloudflare Tunnel. In Zero Trust, point the public hostname's
+  # ingress at the app over this shared network: http://sous-web:80
+  # (Prefer running cloudflared on the host? Remove this service and point that
+  # tunnel at the published port http://127.0.0.1:8080 instead.)
   sous-cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: sous_web_tunnel
     restart: unless-stopped
-    profiles:
-      - tunnel
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}

@@ -92,29 +92,19 @@ On the Debian server (Docker Engine + Compose plugin installed). Name the config
 `VITE_*` from ever being baked in blank:
 
 ```bash
-cp .env.deploy.example .env          # set VITE_* (and the token for option B)
-```
-
-**Option A — run cloudflared yourself (host/another stack).** Start just the app;
-point your tunnel at the published port `http://127.0.0.1:8080`:
-
-```bash
+cp .env.deploy.example .env   # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
 docker compose up -d --build
 ```
 
-**Option B — bundled tunnel.** Set `CLOUDFLARE_TUNNEL_TOKEN` in `.env`, then
-enable the `tunnel` profile:
+This runs the app (`sous_web_app`) and the bundled Cloudflare Tunnel
+(`sous_web_tunnel`). In Cloudflare Zero Trust → Networks → Tunnels: create a
+tunnel, copy its token into `.env`, and add a public hostname whose ingress
+points at `http://sous-web:80` (the shared compose network).
 
-```bash
-docker compose --profile tunnel up -d --build
-```
-
-In Cloudflare Zero Trust → Networks → Tunnels: create a tunnel, copy its token
-into `.env`, and add a public hostname whose ingress points at
-`http://sous-web:80` (option B, shared compose network) or
-`http://127.0.0.1:8080` (option A, host).
-
-> If you keep the file named `.env.deploy`, pass `--env-file .env.deploy` on
+> Prefer to run cloudflared yourself? Remove the `sous-cloudflared` service and
+> point your tunnel at the published port `http://127.0.0.1:8080`.
+>
+> If you keep the config named `.env.deploy`, pass `--env-file .env.deploy` on
 > **every** command (including `build`) — otherwise `VITE_*` build args resolve
 > to blank and the app ships without its Clerk key / API URL.
 
