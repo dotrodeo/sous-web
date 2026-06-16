@@ -1,3 +1,6 @@
+# check=skip=SecretsUsedInArgOrEnv
+# (VITE_* build args are non-secret by design: Clerk *publishable* key + API URL.)
+
 # ---- build stage ----
 # Debian-slim (glibc) so the toolchain matches the target Debian host.
 FROM node:22-bookworm-slim AS build
