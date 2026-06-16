@@ -46,7 +46,7 @@ export function RecipeRow({ recipe, available, total, ratio, onOpen, onDelete }:
             onDelete()
           }}
         >
-          <TrashIcon size={16} />
+          <TrashIcon size={18} />
         </button>
       </span>
     </div>

@@ -26,7 +26,7 @@ function StatusDot({ item }: { item: PantryItem }) {
   if (item.isFavorite) {
     return <StarIcon size={16} fill={color} color={color} />
   }
-  return <span className="status-dot" style={{ background: color, width: 14, height: 14 }} />
+  return <span className="status-dot" style={{ background: color }} />
 }
 
 export function PantryItemRow({ item, onTap, onToggleFavorite, onMarkOutOfStock, onDelete }: PantryItemRowProps) {
