@@ -31,9 +31,12 @@ export function PantryPage() {
     upsert.mutate({ pantryId, patch })
   }
 
+  // The server requires `name` present on every pantry write (the native app
+  // sends it because Swift encodes nil optionals as null; JSON omits undefined).
   function toggleFavorite(item: PantryItem) {
     apply({
       id: item.id,
+      name: item.name,
       isFavorite: !item.isFavorite,
       // Un-favoriting moves the item onto the shopping list (PantryViewModel).
       ...(item.isFavorite ? { isInShoppingList: true } : {}),
@@ -43,13 +46,14 @@ export function PantryPage() {
   function markOutOfStock(item: PantryItem) {
     apply({
       id: item.id,
+      name: item.name,
       isInStock: false,
       ...(item.isFavorite ? { isInShoppingList: true } : {}),
     })
   }
 
   function deleteItem(item: PantryItem) {
-    apply({ id: item.id, isInStock: false, deletedAt: toISOString() })
+    apply({ id: item.id, name: item.name, isInStock: false, deletedAt: toISOString() })
   }
 
   function saveItem(patch: PantryItemPatch) {

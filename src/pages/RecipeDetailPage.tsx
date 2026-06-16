@@ -47,7 +47,8 @@ export function RecipeDetailPage() {
       // Not in pantry: create it on the shopping list.
       upsertItem.mutate({ pantryId, patch: { name: match.ingredient.item ?? match.ingredient.sentence, isInShoppingList: true } })
     } else if (!item.isInShoppingList && !item.isInStock) {
-      upsertItem.mutate({ pantryId, patch: { id: item.id, isInShoppingList: true } })
+      // `name` is required on every pantry write (see PantryPage).
+      upsertItem.mutate({ pantryId, patch: { id: item.id, name: item.name, isInShoppingList: true } })
     }
   }
 
