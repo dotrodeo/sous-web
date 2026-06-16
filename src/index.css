@@ -73,6 +73,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
@@ -99,11 +100,14 @@ a {
   text-decoration: none;
 }
 
-/* App frame: a centered mobile-width column, full height. */
+/* App frame: a centered mobile-width column pinned to the viewport height, so
+   page content scrolls inside it and the tab bar stays fixed at the bottom. */
 #root {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100svh;
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--p-background);
