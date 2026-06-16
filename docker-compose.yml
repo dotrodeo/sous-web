@@ -29,16 +29,21 @@ services:
       timeout: 5s
       retries: 3
 
-  # Cloudflare Tunnel. In the Zero Trust dashboard, point the public hostname's
-  # ingress at the app over this shared network: http://sous-web:80
-  # Remove this service if you run cloudflared elsewhere.
+  # Bundled Cloudflare Tunnel — OPT-IN via the "tunnel" profile:
+  #   docker compose --env-file .env.deploy --profile tunnel up -d --build
+  # In Zero Trust, point the public hostname's ingress at the app over this
+  # shared network: http://sous-web:80
+  # Skip this (omit --profile tunnel) if you run cloudflared on the host; then
+  # point that tunnel at the published port http://127.0.0.1:8080 instead.
   sous-cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: sous_web_tunnel
     restart: unless-stopped
+    profiles:
+      - tunnel
     command: tunnel --no-autoupdate run
     environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
     depends_on:
       - sous-web
     networks:

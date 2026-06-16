@@ -90,13 +90,28 @@ network (`sous_web_net`); the public path is the tunnel, not a host port.
 On the Debian server (Docker Engine + Compose plugin installed):
 
 ```bash
-cp .env.deploy.example .env.deploy   # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
+cp .env.deploy.example .env.deploy   # set VITE_* (and the token for option B)
+```
+
+**Option A — run cloudflared yourself (host/another stack).** Start just the app;
+point your tunnel at the published port `http://127.0.0.1:8080`:
+
+```bash
 docker compose --env-file .env.deploy up -d --build
 ```
 
-Cloudflare Zero Trust → Networks → Tunnels: create a tunnel, copy its token into
-`.env.deploy`, and add a public hostname whose ingress points at
-`http://sous-web:80` (reachable over the shared compose network).
+**Option B — bundled tunnel.** Set `CLOUDFLARE_TUNNEL_TOKEN` in `.env.deploy`,
+then enable the `tunnel` profile:
+
+```bash
+docker compose --env-file .env.deploy --profile tunnel up -d --build
+```
+
+In Cloudflare Zero Trust → Networks → Tunnels: create a tunnel, copy its token
+into `.env.deploy`, and add a public hostname whose ingress points at
+`http://sous-web:80` (option B, shared compose network) or
+`http://127.0.0.1:8080` (option A, host). Compose fails fast if the token is
+missing when the `tunnel` profile is used.
 
 Notes:
 - `VITE_*` are **build-time** (Vite inlines them); both are non-secret. Rebuild
