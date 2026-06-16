@@ -858,6 +858,86 @@ button.primary {
   opacity: 0.45;
 }
 
+/* ── Plan ── */
+.plan-section {
+  margin-bottom: 22px;
+}
+
+.plan-day-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px 4px;
+}
+
+.plan-pill {
+  font-size: 13px;
+  color: var(--p-pink);
+  background: color-mix(in srgb, var(--p-foreground) 10%, transparent);
+  padding: 3px 12px;
+  border-radius: 99px;
+}
+
+.plan-empty {
+  padding: 14px 16px;
+  opacity: 0.5;
+  font-size: 15px;
+}
+
+.plan-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: color-mix(in srgb, var(--p-foreground) 35%, transparent);
+}
+
+.plan-add-recipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--p-primary);
+  font-weight: 500;
+  font-size: 15px;
+  padding: 10px 4px 0;
+}
+
+/* Recipe selector + date modals */
+.selector-modal,
+.date-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 56svh;
+  overflow-y: auto;
+}
+
+.selector-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid transparent;
+  background: var(--p-background);
+  color: var(--p-foreground);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  text-transform: lowercase;
+}
+
+.selector-option.selected {
+  border-color: var(--p-primary);
+  color: var(--p-primary);
+}
+
 /* Pantry item modal */
 .item-modal {
   display: flex;

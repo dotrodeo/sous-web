@@ -73,9 +73,11 @@ export function useCompleteRecipe() {
       completion: RecipeCompletion
     }) => recipeService.complete(api, household!.id, recipeId, completion),
     onSuccess: () => {
-      // Completion can mark pantry items finished, so refresh both.
+      // Completion updates recipe stats, can finish pantry items, and the plan
+      // embeds recipes — refresh all three.
       qc.invalidateQueries({ queryKey: ['recipes', household?.id] })
       qc.invalidateQueries({ queryKey: ['pantry', household?.id] })
+      qc.invalidateQueries({ queryKey: ['plan', household?.id] })
     },
   })
 }

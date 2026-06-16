@@ -8,7 +8,8 @@ import { RecipeEditPage } from './pages/RecipeEditPage'
 import { BigModePage } from './pages/BigModePage'
 import { PantryPage } from './pages/PantryPage'
 import { ListPage } from './pages/ListPage'
-import { PlanPage, ProfilePage } from './pages/PlaceholderPages'
+import { PlanPage } from './pages/PlanPage'
+import { ProfilePage } from './pages/ProfilePage'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */

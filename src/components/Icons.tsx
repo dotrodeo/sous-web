@@ -24,4 +24,5 @@ export {
   CalendarClock as ExpiringIcon,
   Pencil as PencilIcon,
   List as ListBulletIcon,
+  CookingPot as MadeIcon,
 } from 'lucide-react'

@@ -68,7 +68,10 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
      indicators, favorite/out-of-stock/delete row actions, add/edit item modal
    - ✅ List tab: category-grouped shopping list, tap-to-purchase, "add from
      items" mode to add pantry items, edit/delete row actions
-   - ⏳ Plan → Profile (stub tabs in `PlaceholderPages.tsx`)
+   - ✅ Plan tab: future plan days, add plan day (date picker), add/remove
+     recipes (multi-select), ratio dots, tap-to-detail, "I made this"
+   - ◐ Settings/Profile: basic info + sign-out; category editing and household
+     share/join (QR) still to come
 5. ⏳ PWA shell (manifest, service worker, install prompt)
 6. ⏳ Deploy + cutover
 
