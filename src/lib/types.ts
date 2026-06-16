@@ -197,10 +197,11 @@ export interface RecipeImport {
   instructions: string[] | null
 }
 
-/** RecipeModel.swift — RecipeCompletion (POST /recipes/{id}/made). */
+/** RecipeModel.swift — RecipeCompletion (POST /recipes/{id}/made).
+ *  rating is optional and must be OMITTED when unset — the server rejects null. */
 export interface RecipeCompletion {
   recipeId: number
-  rating: Rating | null
+  rating?: Rating
   finishedPantryItems: number[]
 }
 

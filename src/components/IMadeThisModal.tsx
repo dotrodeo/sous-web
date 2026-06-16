@@ -32,11 +32,13 @@ export function IMadeThisModal({ recipe, matched, onClose, onSave }: IMadeThisMo
   }
 
   function done() {
-    onSave({
+    // Omit rating entirely when unset — the server rejects an explicit null.
+    const completion: RecipeCompletion = {
       recipeId: recipe.id,
-      rating,
       finishedPantryItems: [...finished],
-    })
+    }
+    if (rating != null) completion.rating = rating
+    onSave(completion)
   }
 
   return (
