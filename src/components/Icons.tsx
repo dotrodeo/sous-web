@@ -22,4 +22,6 @@ export {
   Star as StarIcon,
   CircleSlash as OutOfStockIcon,
   CalendarClock as ExpiringIcon,
+  Pencil as PencilIcon,
+  List as ListBulletIcon,
 } from 'lucide-react'

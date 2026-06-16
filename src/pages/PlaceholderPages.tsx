@@ -11,10 +11,6 @@ function ComingSoon({ title }: { title: string }) {
   )
 }
 
-export function ListPage() {
-  return <ComingSoon title="list" />
-}
-
 export function PlanPage() {
   return <ComingSoon title="plan" />
 }

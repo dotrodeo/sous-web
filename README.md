@@ -66,7 +66,9 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
      (form, URL import, tags), big mode (paginated + ingredient highlighting)
    - ✅ Pantry tab: category-grouped inventory (in-stock first), status
      indicators, favorite/out-of-stock/delete row actions, add/edit item modal
-   - ⏳ List → Plan → Profile (stub tabs in `PlaceholderPages.tsx`)
+   - ✅ List tab: category-grouped shopping list, tap-to-purchase, "add from
+     items" mode to add pantry items, edit/delete row actions
+   - ⏳ Plan → Profile (stub tabs in `PlaceholderPages.tsx`)
 5. ⏳ PWA shell (manifest, service worker, install prompt)
 6. ⏳ Deploy + cutover
 

@@ -22,6 +22,15 @@ export function inPantry(items: PantryItem[], searchText: string): PantryItem[] 
     })
 }
 
+/** Shopping-list items (or all, in add mode), search-filtered, A→Z (ListViewModel). */
+export function inShoppingList(items: PantryItem[], searchText: string, showAll: boolean): PantryItem[] {
+  const q = searchText.trim().toLowerCase()
+  return items
+    .filter((it) => (q ? it.name.toLowerCase().includes(q) : true))
+    .filter((it) => showAll || it.isInShoppingList)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
 /** Group items by category (sorted by sortOrder); trailing "Uncategorized". */
 export function groupByCategory(items: PantryItem[]): CategoryWithItems[] {
   const groups = new Map<number, { category: ItemCategory; items: PantryItem[] }>()

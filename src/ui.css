@@ -846,6 +846,18 @@ button.primary {
   color: var(--p-error);
 }
 
+.shopping-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.list-row-dim {
+  opacity: 0.45;
+}
+
 /* Pantry item modal */
 .item-modal {
   display: flex;
