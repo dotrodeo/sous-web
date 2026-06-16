@@ -1,6 +1,9 @@
 # Self-hosted deploy: static PWA served by nginx, exposed publicly through a
-# Cloudflare Tunnel. Run with:
-#   docker compose --env-file .env.deploy up -d --build
+# Cloudflare Tunnel. Put config in a .env file (Compose auto-loads it, so no
+# --env-file flag is needed and VITE_* are never accidentally blank):
+#   cp .env.deploy.example .env        # then fill it in
+#   docker compose up -d --build                   # app only (host/external tunnel)
+#   docker compose --profile tunnel up -d --build  # app + bundled cloudflared
 #
 # Unique project / network / container names avoid clashes with other stacks.
 name: sous-web

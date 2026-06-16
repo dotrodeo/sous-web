@@ -87,31 +87,36 @@ A multi-stage `Dockerfile` builds the static bundle and serves it with nginx
 app (`sous_web_app`) and a `cloudflared` tunnel (`sous_web_tunnel`) on a private
 network (`sous_web_net`); the public path is the tunnel, not a host port.
 
-On the Debian server (Docker Engine + Compose plugin installed):
+On the Debian server (Docker Engine + Compose plugin installed). Name the config
+`.env` so Compose auto-loads it — this avoids `--env-file` and prevents the
+`VITE_*` from ever being baked in blank:
 
 ```bash
-cp .env.deploy.example .env.deploy   # set VITE_* (and the token for option B)
+cp .env.deploy.example .env          # set VITE_* (and the token for option B)
 ```
 
 **Option A — run cloudflared yourself (host/another stack).** Start just the app;
 point your tunnel at the published port `http://127.0.0.1:8080`:
 
 ```bash
-docker compose --env-file .env.deploy up -d --build
+docker compose up -d --build
 ```
 
-**Option B — bundled tunnel.** Set `CLOUDFLARE_TUNNEL_TOKEN` in `.env.deploy`,
-then enable the `tunnel` profile:
+**Option B — bundled tunnel.** Set `CLOUDFLARE_TUNNEL_TOKEN` in `.env`, then
+enable the `tunnel` profile:
 
 ```bash
-docker compose --env-file .env.deploy --profile tunnel up -d --build
+docker compose --profile tunnel up -d --build
 ```
 
 In Cloudflare Zero Trust → Networks → Tunnels: create a tunnel, copy its token
-into `.env.deploy`, and add a public hostname whose ingress points at
+into `.env`, and add a public hostname whose ingress points at
 `http://sous-web:80` (option B, shared compose network) or
-`http://127.0.0.1:8080` (option A, host). Compose fails fast if the token is
-missing when the `tunnel` profile is used.
+`http://127.0.0.1:8080` (option A, host).
+
+> If you keep the file named `.env.deploy`, pass `--env-file .env.deploy` on
+> **every** command (including `build`) — otherwise `VITE_*` build args resolve
+> to blank and the app ships without its Clerk key / API URL.
 
 Notes:
 - `VITE_*` are **build-time** (Vite inlines them); both are non-secret. Rebuild
