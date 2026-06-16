@@ -1,6 +1,8 @@
+import { lazy, Suspense } from 'react'
 import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react'
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { TabBar } from './components/TabBar'
+import { Screen } from './components/Screen'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import { RecipesListPage } from './pages/RecipesListPage'
 import { RecipeDetailPage } from './pages/RecipeDetailPage'
@@ -10,7 +12,14 @@ import { PantryPage } from './pages/PantryPage'
 import { ListPage } from './pages/ListPage'
 import { PlanPage } from './pages/PlanPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { EditCategoriesPage } from './pages/EditCategoriesPage'
+import { ShareHouseholdPage } from './pages/ShareHouseholdPage'
 import './ui.css'
+
+// Lazy-loaded: pulls in the heavy html5-qrcode camera library only on demand.
+const JoinHouseholdPage = lazy(() =>
+  import('./pages/JoinHouseholdPage').then((m) => ({ default: m.JoinHouseholdPage })),
+)
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
 function HouseholdEventsListener() {
@@ -60,6 +69,16 @@ function App() {
             <Route path="/list" element={<ListPage />} />
             <Route path="/plan" element={<PlanPage />} />
             <Route path="/settings" element={<ProfilePage />} />
+            <Route path="/settings/categories" element={<EditCategoriesPage />} />
+            <Route path="/settings/share" element={<ShareHouseholdPage />} />
+            <Route
+              path="/settings/join"
+              element={
+                <Suspense fallback={<Screen title="join household" loading />}>
+                  <JoinHouseholdPage />
+                </Suspense>
+              }
+            />
             <Route path="*" element={<Navigate to="/recipes" replace />} />
           </Route>
         </Routes>

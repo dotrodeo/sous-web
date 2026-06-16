@@ -25,4 +25,8 @@ export {
   Pencil as PencilIcon,
   List as ListBulletIcon,
   CookingPot as MadeIcon,
+  QrCode as QrCodeIcon,
+  ScanLine as ScanIcon,
+  ChevronUp as ChevronUpIcon,
+  ChevronDown as ChevronDownIcon,
 } from 'lucide-react'

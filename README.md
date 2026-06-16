@@ -70,8 +70,9 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
      items" mode to add pantry items, edit/delete row actions
    - ✅ Plan tab: future plan days, add plan day (date picker), add/remove
      recipes (multi-select), ratio dots, tap-to-detail, "I made this"
-   - ◐ Settings/Profile: basic info + sign-out; category editing and household
-     share/join (QR) still to come
+   - ✅ Settings tab: nav rows + sign-out; category editor (reorder + save,
+     add/edit/delete); share household (QR via qrcode.react); join household
+     (QR scan via html5-qrcode, lazy-loaded; needs HTTPS/localhost + camera)
 5. ⏳ PWA shell (manifest, service worker, install prompt)
 6. ⏳ Deploy + cutover
 

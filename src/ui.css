@@ -775,6 +775,130 @@ button.primary {
   text-transform: lowercase;
 }
 
+.settings-section-title {
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 0.6;
+  margin: 0 0 8px 4px;
+  text-transform: lowercase;
+}
+
+.settings-version {
+  text-align: center;
+  opacity: 0.35;
+  font-size: 13px;
+  padding: 24px 0;
+}
+
+/* Category reorder */
+.reorder-controls {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.reorder-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--p-foreground) 6%, transparent);
+  color: var(--p-foreground);
+}
+
+.reorder-btn:disabled {
+  opacity: 0.3;
+}
+
+.reorder-hint {
+  text-align: center;
+  opacity: 0.5;
+  font-size: 13px;
+  padding: 16px 0;
+}
+
+.emoji-input {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--p-foreground) 12%, transparent);
+  text-align: center;
+  font-size: 22px;
+  outline: none;
+}
+
+/* QR share */
+.qr-share {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.qr-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: var(--p-surface);
+}
+
+.qr-caption {
+  text-align: center;
+  opacity: 0.6;
+  font-size: 14px;
+  max-width: 320px;
+}
+
+/* QR scan */
+.qr-reader {
+  width: 100%;
+  max-width: 360px;
+  margin: 8px auto 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #000;
+}
+
+.qr-reader video {
+  display: block;
+  width: 100%;
+}
+
+.join-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.join-label {
+  opacity: 0.6;
+  text-transform: lowercase;
+}
+
+.join-token {
+  font-weight: 500;
+  font-size: 18px;
+  word-break: break-all;
+}
+
+.join-done {
+  font-size: 22px;
+  font-weight: 500;
+}
+
 /* ── Pantry ── */
 .pantry-section {
   margin-bottom: 18px;
