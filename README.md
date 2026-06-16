@@ -28,20 +28,20 @@ npm run dev                  # http://localhost:5173
 
 Values mirror `Debug.xcconfig` in the `sous-swift` project:
 
-| Var | Notes |
-| --- | --- |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk *publishable* key — client-side by design, safe to expose |
-| `VITE_API_BASE_URL` | `https://soupi-development.up.railway.app` |
+| Var                          | Notes                                                           |
+| ---------------------------- | --------------------------------------------------------------- |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk _publishable_ key — client-side by design, safe to expose |
+| `VITE_API_BASE_URL`          | `https://soupi-development.up.railway.app`                      |
 
 ## How it maps to the Swift app
 
-| Web | Swift source of truth |
-| --- | --- |
-| `src/lib/api.ts` | `Utils/APIHelper.swift` (Bearer injection, JSON, non-2xx throws) |
-| `src/lib/useApi.ts` | `clerk.session?.getToken()?.jwt` → `useAuth().getToken()` |
-| `src/lib/types.ts` | `Models/*.swift` (Recipe, Ingredient, RecipeTag, User) |
-| `src/hooks/useUser.ts` | `SessionManager.handleAuthEvent()` (GET /user, fallback /user/sync; resolve household from `defaultHouseholdId`) |
-| `src/hooks/useRecipes.ts` | `RecipeService.fetchRecipes()` (`GET /household/{id}/recipes`) |
+| Web                       | Swift source of truth                                                                                            |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `src/lib/api.ts`          | `Utils/APIHelper.swift` (Bearer injection, JSON, non-2xx throws)                                                 |
+| `src/lib/useApi.ts`       | `clerk.session?.getToken()?.jwt` → `useAuth().getToken()`                                                        |
+| `src/lib/types.ts`        | `Models/*.swift` (Recipe, Ingredient, RecipeTag, User)                                                           |
+| `src/hooks/useUser.ts`    | `SessionManager.handleAuthEvent()` (GET /user, fallback /user/sync; resolve household from `defaultHouseholdId`) |
+| `src/hooks/useRecipes.ts` | `RecipeService.fetchRecipes()` (`GET /household/{id}/recipes`)                                                   |
 
 ## Verified in this spike
 
@@ -112,6 +112,7 @@ points at `http://sous-web:80` (the shared compose network).
 > to blank and the app ships without its Clerk key / API URL.
 
 Notes:
+
 - `VITE_*` are **build-time** (Vite inlines them); both are non-secret. Rebuild
   to change them. `.env.deploy` is gitignored.
 - The service worker is `autoUpdate`; a rebuild + redeploy rolls out to clients.

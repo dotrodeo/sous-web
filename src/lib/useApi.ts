@@ -8,6 +8,6 @@ import { createApiClient } from './api'
  * sous-swift sends via `clerk.session?.getToken()?.jwt`.
  */
 export function useApi() {
-  const { getToken } = useAuth()
-  return useMemo(() => createApiClient(() => getToken()), [getToken])
+    const { getToken } = useAuth()
+    return useMemo(() => createApiClient(() => getToken()), [getToken])
 }

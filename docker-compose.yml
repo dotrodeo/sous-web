@@ -18,15 +18,15 @@ services:
     container_name: sous_web_app
     restart: unless-stopped
     expose:
-      - "80"
+      - '80'
     # Optional: localhost-only host port for testing on the server itself.
     # The public path is the Cloudflare Tunnel, not this port.
     ports:
-      - "127.0.0.1:8080:80"
+      - '127.0.0.1:8080:80'
     networks:
       - sous_web_net
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      test: ['CMD', 'wget', '-qO-', 'http://localhost/']
       interval: 30s
       timeout: 5s
       retries: 3

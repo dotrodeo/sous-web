@@ -29,14 +29,14 @@ await writeFile(new URL('icon.svg', outDir), svg)
 await writeFile(new URL('favicon.svg', outDir), svg)
 
 const targets = [
-  ['pwa-192.png', 192],
-  ['pwa-512.png', 512],
-  ['pwa-maskable-512.png', 512],
-  ['apple-touch-icon-180.png', 180],
-  ['favicon-32.png', 32],
+    ['pwa-192.png', 192],
+    ['pwa-512.png', 512],
+    ['pwa-maskable-512.png', 512],
+    ['apple-touch-icon-180.png', 180],
+    ['favicon-32.png', 32],
 ]
 
 for (const [name, size] of targets) {
-  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(new URL(name, outDir).pathname)
-  console.log('wrote', name)
+    await sharp(Buffer.from(svg)).resize(size, size).png().toFile(new URL(name, outDir).pathname)
+    console.log('wrote', name)
 }
