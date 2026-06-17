@@ -10,7 +10,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "icons": "node scripts/generate-icons.mjs",
     "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
@@ -36,7 +35,6 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "prettier": "^3.8.4",
-    "sharp": "^0.35.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",

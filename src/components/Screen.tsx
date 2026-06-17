@@ -1,33 +1,53 @@
 import type { ReactNode } from 'react'
+import { PlusIcon } from './Icons'
+
+interface ScreenAction {
+    label: string
+    onClick: () => void
+}
 
 interface ScreenProps {
     title: string
-    /** Toolbar actions shown at the right of the header. */
-    right?: ReactNode
-    /** Optional search bar rendered under the header. */
-    search?: ReactNode
-    loading?: boolean
+    /** Primary action — a FAB in the mobile blob header, a pill in the desktop header. */
+    action?: ScreenAction
     children?: ReactNode
 }
 
-/** Base screen scaffold (header title in Caprasimo + optional search + body). */
-export function Screen({ title, right, search, loading, children }: ScreenProps) {
+/** Per-screen scaffold: sunflower blob header (mobile) / large title + action
+ *  (desktop), then the content column. */
+export function Screen({ title, action, children }: ScreenProps) {
     return (
-        <div className="screen">
-            <div className="screen-deco" aria-hidden />
-            {right && <div className="screen-actions">{right}</div>}
-            <header className="screen-header">
+        <>
+            <div className="blob">
+                <div className="blob-actions">
+                    {action && (
+                        <button
+                            className="fab"
+                            type="button"
+                            aria-label={action.label}
+                            onClick={action.onClick}
+                        >
+                            <PlusIcon size={24} />
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="content">
+                <div className="desktop-header">
+                    <h1 className="screen-title">{title}</h1>
+                    {action && (
+                        <button className="btn-primary" type="button" onClick={action.onClick}>
+                            <PlusIcon size={20} />
+                            {action.label}
+                        </button>
+                    )}
+                </div>
+
                 <h1 className="screen-title">{title}</h1>
-            </header>
-            {search}
-            <div className="screen-content">
-                {loading && (
-                    <div className="screen-loading">
-                        <span className="spinner" />
-                    </div>
-                )}
+
                 {children}
             </div>
-        </div>
+        </>
     )
 }

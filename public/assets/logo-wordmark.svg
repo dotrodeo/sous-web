@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="92" viewBox="0 0 300 92" font-family="Jost, system-ui, sans-serif">
+  <g transform="translate(4,10) scale(0.72)">
+    <rect x="2" y="2" width="96" height="96" rx="26" fill="#FFC93C"></rect>
+    <path d="M68 37 C68 25 34 24 34 40 C34 53 67 49 67 61 C67 78 31 77 32 63" fill="none" stroke="#3B5BFF" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"></path>
+  </g>
+  <text x="90" y="62" font-size="56" font-weight="700" letter-spacing="-1.5" fill="#1B1B1F">sous</text>
+</svg>

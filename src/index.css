@@ -1,91 +1,52 @@
-/* ─ Fonts (ported from sous-swift/Fonts, see Info.plist UIAppFonts) ─ */
-@font-face {
-    font-family: 'Poppins';
-    font-weight: 300;
-    font-display: swap;
-    src: url('/fonts/Poppins-Light.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Poppins';
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/Poppins-Regular.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Poppins';
-    font-weight: 500;
-    font-display: swap;
-    src: url('/fonts/Poppins-Medium.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Poppins';
-    font-weight: 700;
-    font-display: swap;
-    src: url('/fonts/Poppins-Bold.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Caprasimo';
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/Caprasimo-Regular.ttf') format('truetype');
-}
-
-/* ─ Palette (ported from Assets.xcassets p_*.colorset) ─ */
+/* sous design tokens — see design handoff (Design Library). Jost is loaded in index.html. */
 :root {
-    --p-primary: #3d51ff;
-    --p-background: #f7f7f7;
-    --p-foreground: #121212;
-    --p-surface: #ffffff;
-    --p-pink: #ffa69e;
-    --p-error: #ff1b1c;
-    --p-success: #58bc82;
-    --p-warning: #ffd541;
-    --p-sous: #ffd541;
-    --p-indeterminate: #e8e8e8;
-    /* Decorative top ellipse: p_sous in light, p_primary in dark (Screen.swift). */
-    --p-deco: #ffd541;
+    --brand: #ffc93c;
+    --brand-deep: #f2b600;
+    --accent: #3b5bff;
+    --accent-soft: #eaeeff;
 
-    --font-body: 'Poppins', system-ui, sans-serif;
-    --font-display: 'Caprasimo', Georgia, serif;
+    /* status scale */
+    --stocked: #33c47a;
+    --partial: #ffc93c;
+    --out: #d7d8de;
+    --alert: #fb7163;
+    --alert-soft: #ffe7e3;
 
-    color-scheme: light dark;
+    --ink: #1b1b1f;
+    --ink-60: #5c5c66;
+    --ink-40: #9a9aa3;
+
+    --line: #ececef;
+    --surface: #ffffff;
+    --canvas: #f3f3f5;
+    --chip: #efeff2;
+
+    --font: 'Jost', system-ui, -apple-system, sans-serif;
+
+    color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --p-primary: #5b6fff;
-        --p-background: #141416;
-        --p-foreground: #ffffff;
-        --p-surface: #1a1a1d;
-        --p-pink: #ffb6ae;
-        --p-error: #ff5a5b;
-        --p-success: #6edca3;
-        --p-warning: #ffd85a;
-        --p-sous: #ffd85a;
-        --p-indeterminate: #2b2b2e;
-        --p-deco: #5b6fff;
-    }
-}
-
-/* ─ Reset / base ─ */
-* {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 html,
 body {
     margin: 0;
-    padding: 0;
-    height: 100%;
 }
 
 body {
-    font-family: var(--font-body);
-    font-weight: 300;
-    color: var(--p-foreground);
-    background: var(--p-background);
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--canvas);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100svh;
 }
 
 button {
@@ -94,8 +55,14 @@ button {
 }
 
 input,
-textarea {
+textarea,
+select {
     font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--ink-40);
 }
 
 a {
@@ -103,15 +70,6 @@ a {
     text-decoration: none;
 }
 
-/* App frame: a centered mobile-width column pinned to the viewport height, so
-   page content scrolls inside it and the tab bar stays fixed at the bottom. */
-#root {
-    max-width: 480px;
-    margin: 0 auto;
-    height: 100svh;
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    background: var(--p-background);
+::selection {
+    background: var(--brand);
 }
