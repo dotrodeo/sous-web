@@ -83,41 +83,42 @@ Values mirror `Debug.xcconfig` in the `sous-swift` project:
 ## Deploy (self-hosted: Docker Compose + Cloudflare Tunnel)
 
 A multi-stage `Dockerfile` builds the static bundle and serves it with nginx
-(SPA fallback; `sw.js`/manifest set to `no-cache`). `docker-compose.yml` runs the
-app (`sous_web_app`) and a `cloudflared` tunnel (`sous_web_tunnel`) on a private
-network (`sous_web_net`); the public path is the tunnel, not a host port.
+(SPA fallback; `sw.js`/manifest set to `no-cache`). `docker-compose.yml` is
+**per-environment** — separate `dev` and `prod` stacks run side by side on one
+host (container/network/image names suffixed with `${ENV}`): the nginx app
+(`sous_web_<env>_app`) + a bundled `cloudflared` tunnel (`sous_web_<env>_tunnel`).
 
-On the Debian server (Docker Engine + Compose plugin installed). Name the config
-`.env` so Compose auto-loads it — this avoids `--env-file` and prevents the
-`VITE_*` from ever being baked in blank:
+`VITE_*` are **build-time** (Vite inlines them), so each environment is its own
+build. Point `VITE_API_BASE_URL` at that environment's **public** soupi API URL
+(the browser calls it directly — use the tunnel hostname, not a container name).
+
+On the Debian server (Docker Engine + Compose plugin):
 
 ```bash
-cp .env.deploy.example .env   # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
-npm run deploy                # build + (re)start the stack (or: docker compose up -d --build)
+cp .env.deploy.example .env.dev      # set ENV, VITE_*, WEB_PORT, TUNNEL_TOKEN
+npm run deploy dev                   # or: docker compose --env-file .env.dev up -d --build
+npm run deploy prod                  # likewise with .env.prod
 ```
 
-`npm run deploy` wraps `docker compose up -d --build` (auto-detecting `.env` vs
-`.env.deploy`). Companions: `npm run deploy:logs`, `npm run deploy:down`.
+In Cloudflare Zero Trust → Networks → Tunnels, create a tunnel per environment,
+put its token in `.env.<env>`, and point its public hostname ingress at
+`http://sous_web_<env>_app:80`.
 
-This runs the app (`sous_web_app`) and the bundled Cloudflare Tunnel
-(`sous_web_tunnel`). In Cloudflare Zero Trust → Networks → Tunnels: create a
-tunnel, copy its token into `.env`, and add a public hostname whose ingress
-points at `http://sous-web:80` (the shared compose network).
+Operations (per environment):
 
-> Prefer to run cloudflared yourself? Remove the `sous-cloudflared` service and
-> point your tunnel at the published port `http://127.0.0.1:8080`.
->
-> If you keep the config named `.env.deploy`, pass `--env-file .env.deploy` on
-> **every** command (including `build`) — otherwise `VITE_*` build args resolve
-> to blank and the app ships without its Clerk key / API URL.
+```bash
+docker compose --env-file .env.dev logs -f
+docker compose --env-file .env.dev ps
+docker compose --env-file .env.dev down
+```
 
 Notes:
 
-- `VITE_*` are **build-time** (Vite inlines them); both are non-secret. Rebuild
-  to change them. `.env.deploy` is gitignored.
+- `VITE_*` are baked at build time — rebuild (`npm run deploy <env>`) to change
+  them. `.env.dev` / `.env.prod` are gitignored.
+- Use a distinct `WEB_PORT` per env (e.g. dev 8082 / prod 8083) so both can bind
+  a localhost test port on one host.
 - The service worker is `autoUpdate`; a rebuild + redeploy rolls out to clients.
-- For a local smoke test on the server: `curl http://127.0.0.1:8080/` (the
-  localhost-only port; remove it from compose if undesired).
 
 ### Web-vs-native deviations (Recipes tab)
 

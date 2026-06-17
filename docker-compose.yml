@@ -1,28 +1,26 @@
-# Self-hosted deploy: static PWA served by nginx, exposed publicly through a
-# bundled Cloudflare Tunnel. Put config in a .env file (Compose auto-loads it,
-# so no --env-file flag is needed and VITE_* are never accidentally blank):
-#   cp .env.deploy.example .env        # set VITE_* and CLOUDFLARE_TUNNEL_TOKEN
-#   docker compose up -d --build
-#
-# Unique project / network / container names avoid clashes with other stacks.
-name: sous-web
+# Self-hosted deploy: static PWA (nginx) + bundled Cloudflare Tunnel, one stack
+# per environment (dev/prod side by side; names suffixed with ${ENV}):
+#   cp .env.deploy.example .env.dev        # set VITE_*, TUNNEL_TOKEN, WEB_PORT, ENV
+#   npm run deploy dev                     # or: docker compose --env-file .env.dev up -d --build
+#   npm run deploy prod
+# VITE_* are build-time (baked into the bundle), so each env is its own build.
+name: sous-web-${ENV:-dev}
 
 services:
-  sous-web:
+  web:
     build:
       context: .
       args:
         VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-    image: sous-web:latest
-    container_name: sous_web_app
+    image: sous-web:${ENV:-dev}
+    container_name: sous_web_${ENV:-dev}_app
     restart: unless-stopped
     expose:
       - '80'
-    # Optional: localhost-only host port for testing on the server itself.
-    # The public path is the Cloudflare Tunnel, not this port.
+    # localhost-only host port for on-server smoke tests; the public path is the tunnel.
     ports:
-      - '127.0.0.1:8080:80'
+      - '127.0.0.1:${WEB_PORT:-8082}:80'
     networks:
       - sous_web_net
     healthcheck:
@@ -31,22 +29,20 @@ services:
       timeout: 5s
       retries: 3
 
-  # Bundled Cloudflare Tunnel. In Zero Trust, point the public hostname's
-  # ingress at the app over this shared network: http://sous-web:80
-  # (Prefer running cloudflared on the host? Remove this service and point that
-  # tunnel at the published port http://127.0.0.1:8080 instead.)
-  sous-cloudflared:
+  # Bundled Cloudflare Tunnel. In Zero Trust, point the public hostname's ingress
+  # at the app over this shared network: http://sous_web_${ENV}_app:80
+  tunnel:
     image: cloudflare/cloudflared:latest
-    container_name: sous_web_tunnel
+    container_name: sous_web_${ENV:-dev}_tunnel
     restart: unless-stopped
     command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    env_file:
+      - .env.${ENV:-dev} # provides TUNNEL_TOKEN
     depends_on:
-      - sous-web
+      - web
     networks:
       - sous_web_net
 
 networks:
   sous_web_net:
-    name: sous_web_net
+    name: sous_web_${ENV:-dev}_net

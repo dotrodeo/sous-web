@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
-# Build and (re)start the self-hosted stack. Run via: npm run deploy
+# Build and (re)start one environment's stack. Usage: npm run deploy <dev|prod>
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Compose auto-loads a file named .env; otherwise fall back to .env.deploy.
-COMPOSE_ARGS=()
-if [[ -f .env ]]; then
-  :
-elif [[ -f .env.deploy ]]; then
-  COMPOSE_ARGS=(--env-file .env.deploy)
-else
-  echo "error: no .env or .env.deploy found." >&2
-  echo "       cp .env.deploy.example .env  # then fill in VITE_* and CLOUDFLARE_TUNNEL_TOKEN" >&2
+ENV_NAME="${1:-}"
+if [ -z "$ENV_NAME" ]; then
+  echo "usage: npm run deploy <dev|prod>" >&2
   exit 1
 fi
 
-echo "▶ Building and starting sous-web…"
-docker compose "${COMPOSE_ARGS[@]}" up -d --build
+ENV_FILE=".env.$ENV_NAME"
+if [ ! -f "$ENV_FILE" ]; then
+  echo "error: $ENV_FILE not found (cp .env.deploy.example $ENV_FILE and fill it in)" >&2
+  exit 1
+fi
 
+echo "▶ Deploying sous-web ($ENV_NAME)…"
+docker compose --env-file "$ENV_FILE" up -d --build
 echo
-docker compose "${COMPOSE_ARGS[@]}" ps
+docker compose --env-file "$ENV_FILE" ps
