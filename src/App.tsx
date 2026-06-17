@@ -9,7 +9,8 @@ import { RecipeEditPage } from './pages/RecipeEditPage'
 import { PantryPage } from './pages/PantryPage'
 import { ListPage } from './pages/ListPage'
 import { PlanPage } from './pages/PlanPage'
-import { SettingsPage } from './pages/Placeholders'
+import { SettingsPage } from './pages/SettingsPage'
+import { CategoriesPage } from './pages/CategoriesPage'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
@@ -37,6 +38,7 @@ function AuthedApp() {
                         <Route path="/pantry" element={<PantryPage />} />
                         <Route path="/list" element={<ListPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/settings/categories" element={<CategoriesPage />} />
                         <Route path="*" element={<Navigate to="/recipes" replace />} />
                     </Routes>
                 </AppShell>

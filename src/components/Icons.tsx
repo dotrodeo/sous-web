@@ -182,6 +182,38 @@ export const CalendarAlertIcon = (p: IconProps) => (
     </Svg>
 )
 
+/** Settings rows. */
+export const ListLinesIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+    </Svg>
+)
+export const ShareQrIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <path d="M14 14h3v3M21 14v.01M17 21h.01M21 17v4h-4" />
+    </Svg>
+)
+export const ScanIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10" />
+    </Svg>
+)
+export const LogoutIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="m16 17 5-5-5-5M21 12H9" />
+    </Svg>
+)
+export const CameraOffIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="m2 2 20 20" />
+        <path d="M7 4h10l2 3h2a1 1 0 0 1 1 1v9.5M16.5 16.5A3.5 3.5 0 0 1 12 12M2 8.5V17a1 1 0 0 0 1 1h11" />
+    </Svg>
+)
+
 /** Calendar with a plus — "add a date" / schedule-to-plan affordance. */
 export const CalendarPlusIcon = (p: IconProps) => (
     <Svg {...p}>
