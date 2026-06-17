@@ -147,6 +147,41 @@ export const ThumbDownIcon = (p: IconProps) => (
     </Svg>
 )
 
+export const ChevronDownIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="m6 9 6 6 6-6" />
+    </Svg>
+)
+export const ChevronUpIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="m6 15 6-6 6 6" />
+    </Svg>
+)
+/** Two-arrow refresh loop — the pantry "restock / staple" toggle. */
+export const RestockIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M17 2l4 4-4 4" />
+        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+        <path d="M7 22l-4-4 4-4" />
+        <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+    </Svg>
+)
+/** Circle-minus — remove an item from the shopping list (keeps it in the catalog). */
+export const MinusCircleIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 12h8" />
+    </Svg>
+)
+/** Calendar with an alert tick — "expiring soon" badge. */
+export const CalendarAlertIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <rect x="3" y="4" width="18" height="18" rx="3" />
+        <path d="M3 9h18M8 2v4M16 2v4" />
+        <path d="M12 12v3M12 18.5v.5" />
+    </Svg>
+)
+
 /** Three-dot "more" glyph — filled circles, not a stroke icon. */
 export const MoreIcon = ({ size = 22, className, style }: IconProps) => (
     <svg

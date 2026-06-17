@@ -83,6 +83,7 @@ export interface ItemCategory {
 export interface PantryItem {
     id: number
     name: string
+    quantity: string | null
     isInStock: boolean
     isFavorite: boolean
     isInShoppingList: boolean
@@ -214,11 +215,13 @@ export interface RecipeCompletion {
 export interface PantryItemPatch {
     id?: number
     name?: string
+    quantity?: string | null
     isInStock?: boolean
     isFavorite?: boolean
     isInShoppingList?: boolean
     purchasedAt?: string
-    expiresAt?: string
+    // expiresAt is a real, nullable column (soupi PR #8) — send null to clear it.
+    expiresAt?: string | null
     deletedAt?: string
     categoryId?: number
 }

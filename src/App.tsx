@@ -6,7 +6,9 @@ import { LoginPage } from './pages/LoginPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipeDetailPage } from './pages/RecipeDetailPage'
 import { RecipeEditPage } from './pages/RecipeEditPage'
-import { PlanPage, PantryPage, ListPage, SettingsPage } from './pages/Placeholders'
+import { PantryPage } from './pages/PantryPage'
+import { ListPage } from './pages/ListPage'
+import { PlanPage, SettingsPage } from './pages/Placeholders'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */

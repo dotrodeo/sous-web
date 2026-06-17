@@ -24,10 +24,4 @@ const noop = () => {}
 export const PlanPage = () => (
     <ComingSoon title="plan" action={{ label: 'add a day', onClick: noop }} />
 )
-export const PantryPage = () => (
-    <ComingSoon title="pantry" action={{ label: 'add item', onClick: noop }} />
-)
-export const ListPage = () => (
-    <ComingSoon title="list" action={{ label: 'add item', onClick: noop }} />
-)
 export const SettingsPage = () => <ComingSoon title="settings" />

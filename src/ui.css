@@ -1586,3 +1586,550 @@ textarea.field {
         padding: 40px;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Pantry + List — category groups, item rows, and the shared add/edit sheet.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Page head with summary (pantry/list have a subtitle) ── */
+.page-head {
+    margin-top: 6px;
+}
+.page-head .page-title {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1;
+}
+.summary {
+    font-size: 15px;
+    color: var(--ink-60);
+    margin-top: 6px;
+}
+.page-header {
+    display: none;
+}
+
+/* ── List mode toggle + clear + progress ── */
+.list-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 18px;
+}
+.mode-toggle {
+    display: inline-flex;
+    background: var(--chip);
+    border-radius: 999px;
+    padding: 4px;
+}
+.mode-tab {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 22px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-60);
+    transition:
+        background 0.12s,
+        color 0.12s;
+}
+.mode-tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.2);
+}
+.clear-checked {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 8px 4px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+.progress-track {
+    margin-top: 16px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--chip);
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.25s;
+}
+
+/* ── Category groups (masonry on desktop) ── */
+.cat-groups {
+    margin-top: 22px;
+}
+.cat-group {
+    break-inside: avoid;
+    margin-bottom: 24px;
+}
+.cat-group-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 4px 12px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink-60);
+}
+.cat-group-head .emoji {
+    font-size: 19px;
+}
+.cat-group-head .count {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-40);
+    margin-left: 2px;
+}
+.cat-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 4px 18px;
+    box-shadow: 0 8px 24px -18px rgba(0, 0, 0, 0.25);
+}
+.cat-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--line);
+}
+.cat-row:last-child {
+    border-bottom: none;
+}
+.cat-row .row-name {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pantry: stock dot + restock + expiring */
+.stock-dot {
+    flex: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    display: flex;
+}
+.stock-dot .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--out);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.12s;
+}
+.stock-dot.stocked .dot {
+    background: var(--stocked);
+}
+.expiring-badge {
+    flex: none;
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--alert-soft);
+    color: var(--alert);
+    align-items: center;
+    justify-content: center;
+}
+.restock-btn {
+    flex: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 4px;
+    display: flex;
+    color: var(--out);
+    transition: color 0.12s;
+}
+.restock-btn.on {
+    color: var(--accent);
+}
+
+/* List: check circle + qty + edit/remove + add */
+.check-circle {
+    flex: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    display: flex;
+}
+.check-circle .ring {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--out);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+.check-circle.checked .ring {
+    border: none;
+    background: var(--accent);
+}
+.cat-row.checked .row-name {
+    color: var(--ink-60);
+    text-decoration: line-through;
+}
+.cat-row.checked {
+    opacity: 0.5;
+}
+.cat-row.history .row-name {
+    font-weight: 400;
+    color: var(--ink-40);
+}
+.qty-badge {
+    flex: none;
+    background: var(--chip);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    color: var(--ink-60);
+    white-space: nowrap;
+}
+.cat-row.history .qty-badge {
+    opacity: 0.6;
+}
+.row-icon-btn {
+    flex: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--ink-40);
+    padding: 5px;
+    display: flex;
+    border-radius: 8px;
+    transition:
+        background 0.12s,
+        color 0.12s;
+}
+.row-icon-btn:hover {
+    background: var(--canvas);
+    color: var(--alert);
+}
+.row-icon-btn.edit {
+    color: var(--ink-60);
+}
+.row-icon-btn.edit:hover {
+    color: var(--ink-60);
+}
+.add-pill {
+    flex: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    transition: filter 0.12s;
+}
+.add-pill:hover {
+    filter: brightness(0.96);
+}
+
+/* ── Add / edit sheet ── */
+.sheet-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+.sheet-card {
+    position: relative;
+    width: 100%;
+    background: var(--surface);
+    border-radius: 26px 26px 0 0;
+    padding: 20px 22px 30px;
+    box-shadow: 0 -10px 40px -12px rgba(0, 0, 0, 0.3);
+}
+.sheet-grabber {
+    width: 40px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--out);
+    margin: 0 auto 20px;
+}
+.sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+.sheet-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.sheet-save {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 0;
+}
+.sheet-save:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.sheet-label {
+    display: block;
+    font-size: 16px;
+    color: var(--ink-60);
+    margin-bottom: 8px;
+}
+.sheet-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.sheet-row.fields {
+    align-items: flex-end;
+}
+.sheet-row .grow {
+    flex: 1;
+    min-width: 0;
+}
+.sheet-row .qty-col {
+    width: 108px;
+    flex: none;
+}
+.sheet-field {
+    margin-bottom: 20px;
+}
+.restock-round {
+    flex: none;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: var(--chip);
+    color: var(--ink-40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        background 0.12s,
+        color 0.12s;
+}
+.restock-round.on {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* Category faux-select */
+.cat-select {
+    position: relative;
+    margin-bottom: 6px;
+}
+.cat-select-btn {
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: inherit;
+    font-size: 17px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 13px 15px;
+}
+.cat-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 5;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.4);
+    max-height: 240px;
+    overflow: auto;
+}
+.cat-menu.up {
+    top: auto;
+    bottom: calc(100% + 6px);
+}
+.cat-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    padding: 11px 12px;
+    border-radius: 10px;
+    text-align: left;
+}
+.cat-option.active {
+    background: var(--accent-soft);
+}
+.cat-option .emoji {
+    font-size: 18px;
+}
+
+/* Toggle rows + switch */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    font-size: 18px;
+}
+.toggle-row.bordered {
+    border-bottom: 1px solid var(--line);
+}
+.switch-btn {
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    background: transparent;
+    flex: none;
+}
+.switch {
+    display: inline-block;
+    width: 54px;
+    height: 31px;
+    border-radius: 999px;
+    background: var(--out);
+    position: relative;
+    transition: background 0.15s;
+}
+.switch.on {
+    background: var(--accent);
+}
+.switch .knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: left 0.15s;
+}
+.switch.on .knob {
+    left: 26px;
+}
+.sheet-delete {
+    margin-top: 20px;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--alert);
+    background: var(--alert-soft);
+    border: none;
+    padding: 14px;
+    border-radius: 14px;
+    transition: filter 0.12s;
+}
+.sheet-delete:hover {
+    filter: brightness(0.97);
+}
+
+@media (min-width: 900px) {
+    .page-head {
+        display: none;
+    }
+    .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 20px;
+    }
+    .page-header .page-title {
+        font-size: 52px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0;
+        line-height: 1;
+    }
+    .page-header .summary {
+        font-size: 16px;
+        margin-top: 8px;
+    }
+    .cat-groups {
+        margin-top: 24px;
+        column-width: 440px;
+        column-gap: 24px;
+    }
+    .sheet-overlay {
+        align-items: center;
+        padding: 24px;
+    }
+    .sheet-card {
+        max-width: 440px;
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.5);
+    }
+    .sheet-grabber {
+        display: none;
+    }
+}
