@@ -92,6 +92,78 @@ export const EyeOffIcon = (p: IconProps) => (
         <path d="M16.7 16.7A9 9 0 0 1 12 18c-5 0-9-6-9-6a16 16 0 0 1 4.1-4.6m3.5-1.2A9 9 0 0 1 12 6c5 0 9 6 9 6a16 16 0 0 1-2.3 3" />
     </Svg>
 )
+export const ChevronLeftIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="m15 18-6-6 6-6" />
+    </Svg>
+)
+export const CookIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M5 10h14v4a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" />
+        <path d="M3 10h18" />
+        <path d="M8 10V8a4 4 0 0 1 8 0v2" />
+    </Svg>
+)
+export const EditIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </Svg>
+)
+export const TrashIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+        <path d="M10 11v6M14 11v6" />
+    </Svg>
+)
+export const XIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M6 6l12 12M18 6L6 18" />
+    </Svg>
+)
+export const LinkIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M9 17H7A5 5 0 0 1 7 7h2" />
+        <path d="M15 7h2a5 5 0 0 1 0 10h-2" />
+        <path d="M8 12h8" />
+    </Svg>
+)
+export const AlertCircleIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 8v5M12 16v.5" />
+    </Svg>
+)
+export const ThumbUpIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z" />
+        <path d="M7 10l4-7a2.5 2.5 0 0 1 2.5 3.2L12.5 9H19a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17.6 20H7" />
+    </Svg>
+)
+export const ThumbDownIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M17 14V3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1z" />
+        <path d="M17 14l-4 7a2.5 2.5 0 0 1-2.5-3.2L11.5 15H5a2 2 0 0 1-2-2.4l1.4-7A2 2 0 0 1 6.4 4H17" />
+    </Svg>
+)
+
+/** Three-dot "more" glyph — filled circles, not a stroke icon. */
+export const MoreIcon = ({ size = 22, className, style }: IconProps) => (
+    <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        stroke="none"
+        className={className}
+        style={style}
+        aria-hidden="true"
+    >
+        <circle cx="5" cy="12" r="1.7" />
+        <circle cx="12" cy="12" r="1.7" />
+        <circle cx="19" cy="12" r="1.7" />
+    </svg>
+)
 
 /** The sous mark (sunflower squircle + cobalt "s"). */
 export function Logo({ size = 40 }: { size?: number }) {
