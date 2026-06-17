@@ -21,9 +21,6 @@ function ComingSoon({
 
 const noop = () => {}
 
-export const RecipesPage = () => (
-    <ComingSoon title="recipes" action={{ label: 'new recipe', onClick: noop }} />
-)
 export const PlanPage = () => (
     <ComingSoon title="plan" action={{ label: 'add a day', onClick: noop }} />
 )

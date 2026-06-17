@@ -3,7 +3,10 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import { LoginPage } from './pages/LoginPage'
-import { RecipesPage, PlanPage, PantryPage, ListPage, SettingsPage } from './pages/Placeholders'
+import { RecipesPage } from './pages/RecipesPage'
+import { RecipeDetailPage } from './pages/RecipeDetailPage'
+import { RecipeEditPage } from './pages/RecipeEditPage'
+import { PlanPage, PantryPage, ListPage, SettingsPage } from './pages/Placeholders'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
@@ -24,6 +27,9 @@ function AuthedApp() {
                     <Routes>
                         <Route index element={<Navigate to="/recipes" replace />} />
                         <Route path="/recipes" element={<RecipesPage />} />
+                        <Route path="/recipes/new" element={<RecipeEditPage />} />
+                        <Route path="/recipes/:id" element={<RecipeDetailPage />} />
+                        <Route path="/recipes/:id/edit" element={<RecipeEditPage />} />
                         <Route path="/plan" element={<PlanPage />} />
                         <Route path="/pantry" element={<PantryPage />} />
                         <Route path="/list" element={<ListPage />} />
