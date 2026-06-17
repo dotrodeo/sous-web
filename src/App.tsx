@@ -1,25 +1,10 @@
-import { lazy, Suspense } from 'react'
-import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react'
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
-import { TabBar } from './components/TabBar'
-import { Screen } from './components/Screen'
+import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { AppShell } from './components/AppShell'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
-import { RecipesListPage } from './pages/RecipesListPage'
-import { RecipeDetailPage } from './pages/RecipeDetailPage'
-import { RecipeEditPage } from './pages/RecipeEditPage'
-import { BigModePage } from './pages/BigModePage'
-import { PantryPage } from './pages/PantryPage'
-import { ListPage } from './pages/ListPage'
-import { PlanPage } from './pages/PlanPage'
-import { ProfilePage } from './pages/ProfilePage'
-import { EditCategoriesPage } from './pages/EditCategoriesPage'
-import { ShareHouseholdPage } from './pages/ShareHouseholdPage'
+import { LoginPage } from './pages/LoginPage'
+import { RecipesPage, PlanPage, PantryPage, ListPage, SettingsPage } from './pages/Placeholders'
 import './ui.css'
-
-// Lazy-loaded: pulls in the heavy html5-qrcode camera library only on demand.
-const JoinHouseholdPage = lazy(() =>
-    import('./pages/JoinHouseholdPage').then((m) => ({ default: m.JoinHouseholdPage })),
-)
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
 function HouseholdEventsListener() {
@@ -27,63 +12,45 @@ function HouseholdEventsListener() {
     return null
 }
 
-/** Tabbed shell: scrolling content area above a fixed bottom tab bar. */
-function AppLayout() {
+function AuthedApp() {
     return (
-        <div className="app-shell">
-            <main className="app-main">
-                <Outlet />
-            </main>
-            <TabBar />
-        </div>
+        <>
+            <SignedOut>
+                <LoginPage />
+            </SignedOut>
+            <SignedIn>
+                <HouseholdEventsListener />
+                <AppShell>
+                    <Routes>
+                        <Route index element={<Navigate to="/recipes" replace />} />
+                        <Route path="/recipes" element={<RecipesPage />} />
+                        <Route path="/plan" element={<PlanPage />} />
+                        <Route path="/pantry" element={<PantryPage />} />
+                        <Route path="/list" element={<ListPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="*" element={<Navigate to="/recipes" replace />} />
+                    </Routes>
+                </AppShell>
+            </SignedIn>
+        </>
     )
 }
 
 function App() {
     return (
-        <>
-            <SignedOut>
-                <div className="signin">
-                    <span className="brand-mark">sous</span>
-                    <p>Sign in to view your household’s recipes.</p>
-                    <SignInButton mode="modal">
-                        <button className="primary" type="button">
-                            Sign in
-                        </button>
-                    </SignInButton>
-                </div>
-            </SignedOut>
-
-            <SignedIn>
-                <HouseholdEventsListener />
-                <Routes>
-                    {/* Immersive cooking view has no tab bar. */}
-                    <Route path="/recipes/:id/cook" element={<BigModePage />} />
-                    <Route element={<AppLayout />}>
-                        <Route index element={<Navigate to="/recipes" replace />} />
-                        <Route path="/recipes" element={<RecipesListPage />} />
-                        <Route path="/recipes/new" element={<RecipeEditPage />} />
-                        <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-                        <Route path="/recipes/:id/edit" element={<RecipeEditPage />} />
-                        <Route path="/pantry" element={<PantryPage />} />
-                        <Route path="/list" element={<ListPage />} />
-                        <Route path="/plan" element={<PlanPage />} />
-                        <Route path="/settings" element={<ProfilePage />} />
-                        <Route path="/settings/categories" element={<EditCategoriesPage />} />
-                        <Route path="/settings/share" element={<ShareHouseholdPage />} />
-                        <Route
-                            path="/settings/join"
-                            element={
-                                <Suspense fallback={<Screen title="join household" loading />}>
-                                    <JoinHouseholdPage />
-                                </Suspense>
-                            }
-                        />
-                        <Route path="*" element={<Navigate to="/recipes" replace />} />
-                    </Route>
-                </Routes>
-            </SignedIn>
-        </>
+        <Routes>
+            {/* OAuth (Google/Apple) lands here to finalize the redirect sign-in. */}
+            <Route
+                path="/sso-callback"
+                element={
+                    <AuthenticateWithRedirectCallback
+                        signInForceRedirectUrl="/"
+                        signUpForceRedirectUrl="/"
+                    />
+                }
+            />
+            <Route path="/*" element={<AuthedApp />} />
+        </Routes>
     )
 }
 
