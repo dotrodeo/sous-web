@@ -10,6 +10,16 @@ export interface CategoryWithItems {
     pantryItems: PantryItem[]
 }
 
+/** Days within which an expiry date counts as "expiring soon" (includes past). */
+export const EXPIRING_WINDOW_DAYS = 4
+
+/** True when the item has an expiry date that is past or within the window. */
+export function isExpiringSoon(item: PantryItem): boolean {
+    if (!item.expiresAt) return false
+    const days = (new Date(item.expiresAt).getTime() - Date.now()) / 86_400_000
+    return days <= EXPIRING_WINDOW_DAYS
+}
+
 /** Food items in stock or favorited, search-filtered, in-stock first then A→Z. */
 export function inPantry(items: PantryItem[], searchText: string): PantryItem[] {
     const q = searchText.trim().toLowerCase()
