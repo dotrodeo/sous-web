@@ -11,9 +11,7 @@
     "format:check": "prettier --check .",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs",
-    "deploy": "bash scripts/deploy.sh",
-    "deploy:logs": "docker compose logs -f",
-    "deploy:down": "docker compose down"
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.8",
