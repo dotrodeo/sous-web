@@ -8,7 +8,8 @@ import { RecipeDetailPage } from './pages/RecipeDetailPage'
 import { RecipeEditPage } from './pages/RecipeEditPage'
 import { PantryPage } from './pages/PantryPage'
 import { ListPage } from './pages/ListPage'
-import { PlanPage, SettingsPage } from './pages/Placeholders'
+import { PlanPage } from './pages/PlanPage'
+import { SettingsPage } from './pages/Placeholders'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */

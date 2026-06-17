@@ -2133,3 +2133,247 @@ textarea.field {
         display: none;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Plan — meals grouped by date, schedule / add-recipe / add-date sheets.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.content.plan {
+    max-width: 760px;
+}
+
+.plan-group {
+    margin-bottom: 26px;
+}
+.plan-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 2px 12px;
+}
+.plan-group-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.plan-group-title .label {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+}
+.plan-group-title.today .label {
+    color: var(--accent);
+}
+.plan-group-title .count {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-40);
+}
+.meal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.meal-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border-radius: 18px;
+    box-shadow: 0 6px 18px -13px rgba(0, 0, 0, 0.3);
+    transition:
+        transform 0.12s,
+        box-shadow 0.12s;
+}
+.meal-row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.32);
+}
+.meal-row .name {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.meal-btn {
+    flex: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--ink-40);
+    padding: 5px;
+    display: flex;
+    border-radius: 8px;
+    transition:
+        background 0.12s,
+        color 0.12s;
+}
+.meal-btn.sched:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+.meal-btn.cook {
+    color: var(--accent);
+}
+.meal-btn.cook:hover {
+    background: var(--accent-soft);
+}
+.meal-btn.remove {
+    color: var(--alert);
+}
+.meal-btn.remove:hover {
+    background: var(--alert-soft);
+}
+.meal-btn.open {
+    padding: 3px;
+}
+.meal-empty {
+    padding: 18px 20px;
+    background: var(--surface);
+    border-radius: 18px;
+    box-shadow: 0 6px 18px -13px rgba(0, 0, 0, 0.3);
+    color: var(--ink-40);
+    font-size: 17px;
+}
+.plan-add-here {
+    margin-top: 12px;
+    font-size: 15px;
+    padding: 12px;
+}
+.add-date-link {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    padding: 6px 2px;
+}
+
+/* Recipe picker sheet */
+.sheet-card.picker {
+    max-width: 460px;
+    padding: 26px 26px 22px;
+}
+.picker-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+.picker-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.picker-target {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-top: 2px;
+}
+.picker-close {
+    cursor: pointer;
+    border: none;
+    background: var(--chip);
+    color: var(--ink-60);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+}
+.picker-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--chip);
+    border-radius: 999px;
+    padding: 11px 18px;
+    margin-bottom: 14px;
+    color: var(--ink-40);
+}
+.picker-search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    color: var(--ink);
+}
+.picker-list {
+    overflow: auto;
+    max-height: 46vh;
+    margin: 0 -6px;
+    padding: 0 6px;
+}
+.picker-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 4px;
+    border-bottom: 1px solid var(--line);
+}
+.picker-row:last-child {
+    border-bottom: none;
+}
+.picker-row .name {
+    flex: 1;
+    min-width: 0;
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.picker-empty {
+    padding: 30px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--ink-40);
+}
+.sheet-subtitle {
+    font-size: 16px;
+    color: var(--ink-60);
+    margin-bottom: 18px;
+}
+.sheet-subtitle strong {
+    color: var(--ink);
+    font-weight: 600;
+}
+.sheet-secondary {
+    margin-top: 14px;
+    cursor: pointer;
+    width: 100%;
+    border: none;
+    background: var(--chip);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 13px;
+    border-radius: 14px;
+    transition: background 0.12s;
+}
+.sheet-secondary:hover {
+    background: #e4e4e8;
+}
