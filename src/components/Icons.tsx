@@ -182,6 +182,15 @@ export const CalendarAlertIcon = (p: IconProps) => (
     </Svg>
 )
 
+/** Calendar with a plus — "add a date" / schedule-to-plan affordance. */
+export const CalendarPlusIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <rect x="3" y="4" width="18" height="18" rx="3" />
+        <path d="M3 9h18M8 2v4M16 2v4" />
+        <path d="M12 13v4M10 15h4" />
+    </Svg>
+)
+
 /** Three-dot "more" glyph — filled circles, not a stroke icon. */
 export const MoreIcon = ({ size = 22, className, style }: IconProps) => (
     <svg
