@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Logo, RecipesIcon, PlanIcon, PantryIcon, ListIcon, SettingsIcon } from './Icons'
+import { useUser, useActiveHousehold } from '../hooks/useUser'
+import { initials } from '../lib/initials'
 
 const NAV = [
     { to: '/recipes', label: 'recipes', Icon: RecipesIcon },
@@ -12,6 +14,9 @@ const NAV = [
 
 /** Responsive shell: desktop 248px sidebar ↔ mobile floating bottom nav. */
 export function AppShell({ children }: { children: ReactNode }) {
+    const { data: user } = useUser()
+    const household = useActiveHousehold()
+
     return (
         <div className="app">
             <aside className="sidebar">
@@ -29,6 +34,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                         {label}
                     </NavLink>
                 ))}
+                <div className="sidebar-spacer" />
+                <NavLink to="/settings" className="sidebar-user">
+                    <div className="avatar" style={{ width: 40, height: 40, fontSize: 16 }}>
+                        {initials(user?.name, user?.email)}
+                    </div>
+                    <div className="meta">
+                        <div className="name">{user?.name || user?.email || 'you'}</div>
+                        {household && <div className="sub">{household.name}</div>}
+                    </div>
+                </NavLink>
             </aside>
 
             <div className="main">{children}</div>
