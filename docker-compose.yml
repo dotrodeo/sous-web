@@ -24,10 +24,14 @@ services:
     networks:
       - sous_web_net
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost/']
+      # Use 127.0.0.1, not localhost: nginx only `listen 80` (IPv4), but
+      # `localhost` resolves to IPv6 ::1 first in the container, so wget would
+      # hit [::1]:80 → connection refused → container stuck "unhealthy".
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1/']
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 10s
 
   # Bundled Cloudflare Tunnel. In Zero Trust, point the public hostname's ingress
   # at the app over this shared network: http://sous_web_${ENV}_app:80

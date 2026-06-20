@@ -111,7 +111,10 @@ function RecipeEditForm({
     const [importUrl, setImportUrl] = useState('')
     const [importError, setImportError] = useState('')
 
-    const canSave = name.trim().length > 0
+    // A recipe needs a name and at least one ingredient (empty rows are dropped
+    // on save, so a blank ingredient list must not be saveable).
+    const hasIngredient = ingredients.some((i) => i.text.trim().length > 0)
+    const canSave = name.trim().length > 0 && hasIngredient
 
     const commitTag = () => {
         const v = newTag.trim()
