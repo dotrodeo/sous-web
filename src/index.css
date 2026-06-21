@@ -46,6 +46,21 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Paint the iOS status-bar safe area brand-yellow (PWA is black-translucent so
+   the web view extends under the status bar). Fixed, so it stays yellow on every
+   screen and at any scroll position. Collapses to 0 height off-device. */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top);
+    background: var(--brand);
+    z-index: 1000;
+    pointer-events: none;
+}
+
 #root {
     min-height: 100svh;
 }

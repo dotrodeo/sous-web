@@ -552,6 +552,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0; /* grid item: allow shrink so a long title ellipsizes vs. overflow */
     padding: 18px 20px;
     background: var(--surface);
     border-radius: 18px;
