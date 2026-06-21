@@ -293,12 +293,6 @@ export function LoginPage() {
                                 {busy ? 'one sec…' : signUpMode ? 'create account' : 'sign in'}
                             </button>
 
-                            <div className="divider">
-                                <div className="rule" />
-                                <span>or</span>
-                                <div className="rule" />
-                            </div>
-
                             <p className="legal">
                                 {signUpMode
                                     ? 'by creating an account you agree to our terms & privacy policy.'
