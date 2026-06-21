@@ -149,9 +149,9 @@ export function LoginPage() {
                     sous
                 </div>
                 <h1 className="login-headline">
-                    cook what’s
+                    cook what
                     <br />
-                    already yours.
+                    you have.
                 </h1>
                 <p className="login-sub">
                     plan meals, track your pantry, and build the shopping list automatically.
