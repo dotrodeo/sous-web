@@ -90,6 +90,14 @@ export function PantryPage() {
         pantry &&
         upsert.mutate({ pantryId: pantry.id, patch: { id: item.id, name: item.name, ...patch } })
 
+    const toggleStock = (item: PantryItem) => {
+        const patch: PantryItemPatch = { isInStock: !item.isInStock }
+        // Mirror sous-swift markOutOfStock: a staple that runs out auto-joins
+        // the shopping list (non-staples are left for the user to add).
+        if (item.isInStock && item.isFavorite) patch.isInShoppingList = true
+        patchItem(item, patch)
+    }
+
     const openAdd = () =>
         setDraft({
             id: null,
@@ -217,9 +225,7 @@ export function PantryPage() {
                                                         ? 'in stock — tap to mark out'
                                                         : 'out — tap to mark in stock'
                                                 }
-                                                onClick={() =>
-                                                    patchItem(it, { isInStock: !it.isInStock })
-                                                }
+                                                onClick={() => toggleStock(it)}
                                             >
                                                 <span className="dot">
                                                     {it.isInStock && <CheckIcon size={12} />}
