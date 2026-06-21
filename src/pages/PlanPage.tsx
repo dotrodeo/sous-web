@@ -268,52 +268,54 @@ export function PlanPage() {
                                                     >
                                                         {recipe.name}
                                                     </button>
-                                                    <button
-                                                        type="button"
-                                                        className="meal-btn sched"
-                                                        aria-label="schedule"
-                                                        title="schedule"
-                                                        onClick={() =>
-                                                            openSchedule(day.id, recipe, key)
-                                                        }
-                                                    >
-                                                        <PlanIcon size={21} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="meal-btn cook"
-                                                        aria-label="cook"
-                                                        title="cook"
-                                                        onClick={() =>
-                                                            navigate(`/recipes/${recipe.id}`)
-                                                        }
-                                                    >
-                                                        <CookIcon size={22} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="meal-btn remove"
-                                                        aria-label="remove from plan"
-                                                        title="remove from plan"
-                                                        onClick={() =>
-                                                            setPendingRemove({
-                                                                dayId: day.id,
-                                                                recipe,
-                                                            })
-                                                        }
-                                                    >
-                                                        <XIcon size={20} />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className="meal-btn open"
-                                                        aria-label="open recipe"
-                                                        onClick={() =>
-                                                            navigate(`/recipes/${recipe.id}`)
-                                                        }
-                                                    >
-                                                        <ChevronRightIcon size={20} />
-                                                    </button>
+                                                    <div className="meal-actions">
+                                                        <button
+                                                            type="button"
+                                                            className="meal-btn sched"
+                                                            aria-label="schedule"
+                                                            title="schedule"
+                                                            onClick={() =>
+                                                                openSchedule(day.id, recipe, key)
+                                                            }
+                                                        >
+                                                            <PlanIcon size={21} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="meal-btn cook"
+                                                            aria-label="cook"
+                                                            title="cook"
+                                                            onClick={() =>
+                                                                navigate(`/recipes/${recipe.id}`)
+                                                            }
+                                                        >
+                                                            <CookIcon size={22} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="meal-btn remove"
+                                                            aria-label="remove from plan"
+                                                            title="remove from plan"
+                                                            onClick={() =>
+                                                                setPendingRemove({
+                                                                    dayId: day.id,
+                                                                    recipe,
+                                                                })
+                                                            }
+                                                        >
+                                                            <XIcon size={20} />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className="meal-btn open"
+                                                            aria-label="open recipe"
+                                                            onClick={() =>
+                                                                navigate(`/recipes/${recipe.id}`)
+                                                            }
+                                                        >
+                                                            <ChevronRightIcon size={20} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
