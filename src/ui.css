@@ -234,9 +234,9 @@
 
 .badge {
     background: var(--chip);
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 6px 13px;
+    padding: 6px 8px;
     border-radius: 999px;
     flex: none;
 }
@@ -561,7 +561,7 @@
     align-items: center;
     gap: 16px;
     min-width: 0; /* grid item: allow shrink so a long title ellipsizes vs. overflow */
-    padding: 18px 20px;
+    padding: 14px 16px;
     background: var(--surface);
     border-radius: 18px;
     box-shadow: 0 6px 18px -13px rgba(0, 0, 0, 0.3);
@@ -1487,6 +1487,15 @@ textarea.field {
         margin: 18px 0 0;
         padding: 0;
     }
+    /* Restore the roomier list-item / badge sizing on desktop (tightened on mobile). */
+    .recipe-card,
+    .meal-row {
+        padding: 18px 20px;
+    }
+    .badge {
+        font-size: 15px;
+        padding: 6px 13px;
+    }
     .detail-mobile-title {
         display: none;
     }
@@ -2230,7 +2239,7 @@ textarea.field {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 18px 20px;
+    padding: 14px 16px;
     background: var(--surface);
     border-radius: 18px;
     box-shadow: 0 6px 18px -13px rgba(0, 0, 0, 0.3);
@@ -2280,12 +2289,6 @@ textarea.field {
 .meal-btn.sched:hover {
     background: var(--accent-soft);
     color: var(--accent);
-}
-.meal-btn.cook {
-    color: var(--accent);
-}
-.meal-btn.cook:hover {
-    background: var(--accent-soft);
 }
 .meal-btn.remove {
     color: var(--alert);

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
     CalendarPlusIcon,
     ChevronRightIcon,
-    CookIcon,
     PlanIcon,
     PlusIcon,
     SearchIcon,
@@ -279,17 +278,6 @@ export function PlanPage() {
                                                             }
                                                         >
                                                             <PlanIcon size={21} />
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className="meal-btn cook"
-                                                            aria-label="cook"
-                                                            title="cook"
-                                                            onClick={() =>
-                                                                navigate(`/recipes/${recipe.id}`)
-                                                            }
-                                                        >
-                                                            <CookIcon size={22} />
                                                         </button>
                                                         <button
                                                             type="button"
