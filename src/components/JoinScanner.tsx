@@ -59,12 +59,21 @@ export function JoinScanner({ onClose }: { onClose: () => void }) {
         if (manualMode) return
         let cancelled = false
         decodedRef.current = false
-        const scanner = new Html5Qrcode(READER_ID, false)
+        // Disable the native BarcodeDetector path: on devices that support it,
+        // html5-qrcode renders its own camera UI on top of ours, producing a
+        // duplicate scan area. Forcing the web decoder keeps a single overlay.
+        const scanner = new Html5Qrcode(READER_ID, {
+            useBarCodeDetectorIfSupported: false,
+            verbose: false,
+        })
         scannerRef.current = scanner
         scanner
             .start(
                 { facingMode: 'environment' },
-                { fps: 10, qrbox: 250 },
+                // No qrbox: html5-qrcode would draw its own dimmed scan-box with
+                // corner brackets on top of our branded reticle (a visible
+                // duplicate). Omitting it scans the full frame with no overlay.
+                { fps: 10 },
                 (decodedText) => {
                     if (decodedRef.current) return
                     decodedRef.current = true

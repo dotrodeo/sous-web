@@ -8,6 +8,7 @@ import {
     PlusIcon,
     TrashIcon,
 } from '../components/Icons'
+import { BottomSheet } from '../components/BottomSheet'
 import { Switch } from '../components/SheetControls'
 import { usePantry, useUpsertCategory, useUpdateCategorySortOrder } from '../hooks/usePantry'
 import type { ItemCategory, ItemCategoryPatch } from '../lib/types'
@@ -222,94 +223,90 @@ export function CategoriesPage() {
             </div>
 
             {draft && (
-                <div className="sheet-overlay">
-                    <div className="modal-scrim" onClick={() => setDraft(null)} />
-                    <div className="sheet-card">
-                        <div className="sheet-grabber" />
-                        <div className="sheet-head">
-                            <span className="sheet-title">
-                                {isEdit ? 'edit category' : 'new category'}
-                            </span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={!draft.name.trim()}
-                                onClick={save}
-                            >
-                                save
-                            </button>
-                        </div>
-
-                        <label className="sheet-label">name</label>
-                        <div className="sheet-row">
-                            <input
-                                className="field grow"
-                                autoFocus={!isEdit}
-                                value={draft.name}
-                                onChange={(e) => update({ name: e.target.value })}
-                                placeholder="produce"
-                            />
-                            <button
-                                type="button"
-                                className="cat-emoji-btn"
-                                aria-label="choose emoji"
-                                onClick={() => setEmojiOpen((o) => !o)}
-                            >
-                                {draft.icon}
-                            </button>
-                        </div>
-
-                        {emojiOpen && (
-                            <div className="emoji-panel">
-                                <div className="emoji-grid">
-                                    {EMOJIS.map((g) => (
-                                        <button
-                                            type="button"
-                                            key={g}
-                                            className={`emoji-cell${g === draft.icon ? ' active' : ''}`}
-                                            onClick={() => {
-                                                update({ icon: g })
-                                                setEmojiOpen(false)
-                                            }}
-                                        >
-                                            {g}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="toggle-row bordered">
-                            <div>
-                                <div style={{ fontSize: 18 }}>non-food category</div>
-                                <div style={{ fontSize: 14, color: 'var(--ink-40)', marginTop: 2 }}>
-                                    won’t affect cooking or pantry stock
-                                </div>
-                            </div>
-                            <Switch
-                                on={draft.isNonFood}
-                                label="toggle non-food"
-                                onChange={(on) => update({ isNonFood: on })}
-                            />
-                        </div>
-
-                        {isEdit && (
-                            <button
-                                type="button"
-                                className="sheet-delete"
-                                onClick={() =>
-                                    setPendingDelete({
-                                        id: draft.id as number,
-                                        name: draft.name,
-                                    } as ItemCategory)
-                                }
-                            >
-                                <TrashIcon size={20} />
-                                delete category
-                            </button>
-                        )}
+                <BottomSheet onClose={() => setDraft(null)}>
+                    <div className="sheet-head">
+                        <span className="sheet-title">
+                            {isEdit ? 'edit category' : 'new category'}
+                        </span>
+                        <button
+                            type="button"
+                            className="sheet-save"
+                            disabled={!draft.name.trim()}
+                            onClick={save}
+                        >
+                            save
+                        </button>
                     </div>
-                </div>
+
+                    <label className="sheet-label">name</label>
+                    <div className="sheet-row">
+                        <input
+                            className="field grow"
+                            autoFocus={!isEdit}
+                            value={draft.name}
+                            onChange={(e) => update({ name: e.target.value })}
+                            placeholder="produce"
+                        />
+                        <button
+                            type="button"
+                            className="cat-emoji-btn"
+                            aria-label="choose emoji"
+                            onClick={() => setEmojiOpen((o) => !o)}
+                        >
+                            {draft.icon}
+                        </button>
+                    </div>
+
+                    {emojiOpen && (
+                        <div className="emoji-panel">
+                            <div className="emoji-grid">
+                                {EMOJIS.map((g) => (
+                                    <button
+                                        type="button"
+                                        key={g}
+                                        className={`emoji-cell${g === draft.icon ? ' active' : ''}`}
+                                        onClick={() => {
+                                            update({ icon: g })
+                                            setEmojiOpen(false)
+                                        }}
+                                    >
+                                        {g}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="toggle-row bordered">
+                        <div>
+                            <div style={{ fontSize: 18 }}>non-food category</div>
+                            <div style={{ fontSize: 14, color: 'var(--ink-40)', marginTop: 2 }}>
+                                won’t affect cooking or pantry stock
+                            </div>
+                        </div>
+                        <Switch
+                            on={draft.isNonFood}
+                            label="toggle non-food"
+                            onChange={(on) => update({ isNonFood: on })}
+                        />
+                    </div>
+
+                    {isEdit && (
+                        <button
+                            type="button"
+                            className="sheet-delete"
+                            onClick={() =>
+                                setPendingDelete({
+                                    id: draft.id as number,
+                                    name: draft.name,
+                                } as ItemCategory)
+                            }
+                        >
+                            <TrashIcon size={20} />
+                            delete category
+                        </button>
+                    )}
+                </BottomSheet>
             )}
 
             {pendingDelete && (

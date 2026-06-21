@@ -5,8 +5,10 @@ import {
     PlusIcon,
     RestockIcon,
     SearchIcon,
+    ShoppingCartIcon,
     TrashIcon,
 } from '../components/Icons'
+import { BottomSheet } from '../components/BottomSheet'
 import { CategorySelect, Switch } from '../components/SheetControls'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory, inPantry, isExpiringSoon } from '../lib/pantryHelper'
@@ -230,6 +232,14 @@ export function PantryPage() {
                                             >
                                                 {it.name}
                                             </button>
+                                            {it.isInShoppingList && (
+                                                <span
+                                                    className="cart-badge"
+                                                    title="on the shopping list"
+                                                >
+                                                    <ShoppingCartIcon size={17} />
+                                                </span>
+                                            )}
                                             {isExpiringSoon(it) && (
                                                 <span
                                                     className="expiring-badge"
@@ -265,92 +275,88 @@ export function PantryPage() {
             </div>
 
             {draft && (
-                <div className="sheet-overlay">
-                    <div className="modal-scrim" onClick={() => setDraft(null)} />
-                    <div className="sheet-card">
-                        <div className="sheet-grabber" />
-                        <div className="sheet-head">
-                            <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={!draft.name.trim()}
-                                onClick={saveSheet}
-                            >
-                                save
-                            </button>
-                        </div>
-
-                        <label className="sheet-label">name</label>
-                        <div className="sheet-row">
-                            <input
-                                className="field grow"
-                                autoFocus={!isEdit}
-                                value={draft.name}
-                                onChange={(e) => update({ name: e.target.value })}
-                                placeholder="fresh sage"
-                            />
-                            <button
-                                type="button"
-                                className={`restock-round${draft.isFavorite ? ' on' : ''}`}
-                                aria-label={draft.isFavorite ? 'staple on' : 'staple off'}
-                                title="mark as staple"
-                                onClick={() => update({ isFavorite: !draft.isFavorite })}
-                            >
-                                <RestockIcon size={22} />
-                            </button>
-                        </div>
-
-                        {categories.length > 0 && (
-                            <>
-                                <label className="sheet-label">category</label>
-                                <CategorySelect
-                                    categories={categories}
-                                    value={draft.categoryId}
-                                    onChange={(categoryId) => update({ categoryId })}
-                                />
-                            </>
-                        )}
-
-                        <div className="sheet-field" style={{ marginTop: 14 }}>
-                            <label className="sheet-label">expires (optional)</label>
-                            <input
-                                className="field"
-                                type="date"
-                                value={draft.expiresAt}
-                                onChange={(e) => update({ expiresAt: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="toggle-row">
-                            <span>in stock</span>
-                            <Switch
-                                on={draft.isInStock}
-                                label="toggle in stock"
-                                onChange={(on) => update({ isInStock: on })}
-                            />
-                        </div>
-                        <div className="toggle-row bordered">
-                            <span>in shopping list</span>
-                            <Switch
-                                on={draft.isInShoppingList}
-                                label="toggle in shopping list"
-                                onChange={(on) => update({ isInShoppingList: on })}
-                            />
-                        </div>
-
-                        {isEdit && (
-                            <button
-                                type="button"
-                                className="sheet-delete"
-                                onClick={() => setPendingDelete(draft)}
-                            >
-                                <TrashIcon size={20} />
-                                delete item
-                            </button>
-                        )}
+                <BottomSheet onClose={() => setDraft(null)}>
+                    <div className="sheet-head">
+                        <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
+                        <button
+                            type="button"
+                            className="sheet-save"
+                            disabled={!draft.name.trim()}
+                            onClick={saveSheet}
+                        >
+                            save
+                        </button>
                     </div>
-                </div>
+
+                    <label className="sheet-label">name</label>
+                    <div className="sheet-row">
+                        <input
+                            className="field grow"
+                            autoFocus={!isEdit}
+                            value={draft.name}
+                            onChange={(e) => update({ name: e.target.value })}
+                            placeholder="fresh sage"
+                        />
+                        <button
+                            type="button"
+                            className={`restock-round${draft.isFavorite ? ' on' : ''}`}
+                            aria-label={draft.isFavorite ? 'staple on' : 'staple off'}
+                            title="mark as staple"
+                            onClick={() => update({ isFavorite: !draft.isFavorite })}
+                        >
+                            <RestockIcon size={22} />
+                        </button>
+                    </div>
+
+                    {categories.length > 0 && (
+                        <>
+                            <label className="sheet-label">category</label>
+                            <CategorySelect
+                                categories={categories}
+                                value={draft.categoryId}
+                                onChange={(categoryId) => update({ categoryId })}
+                            />
+                        </>
+                    )}
+
+                    <div className="sheet-field" style={{ marginTop: 14 }}>
+                        <label className="sheet-label">expires (optional)</label>
+                        <input
+                            className="field"
+                            type="date"
+                            value={draft.expiresAt}
+                            onChange={(e) => update({ expiresAt: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="toggle-row">
+                        <span>in stock</span>
+                        <Switch
+                            on={draft.isInStock}
+                            label="toggle in stock"
+                            onChange={(on) => update({ isInStock: on })}
+                        />
+                    </div>
+                    <div className="toggle-row bordered">
+                        <span>in shopping list</span>
+                        <Switch
+                            on={draft.isInShoppingList}
+                            label="toggle in shopping list"
+                            onChange={(on) => update({ isInShoppingList: on })}
+                        />
+                    </div>
+
+                    {isEdit && (
+                        <button
+                            type="button"
+                            className="sheet-delete"
+                            onClick={() => setPendingDelete(draft)}
+                        >
+                            <TrashIcon size={20} />
+                            delete item
+                        </button>
+                    )}
+                </BottomSheet>
             )}
 
             {pendingDelete && (

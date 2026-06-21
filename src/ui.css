@@ -104,7 +104,9 @@
 /* ── Screen scaffold ── */
 .blob {
     background: var(--brand);
-    padding: 16px 20px 30px;
+    /* Extend the yellow up into the status-bar / notch safe area so the region
+       above the header isn't the gray canvas (viewport-fit=cover + PWA). */
+    padding: calc(16px + env(safe-area-inset-top)) 20px 30px;
     border-radius: 0 0 50% 50% / 0 0 44px 44px;
 }
 .blob-actions {
@@ -712,6 +714,7 @@
     flex: 1;
     min-width: 0;
     line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 .ing-status {
     flex: none;
@@ -787,9 +790,12 @@
 }
 .step .text {
     margin: 0;
+    flex: 1;
+    min-width: 0;
     font-size: 17px;
     line-height: 1.55;
     color: var(--ink);
+    overflow-wrap: anywhere;
 }
 
 /* ── More menu ── */
@@ -1234,9 +1240,12 @@
     background: var(--stocked);
 }
 .finished-row .label {
+    flex: 1;
+    min-width: 0;
     font-size: 16px;
     line-height: 1.35;
     color: var(--ink);
+    overflow-wrap: anywhere;
 }
 .finished-row.done .label {
     color: var(--ink-60);
@@ -1765,6 +1774,17 @@ textarea.field {
     align-items: center;
     justify-content: center;
 }
+.cart-badge {
+    flex: none;
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    align-items: center;
+    justify-content: center;
+}
 .restock-btn {
     flex: none;
     cursor: pointer;
@@ -1886,6 +1906,8 @@ textarea.field {
     border-radius: 26px 26px 0 0;
     padding: 20px 22px 30px;
     box-shadow: 0 -10px 40px -12px rgba(0, 0, 0, 0.3);
+    /* Snap back when a swipe-to-close drag is released below the threshold. */
+    transition: transform 0.25s ease;
 }
 .sheet-grabber {
     width: 40px;
@@ -1893,6 +1915,25 @@ textarea.field {
     border-radius: 999px;
     background: var(--out);
     margin: 0 auto 20px;
+}
+/* Draggable swipe-to-close handle wrapping the grabber pill (BottomSheet). */
+.sheet-handle {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 4px 0 18px;
+    margin-top: -4px;
+    cursor: grab;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.sheet-handle:active {
+    cursor: grabbing;
+}
+.sheet-handle .sheet-grabber {
+    margin: 0;
 }
 .sheet-head {
     display: flex;

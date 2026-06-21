@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CheckIcon, EditIcon, MinusCircleIcon, PlusIcon, TrashIcon } from '../components/Icons'
+import { BottomSheet } from '../components/BottomSheet'
 import { CategorySelect } from '../components/SheetControls'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory } from '../lib/pantryHelper'
@@ -290,75 +291,71 @@ export function ListPage() {
             </div>
 
             {draft && (
-                <div className="sheet-overlay">
-                    <div className="modal-scrim" onClick={() => setDraft(null)} />
-                    <div className="sheet-card">
-                        <div className="sheet-grabber" />
-                        <div className="sheet-head">
-                            <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={!draft.name.trim()}
-                                onClick={saveSheet}
-                            >
-                                save
-                            </button>
-                        </div>
-
-                        <div className="sheet-row fields">
-                            <div className="grow">
-                                <label className="sheet-label">item</label>
-                                <input
-                                    className="field"
-                                    autoFocus={!isEdit}
-                                    value={draft.name}
-                                    onChange={(e) => update({ name: e.target.value })}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault()
-                                            saveSheet()
-                                        }
-                                    }}
-                                    placeholder="red onion"
-                                />
-                            </div>
-                            <div className="qty-col">
-                                <label className="sheet-label">qty</label>
-                                <input
-                                    className="field"
-                                    value={draft.quantity}
-                                    onChange={(e) => update({ quantity: e.target.value })}
-                                    placeholder="×2"
-                                />
-                            </div>
-                        </div>
-
-                        {categories.length > 0 && (
-                            <>
-                                <label className="sheet-label">category</label>
-                                <CategorySelect
-                                    categories={categories}
-                                    value={draft.categoryId}
-                                    onChange={(categoryId) => update({ categoryId })}
-                                    dropUp
-                                />
-                            </>
-                        )}
-
-                        {isEdit && (
-                            <button
-                                type="button"
-                                className="sheet-delete"
-                                style={{ marginTop: 22 }}
-                                onClick={() => setPendingDelete(draft)}
-                            >
-                                <TrashIcon size={20} />
-                                delete permanently
-                            </button>
-                        )}
+                <BottomSheet onClose={() => setDraft(null)}>
+                    <div className="sheet-head">
+                        <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
+                        <button
+                            type="button"
+                            className="sheet-save"
+                            disabled={!draft.name.trim()}
+                            onClick={saveSheet}
+                        >
+                            save
+                        </button>
                     </div>
-                </div>
+
+                    <div className="sheet-row fields">
+                        <div className="grow">
+                            <label className="sheet-label">item</label>
+                            <input
+                                className="field"
+                                autoFocus={!isEdit}
+                                value={draft.name}
+                                onChange={(e) => update({ name: e.target.value })}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault()
+                                        saveSheet()
+                                    }
+                                }}
+                                placeholder="red onion"
+                            />
+                        </div>
+                        <div className="qty-col">
+                            <label className="sheet-label">qty</label>
+                            <input
+                                className="field"
+                                value={draft.quantity}
+                                onChange={(e) => update({ quantity: e.target.value })}
+                                placeholder="×2"
+                            />
+                        </div>
+                    </div>
+
+                    {categories.length > 0 && (
+                        <>
+                            <label className="sheet-label">category</label>
+                            <CategorySelect
+                                categories={categories}
+                                value={draft.categoryId}
+                                onChange={(categoryId) => update({ categoryId })}
+                                dropUp
+                            />
+                        </>
+                    )}
+
+                    {isEdit && (
+                        <button
+                            type="button"
+                            className="sheet-delete"
+                            style={{ marginTop: 22 }}
+                            onClick={() => setPendingDelete(draft)}
+                        >
+                            <TrashIcon size={20} />
+                            delete permanently
+                        </button>
+                    )}
+                </BottomSheet>
             )}
 
             {pendingDelete && (

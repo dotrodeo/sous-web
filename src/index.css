@@ -54,6 +54,10 @@ button {
     font-family: inherit;
     text-transform: inherit;
     cursor: pointer;
+    /* iOS Safari renders un-colored button text in the system tint (blue);
+       inherit the surrounding ink so e.g. recipe card names/badges aren't blue.
+       Buttons that need a specific color (chips, FAB, primary) set their own. */
+    color: inherit;
 }
 
 input,

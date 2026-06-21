@@ -166,6 +166,14 @@ export const RestockIcon = (p: IconProps) => (
         <path d="M21 13v2a4 4 0 0 1-4 4H3" />
     </Svg>
 )
+/** Shopping cart — marks a pantry item that's currently on the shopping list. */
+export const ShoppingCartIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <circle cx="9" cy="21" r="1.4" />
+        <circle cx="18" cy="21" r="1.4" />
+        <path d="M2 3h2.2l2.5 12.4a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.2L21 7H5" />
+    </Svg>
+)
 /** Circle-minus — remove an item from the shopping list (keeps it in the catalog). */
 export const MinusCircleIcon = (p: IconProps) => (
     <Svg {...p}>

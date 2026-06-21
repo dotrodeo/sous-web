@@ -9,6 +9,7 @@ import {
     ScanIcon,
     ShareQrIcon,
 } from '../components/Icons'
+import { BottomSheet } from '../components/BottomSheet'
 import { useUser, useActiveHousehold } from '../hooks/useUser'
 import { initials } from '../lib/initials'
 
@@ -109,28 +110,24 @@ export function SettingsPage() {
             </div>
 
             {shareOpen && household && (
-                <div className="sheet-overlay">
-                    <div className="modal-scrim" onClick={() => setShareOpen(false)} />
-                    <div className="sheet-card share">
-                        <div className="sheet-grabber" />
-                        <div className="share-title">share household</div>
-                        <div className="share-desc">
-                            Invite someone to <strong>{household.name}</strong>. They can scan this
-                            code or enter it under “join household”.
-                        </div>
-                        <div className="qr-wrap">
-                            <div className="qr-frame">
-                                <QRCodeSVG value={household.joinToken} size={168} />
-                            </div>
-                        </div>
-                        <div className="invite-row">
-                            <span className="invite-code">{household.joinToken}</span>
-                            <button type="button" className="copy-btn" onClick={copyToken}>
-                                {copied ? 'copied' : 'copy'}
-                            </button>
+                <BottomSheet onClose={() => setShareOpen(false)} className="share">
+                    <div className="share-title">share household</div>
+                    <div className="share-desc">
+                        Invite someone to <strong>{household.name}</strong>. They can scan this code
+                        or enter it under “join household”.
+                    </div>
+                    <div className="qr-wrap">
+                        <div className="qr-frame">
+                            <QRCodeSVG value={household.joinToken} size={168} />
                         </div>
                     </div>
-                </div>
+                    <div className="invite-row">
+                        <span className="invite-code">{household.joinToken}</span>
+                        <button type="button" className="copy-btn" onClick={copyToken}>
+                            {copied ? 'copied' : 'copy'}
+                        </button>
+                    </div>
+                </BottomSheet>
             )}
 
             {joinOpen && (
