@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useSignIn, useSignUp } from '@clerk/clerk-react'
-import { Logo, EyeIcon, EyeOffIcon, GoogleGlyph, AppleGlyph, CheckIcon } from '../components/Icons'
+import { Logo, EyeIcon, EyeOffIcon, CheckIcon } from '../components/Icons'
 
 type Mode = 'signin' | 'signup'
 type Step = 'form' | 'verify' | 'reset'
@@ -117,20 +117,6 @@ export function LoginPage() {
             setError(clerkError(e))
         } finally {
             setBusy(false)
-        }
-    }
-
-    async function social(strategy: 'oauth_google' | 'oauth_apple') {
-        if (!siReady) return
-        setError(null)
-        try {
-            await signIn.authenticateWithRedirect({
-                strategy,
-                redirectUrl: '/sso-callback',
-                redirectUrlComplete: '/',
-            })
-        } catch (e) {
-            setError(clerkError(e))
         }
     }
 
