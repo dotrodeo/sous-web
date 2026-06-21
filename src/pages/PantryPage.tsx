@@ -14,15 +14,6 @@ import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory, inPantry, isExpiringSoon } from '../lib/pantryHelper'
 import type { ItemCategory, PantryItem, PantryItemPatch } from '../lib/types'
 
-type Filter = 'all' | 'low' | 'expiring' | 'staples'
-
-const FILTERS: { key: Filter; label: string }[] = [
-    { key: 'all', label: 'all' },
-    { key: 'low', label: 'low / out' },
-    { key: 'expiring', label: 'expiring' },
-    { key: 'staples', label: 'staples' },
-]
-
 interface Draft {
     id: number | null
     name: string
@@ -52,7 +43,6 @@ export function PantryPage() {
     const upsert = useUpsertPantryItem()
 
     const [query, setQuery] = useState('')
-    const [filter, setFilter] = useState<Filter>('all')
     const [draft, setDraft] = useState<Draft | null>(null)
     const [pendingDelete, setPendingDelete] = useState<Draft | null>(null)
 
@@ -63,25 +53,11 @@ export function PantryPage() {
     )
 
     const base = useMemo(() => inPantry(items, query), [items, query])
-    const filtered = useMemo(() => {
-        switch (filter) {
-            case 'low':
-                return base.filter((it) => !it.isInStock)
-            case 'expiring':
-                return base.filter(isExpiringSoon)
-            case 'staples':
-                return base.filter((it) => it.isFavorite)
-            default:
-                return base
-        }
-    }, [base, filter])
-    const groups = useMemo(() => groupByCategory(filtered), [filtered])
+    const groups = useMemo(() => groupByCategory(base), [base])
 
     const summary = useMemo(() => {
-        const low = base.filter((it) => !it.isInStock).length
         const exp = base.filter(isExpiringSoon).length
         let s = `${base.length} item${base.length === 1 ? '' : 's'}`
-        if (low) s += ` · ${low} low`
         if (exp) s += ` · ${exp} expiring`
         return s
     }, [base])
@@ -184,19 +160,6 @@ export function PantryPage() {
                         placeholder="search your pantry"
                         aria-label="search your pantry"
                     />
-                </div>
-
-                <div className="chip-rail">
-                    {FILTERS.map((f) => (
-                        <button
-                            key={f.key}
-                            type="button"
-                            className={`chip${filter === f.key ? ' active' : ''}`}
-                            onClick={() => setFilter(f.key)}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
                 </div>
 
                 {groups.length === 0 ? (
