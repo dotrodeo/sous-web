@@ -35,6 +35,7 @@
 html,
 body {
     margin: 0;
+    text-transform: lowercase;
 }
 
 body {
@@ -51,6 +52,7 @@ body {
 
 button {
     font-family: inherit;
+    text-transform: inherit;
     cursor: pointer;
 }
 

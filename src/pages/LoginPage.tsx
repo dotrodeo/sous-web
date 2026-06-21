@@ -313,29 +313,10 @@ export function LoginPage() {
                                 <div className="rule" />
                             </div>
 
-                            <div className="social">
-                                <button
-                                    className="social-btn"
-                                    type="button"
-                                    onClick={() => social('oauth_google')}
-                                >
-                                    <GoogleGlyph />
-                                    continue with Google
-                                </button>
-                                <button
-                                    className="social-btn apple"
-                                    type="button"
-                                    onClick={() => social('oauth_apple')}
-                                >
-                                    <AppleGlyph />
-                                    continue with Apple
-                                </button>
-                            </div>
-
                             <p className="legal">
                                 {signUpMode
                                     ? 'by creating an account you agree to our terms & privacy policy.'
-                                    : 'protected by the usual kitchen magic.'}
+                                    : ''}
                             </p>
                         </>
                     )}
