@@ -579,7 +579,7 @@
 }
 .recipe-card .name {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     flex: 1;
     min-width: 0;
     white-space: nowrap;
