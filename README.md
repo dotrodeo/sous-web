@@ -154,3 +154,7 @@ Data is fetched and cached with TanStack Query, keyed by household. When a live
 update arrives, `src/hooks/useHouseholdEvents.ts` refreshes the matching queries.
 API types in `src/lib/types.ts` mirror soupi's data model: when you add a field,
 add it to both.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
