@@ -1,127 +1,156 @@
-# sous-web
+# Sous
 
-A progressive-web-app rewrite of the `sous` iOS app (SwiftUI → React). The native
-app is a thin presentation layer over a REST + SSE backend, so the migration is
-mostly re-implementing the UI and the API/auth glue on the web.
+Sous is a cooking app for households. Everyone in the household shares one recipe
+box, meal plan, pantry and shopping list, and changes show up on everyone's devices
+as they happen.
 
-> **Status: Phase 1 spike.** Proves the riskiest end-to-end path — Clerk auth →
-> resolve household → render the Recipes list from the live backend — before
-> committing to a full port. See the migration decision doc for the phased plan.
+This repository is the web app: an installable progressive web app (PWA) for phones
+and desktops. It needs the [soupi](https://github.com/dotrodeo/soupi) API server
+behind it.
 
-## Stack
+## What it does
 
-- **Vite + React + TypeScript**
-- **@clerk/clerk-react** — same Clerk instance as the iOS app (auth ports 1:1)
-- **@tanstack/react-query** — server state; maps onto the Swift "ViewModel fetches
-  from a service" pattern, with SSE invalidation slated for a later phase
-- **vite-plugin-pwa** — installed, wired up in the PWA-shell phase
+**Recipes**
 
-## Setup
+- Import a recipe from a URL, or write one by hand. Imported ingredient lines are
+  split into amount, unit and item.
+- Search, filter by tag, and sort by how much of each recipe your pantry covers.
+- Each ingredient shows whether it's in the pantry, on the shopping list, or
+  missing. One tap adds a missing ingredient to the list.
+- Cook mode shows one step at a time in large type, with the step's ingredients
+  highlighted.
+- "I made this" records a rating, marks the ingredients you used up as out of
+  stock, and removes the recipe from the meal plan.
+
+**Meal plan**
+
+- Add days and put recipes on them. Each recipe shows how much of it the pantry
+  covers.
+
+**Pantry**
+
+- Items grouped by category, with stock status, quantity and expiration date.
+  Items expiring soon are flagged.
+- Mark items as staples. A staple that runs out goes on the shopping list
+  automatically.
+
+**Shopping list**
+
+- Grouped by category. Add items directly or pick them from the pantry.
+- Shopping mode: check items off as you get them (which marks them in stock), then
+  clear the checked ones.
+
+**Household**
+
+- Share your household with a QR code or join code. Others join by scanning it or
+  typing it in.
+- Reorder, add, rename and remove categories, and mark categories as non-food.
+- Every change syncs live to the other members.
+
+Sign-in is by email and password. Sous needs a network connection: only the app
+itself is cached for offline startup, not your data.
+
+## How it fits together
+
+```
+browser (sous-web) ──HTTPS──▶ soupi API ──▶ Postgres
+        │                        │
+        └──── Clerk (sign-in) ◀──┘
+```
+
+- The browser calls soupi directly, with the user's Clerk session token.
+- soupi pushes changes back over a Server-Sent Events stream, and the app refreshes
+  the affected data.
+- sous-web is a static build served by nginx. It has no server-side code.
+
+## Run it locally
+
+You need Node 22, a running soupi (see its
+[README](https://github.com/dotrodeo/soupi#run-it-locally)), and the publishable key
+of the Clerk application soupi uses.
 
 ```bash
 npm install
-cp .env.example .env.local   # then fill in the values (see below)
-npm run dev                  # http://localhost:5173
+cp .env.example .env.local     # fill in the two values below
+npm run dev                    # http://localhost:5173
 ```
 
-### Environment (`.env.local`)
+| Variable                     | Description                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Publishable key of the Clerk application soupi uses.                         |
+| `VITE_API_BASE_URL`          | soupi's URL, such as `http://localhost:8080`. The browser calls it directly. |
 
-Values mirror `Debug.xcconfig` in the `sous-swift` project:
+If soupi sets `CORS_ORIGINS`, include `http://localhost:5173`.
 
-| Var                          | Notes                                                           |
-| ---------------------------- | --------------------------------------------------------------- |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk _publishable_ key — client-side by design, safe to expose |
-| `VITE_API_BASE_URL`          | `https://soupi-development.up.railway.app`                      |
+Scanning a join code needs camera access, which browsers allow only on HTTPS or
+`localhost`.
 
-## How it maps to the Swift app
+## Self-hosting
 
-| Web                       | Swift source of truth                                                                                            |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `src/lib/api.ts`          | `Utils/APIHelper.swift` (Bearer injection, JSON, non-2xx throws)                                                 |
-| `src/lib/useApi.ts`       | `clerk.session?.getToken()?.jwt` → `useAuth().getToken()`                                                        |
-| `src/lib/types.ts`        | `Models/*.swift` (Recipe, Ingredient, RecipeTag, User)                                                           |
-| `src/hooks/useUser.ts`    | `SessionManager.handleAuthEvent()` (GET /user, fallback /user/sync; resolve household from `defaultHouseholdId`) |
-| `src/hooks/useRecipes.ts` | `RecipeService.fetchRecipes()` (`GET /household/{id}/recipes`)                                                   |
+Deploy [soupi](https://github.com/dotrodeo/soupi#self-hosting) first: sous-web needs
+its public URL at build time.
 
-## Verified in this spike
+`docker-compose.yml` builds the app and serves it with nginx (service `web`), with an
+optional bundled [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
+(service `tunnel`). One env file defines one environment, and names are suffixed
+with its `ENV`, so several environments can run on one host.
 
-- ✅ Type-checks and production-builds clean (`npm run build`)
-- ✅ Dev server serves the app shell
-- ✅ Backend reachable; **CORS open to the web origin** (`access-control-allow-origin: *`,
-  `authorization` header allowed) — confirmed via preflight from `localhost:5173`
-- ⏳ **Manual, needs a real browser + your Clerk login:** sign in, then confirm the
-  Recipes list renders real household data. (Cannot be done headlessly.)
+1. Copy the template and fill it in:
 
-## Phases
+   ```bash
+   cp .env.deploy.example .env.prod
+   ```
 
-1. ✅ Spike: Clerk auth + Recipes list end-to-end
-2. ✅ Port models + services into typed query/mutation hooks (`src/hooks`)
-3. ✅ SSE layer (`/events/{householdId}` → `queryClient.invalidateQueries`).
-   Uses SSE-over-fetch (`@microsoft/fetch-event-source`) because native
-   `EventSource` can't send the `Authorization` header the backend requires.
-4. ◐ Feature parity tab-by-tab. Faithful port: Poppins/Caprasimo fonts, the
-   `p_*` palette (light+dark), 5-tab bottom nav via React Router.
-   - ✅ Recipes tab: list (fuzzy pantry-ratio sort, tag filters, search),
-     detail (pantry-matched ingredients, add-to-list, "I made this"), edit
-     (form, URL import, tags), big mode (paginated + ingredient highlighting)
-   - ✅ Pantry tab: category-grouped inventory (in-stock first), status
-     indicators, favorite/out-of-stock/delete row actions, add/edit item modal
-   - ✅ List tab: category-grouped shopping list, tap-to-purchase, "add from
-     items" mode to add pantry items, edit/delete row actions
-   - ✅ Plan tab: future plan days, add plan day (date picker), add/remove
-     recipes (multi-select), ratio dots, tap-to-detail, "I made this"
-   - ✅ Settings tab: nav rows + sign-out; category editor (reorder + save,
-     add/edit/delete); share household (QR via qrcode.react); join household
-     (QR scan via html5-qrcode, lazy-loaded; needs HTTPS/localhost + camera)
-5. ✅ PWA shell: web manifest + chef-toque app icons (generated by
-   `node scripts/generate-icons.mjs` from a vector source), service worker via
-   `vite-plugin-pwa` (autoUpdate) that precaches the app shell only — API/SSE
-   responses are never cached, so the app stays online-only.
-6. ✅ Deploy: self-hosted via Docker Compose behind a Cloudflare Tunnel (see
-   below). The tunnel provides HTTPS, which the QR scanner requires.
+   Set `ENV=prod`, `VITE_CLERK_PUBLISHABLE_KEY`, `VITE_API_BASE_URL` (soupi's
+   **public** URL) and `WEB_PORT` (the host port, bound to `127.0.0.1`).
 
-## Deploy (self-hosted: Docker Compose + Cloudflare Tunnel)
+2. Build and start it. Pass `--env-file` on **every** `docker compose` command.
 
-A multi-stage `Dockerfile` builds the static bundle and serves it with nginx
-(SPA fallback; `sw.js`/manifest set to `no-cache`). `docker-compose.yml` is
-**per-environment** — separate `dev` and `prod` stacks run side by side on one
-host (container/network/image names suffixed with `${ENV}`): the nginx app
-(`sous_web_<env>_app`) + a bundled `cloudflared` tunnel (`sous_web_<env>_tunnel`).
+   ```bash
+   docker compose --env-file .env.prod up -d --build          # with the tunnel
+   docker compose --env-file .env.prod up -d --build web      # without it
+   ```
 
-`VITE_*` are **build-time** (Vite inlines them), so each environment is its own
-build. Point `VITE_API_BASE_URL` at that environment's **public** soupi API URL
-(the browser calls it directly — use the tunnel hostname, not a container name).
+3. Serve it over HTTPS, which installing the app and scanning join codes require.
+   Either:
+   - set `TUNNEL_TOKEN` to a Cloudflare Tunnel token and route the tunnel's public
+     hostname to `http://sous_web_<ENV>_app:80`, or
+   - put your own reverse proxy in front of `127.0.0.1:<WEB_PORT>`.
 
-On the Debian server (Docker Engine + Compose plugin):
+4. Add this URL to soupi's `CORS_ORIGINS` and restart soupi's `api` service.
+
+The `VITE_*` values are compiled into the build. Changing them, or pulling new code,
+means rebuilding:
 
 ```bash
-cp .env.deploy.example .env.dev      # set ENV, VITE_*, WEB_PORT, TUNNEL_TOKEN
-npm run deploy dev                   # or: docker compose --env-file .env.dev up -d --build
-npm run deploy prod                  # likewise with .env.prod
+docker compose --env-file .env.prod up -d --build web
 ```
 
-In Cloudflare Zero Trust → Networks → Tunnels, create a tunnel per environment,
-put its token in `.env.<env>`, and point its public hostname ingress at
-`http://sous_web_<env>_app:80`.
+Open apps pick up a new build on their next load.
 
-Operations (per environment):
+## Development
 
-```bash
-docker compose --env-file .env.dev logs -f
-docker compose --env-file .env.dev ps
-docker compose --env-file .env.dev down
+| Command           | What it does                       |
+| ----------------- | ---------------------------------- |
+| `npm run dev`     | Dev server with hot reload         |
+| `npm run build`   | Type-check and build to `dist/`    |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint`    | ESLint                             |
+| `npm run format`  | Prettier                           |
+
+Stack: Vite, React 19, TypeScript, TanStack Query, React Router, Clerk, and
+vite-plugin-pwa, with plain CSS.
+
+```
+src/pages/        One component per screen
+src/components/   App shell, bottom sheets, icons, QR scanner
+src/hooks/        Data queries and mutations, live-update listener
+src/lib/          API client, endpoint functions, types, helpers
+src/index.css     Design tokens (colors, font)
+src/ui.css        Layout and shared components
 ```
 
-Notes:
-
-- `VITE_*` are baked at build time — rebuild (`npm run deploy <env>`) to change
-  them. `.env.dev` / `.env.prod` are gitignored.
-- Use a distinct `WEB_PORT` per env (e.g. dev 8082 / prod 8083) so both can bind
-  a localhost test port on one host.
-- The service worker is `autoUpdate`; a rebuild + redeploy rolls out to clients.
-
-### Web-vs-native deviations (Recipes tab)
-
-- Delete is a trash button on the row, not swipe-to-delete.
-- The "import recipe" toolbar uses a URL prompt instead of clipboard paste.
-- Tab icons are placeholder line SVGs (SF Symbols have no web equivalent).
+Data is fetched and cached with TanStack Query, keyed by household. When a live
+update arrives, `src/hooks/useHouseholdEvents.ts` refreshes the matching queries.
+API types in `src/lib/types.ts` mirror soupi's data model: when you add a field,
+add it to both.
