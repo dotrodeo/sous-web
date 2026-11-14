@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
+import { TimersDock } from './components/TimersDock'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import { useThemePreference } from './hooks/useTheme'
 import { LoginPage } from './pages/LoginPage'
@@ -35,6 +36,7 @@ function AuthedApp() {
             <SignedIn>
                 <HouseholdEventsListener />
                 <ThemeSync />
+                <TimersDock />
                 <AppShell>
                     <Routes>
                         <Route index element={<Navigate to="/recipes" replace />} />

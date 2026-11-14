@@ -13,6 +13,8 @@ export interface HighlightedSegment {
     text: string
     isHighlighted: boolean
     match?: FuzzyMatchResult<IngredientKeyword>
+    /** Set on a time mention ("10 minutes"), which can start a timer. */
+    time?: { seconds: number }
 }
 
 const STOPWORDS = new Set<string>([
@@ -226,6 +228,41 @@ export function mergeIngredientMentions(segments: HighlightedSegment[]): Highlig
             continue
         }
         out.push(seg)
+    }
+    return out
+}
+
+// "10 minutes", "25-30 min", "1 to 2 hours", "45 sec". A range uses its low end.
+const TIME_RE = /(\d+)(?:\s*(?:-|–|to)\s*\d+)?\s?(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/gi
+const UNIT_SECONDS: Record<string, number> = { h: 3600, m: 60, s: 1 }
+
+/** Splits time mentions out of the non-ingredient text into their own segments. */
+export function splitTimeMentions(segments: HighlightedSegment[]): HighlightedSegment[] {
+    const out: HighlightedSegment[] = []
+    for (const seg of segments) {
+        if (seg.isHighlighted) {
+            out.push(seg)
+            continue
+        }
+        let last = 0
+        let n = 0
+        for (const m of seg.text.matchAll(TIME_RE)) {
+            const at = m.index ?? 0
+            if (at > last)
+                out.push({ ...seg, id: `${seg.id}.${n++}`, text: seg.text.slice(last, at) })
+            const seconds = Number(m[1]) * UNIT_SECONDS[m[2][0].toLowerCase()]
+            out.push({
+                id: `${seg.id}.${n++}`,
+                text: m[0],
+                isHighlighted: false,
+                time: { seconds },
+            })
+            last = at + m[0].length
+        }
+        if (last === 0) out.push(seg)
+        else if (last < seg.text.length) {
+            out.push({ ...seg, id: `${seg.id}.${n}`, text: seg.text.slice(last) })
+        }
     }
     return out
 }

@@ -19,6 +19,10 @@ behind it.
   missing. One tap adds a missing ingredient to the list.
 - Cook mode shows one step at a time in large type. Ingredients in the step are
   underlined; tap one to see its full line and amount at the chosen scale.
+- Times in a step ("simmer 10 minutes", "bake 25-30 min") start a timer when
+  tapped; a range uses the shorter time. Several timers can run at once, they keep
+  running when you leave cook mode, and each rings an alarm when it ends. Cook mode
+  keeps the screen awake.
 - Scale a recipe from ¼ to 3×. Ingredient amounts and servings update, shown as
   fractions.
 - "I made this" records a rating, marks the ingredients you used up as out of
