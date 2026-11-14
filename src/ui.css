@@ -2424,6 +2424,10 @@ textarea.field {
     margin-top: 14px;
     cursor: pointer;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
     border: none;
     background: var(--chip);
     color: var(--ink);
