@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
     CheckIcon,
@@ -17,7 +17,11 @@ import {
 import { useCompleteRecipe, useDeleteRecipe, useRecipe } from '../hooks/useRecipes'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { matchIngredientsToPantry, type PantryMatchedIngredient } from '../lib/recipeHelper'
-import { highlight } from '../lib/instructionHighlighter'
+import {
+    highlight,
+    mergeIngredientMentions,
+    type HighlightedSegment,
+} from '../lib/instructionHighlighter'
 import { DEFAULT_STEP, SCALE_STEPS, scaleIngredient, scaleServings } from '../lib/scale'
 import type { PantryItem, Rating, RecipeCompletion } from '../lib/types'
 
@@ -27,6 +31,16 @@ function statusOf(item: PantryItem | null): IngStatus {
     if (item?.isInStock) return 'stock'
     if (item?.isInShoppingList) return 'list'
     return 'add'
+}
+
+/** The ingredient popover in cook mode, anchored to the word that opened it. */
+interface IngredientPopover {
+    segId: string
+    step: number
+    text: string
+    anchor: DOMRect
+    /** Opened by a tap or click, so it stays open until dismissed (not just on hover). */
+    pinned: boolean
 }
 
 const STATUS_LABEL: Record<IngStatus, string> = {
@@ -92,20 +106,51 @@ export function RecipeDetailPage() {
 
     const total = instructions.length
     const cookSegments = useMemo(
-        () => highlight(ingredientStrings, instructions[stepIndex] ?? ''),
+        () => mergeIngredientMentions(highlight(ingredientStrings, instructions[stepIndex] ?? '')),
         [ingredientStrings, instructions, stepIndex],
     )
-    /** The ingredients this step mentions, with amounts at the current scale. */
-    const stepIngredients = useMemo(
-        () => [
-            ...new Set(
-                cookSegments.flatMap((seg) =>
-                    seg.isHighlighted && seg.match ? [seg.match.item.fullIngredient] : [],
-                ),
-            ),
-        ],
-        [cookSegments],
-    )
+    const [popover, setPopover] = useState<IngredientPopover | null>(null)
+    const popoverRef = useRef<HTMLDivElement>(null)
+    // The popover belongs to the step it was opened on; changing steps hides it.
+    const shownPopover = cookOpen && popover?.step === stepIndex ? popover : null
+
+    const openPopover = (seg: HighlightedSegment, el: HTMLElement, pinned: boolean) => {
+        if (!seg.match) return
+        setPopover({
+            segId: seg.id,
+            step: stepIndex,
+            text: seg.match.item.fullIngredient,
+            anchor: el.getBoundingClientRect(),
+            pinned,
+        })
+    }
+    /** Tap or click: pin the popover open, or close it if it's already pinned. */
+    const togglePopover = (seg: HighlightedSegment, el: HTMLElement) => {
+        if (shownPopover?.segId === seg.id && shownPopover.pinned) setPopover(null)
+        else openPopover(seg, el, true)
+    }
+    const closeUnpinned = (segId: string) =>
+        setPopover((p) => (p && p.segId === segId && !p.pinned ? null : p))
+
+    // Place the popover under its word (above it near the bottom of the screen),
+    // kept inside the viewport.
+    useLayoutEffect(() => {
+        const el = popoverRef.current
+        if (!el || !shownPopover) return
+        const { anchor } = shownPopover
+        const margin = 12
+        const left = Math.min(
+            Math.max(anchor.left + anchor.width / 2 - el.offsetWidth / 2, margin),
+            window.innerWidth - el.offsetWidth - margin,
+        )
+        const below = anchor.bottom + 10
+        const top =
+            below + el.offsetHeight > window.innerHeight - margin
+                ? anchor.top - el.offsetHeight - 10
+                : below
+        el.style.left = `${left}px`
+        el.style.top = `${top}px`
+    }, [shownPopover])
 
     const step = useCallback(
         (delta: number) =>
@@ -116,7 +161,8 @@ export function RecipeDetailPage() {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                if (pendingDelete) setPendingDelete(false)
+                if (shownPopover) setPopover(null)
+                else if (pendingDelete) setPendingDelete(false)
                 else if (madeOpen) setMadeOpen(false)
                 else if (cookOpen) setCookOpen(false)
                 else if (menuOpen) setMenuOpen(false)
@@ -126,7 +172,7 @@ export function RecipeDetailPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [pendingDelete, madeOpen, cookOpen, menuOpen, step])
+    }, [shownPopover, pendingDelete, madeOpen, cookOpen, menuOpen, step])
 
     if (!recipe) {
         return (
@@ -414,7 +460,13 @@ export function RecipeDetailPage() {
             {menuOpen && moreMenu}
 
             {cookOpen && (
-                <div className="cook-overlay">
+                <div
+                    className="cook-overlay"
+                    onPointerDown={(e) => {
+                        const target = e.target as HTMLElement
+                        if (shownPopover && !target.closest('.kw, .kw-popover')) setPopover(null)
+                    }}
+                >
                     <button
                         type="button"
                         className="cook-close"
@@ -426,20 +478,43 @@ export function RecipeDetailPage() {
                     <div className="cook-body">
                         <div className="cook-num">{stepIndex + 1}</div>
                         <p className="cook-text">
-                            {cookSegments.map((seg) => (
-                                <span key={seg.id} className={seg.isHighlighted ? 'kw' : undefined}>
-                                    {seg.text}
-                                </span>
-                            ))}
+                            {cookSegments.map((seg) => {
+                                if (!seg.isHighlighted || !seg.match) {
+                                    return <span key={seg.id}>{seg.text}</span>
+                                }
+                                const open = shownPopover?.segId === seg.id
+                                return (
+                                    <button
+                                        key={seg.id}
+                                        type="button"
+                                        className={`kw${open ? ' open' : ''}`}
+                                        aria-expanded={open}
+                                        aria-describedby={open ? 'kw-popover' : undefined}
+                                        onPointerEnter={(e) => {
+                                            if (e.pointerType === 'mouse') {
+                                                openPopover(seg, e.currentTarget, false)
+                                            }
+                                        }}
+                                        onPointerLeave={(e) => {
+                                            if (e.pointerType === 'mouse') closeUnpinned(seg.id)
+                                        }}
+                                        onFocus={(e) => {
+                                            if (!open) openPopover(seg, e.currentTarget, false)
+                                        }}
+                                        onBlur={() => closeUnpinned(seg.id)}
+                                        onClick={(e) => togglePopover(seg, e.currentTarget)}
+                                    >
+                                        {seg.text}
+                                    </button>
+                                )
+                            })}
                         </p>
-                        {stepIngredients.length > 0 && (
-                            <ul className="cook-ings" aria-label="ingredients in this step">
-                                {stepIngredients.map((line) => (
-                                    <li key={line}>{line}</li>
-                                ))}
-                            </ul>
-                        )}
                     </div>
+                    {shownPopover && (
+                        <div id="kw-popover" role="tooltip" className="kw-popover" ref={popoverRef}>
+                            {shownPopover.text}
+                        </div>
+                    )}
                     <div className="cook-foot">
                         <button
                             type="button"
