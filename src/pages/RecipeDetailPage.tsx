@@ -18,6 +18,7 @@ import { useCompleteRecipe, useDeleteRecipe, useRecipe } from '../hooks/useRecip
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { matchIngredientsToPantry, type PantryMatchedIngredient } from '../lib/recipeHelper'
 import { highlight } from '../lib/instructionHighlighter'
+import { DEFAULT_STEP, SCALE_STEPS, scaleIngredient, scaleServings } from '../lib/scale'
 import type { PantryItem, Rating, RecipeCompletion } from '../lib/types'
 
 type IngStatus = 'stock' | 'list' | 'add'
@@ -53,6 +54,15 @@ export function RecipeDetailPage() {
     const [verdict, setVerdict] = useState<'up' | 'down' | null>(null)
     const [finishedIds, setFinishedIds] = useState<Record<number, boolean>>({})
     const [toast, setToast] = useState<string | null>(null)
+    // Scale index into SCALE_STEPS. Not persisted: every visit opens at 1×.
+    const [scaleIndex, setScaleIndex] = useState(DEFAULT_STEP)
+    const [scaledFor, setScaledFor] = useState(recipeId)
+    if (scaledFor !== recipeId) {
+        setScaledFor(recipeId)
+        setScaleIndex(DEFAULT_STEP)
+    }
+    const scaleStep = SCALE_STEPS[scaleIndex]
+    const isScaled = scaleIndex !== DEFAULT_STEP
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
     const matched = useMemo<PantryMatchedIngredient[]>(
@@ -60,9 +70,22 @@ export function RecipeDetailPage() {
         [recipe, pantryItems],
     )
     const instructions = useMemo<string[]>(() => recipe?.instructions ?? [], [recipe])
+    /** Each ingredient's line at the current scale, by ingredient id. */
+    const scaledLines = useMemo(
+        () =>
+            new Map(
+                (recipe?.ingredients ?? []).map((i) => [
+                    i.id,
+                    scaleIngredient(i.sentence, scaleStep),
+                ]),
+            ),
+        [recipe, scaleStep],
+    )
+    const lineFor = (ingredientId: number, fallback: string) =>
+        scaledLines.get(ingredientId)?.text ?? fallback
     const ingredientStrings = useMemo<string[]>(
-        () => (recipe?.ingredients ?? []).map((i) => i.sentence),
-        [recipe],
+        () => [...scaledLines.values()].map((l) => l.text),
+        [scaledLines],
     )
     /** Only pantry-backed ingredients can be "used up" → moved to the list. */
     const finishable = useMemo(() => matched.filter((m) => m.pantryItem), [matched])
@@ -71,6 +94,17 @@ export function RecipeDetailPage() {
     const cookSegments = useMemo(
         () => highlight(ingredientStrings, instructions[stepIndex] ?? ''),
         [ingredientStrings, instructions, stepIndex],
+    )
+    /** The ingredients this step mentions, with amounts at the current scale. */
+    const stepIngredients = useMemo(
+        () => [
+            ...new Set(
+                cookSegments.flatMap((seg) =>
+                    seg.isHighlighted && seg.match ? [seg.match.item.fullIngredient] : [],
+                ),
+            ),
+        ],
+        [cookSegments],
     )
 
     const step = useCallback(
@@ -272,7 +306,32 @@ export function RecipeDetailPage() {
                     </div>
                     <div>
                         <div className="stat-label">servings</div>
-                        <div className="stat-value">{recipe.servings || '—'}</div>
+                        <div
+                            className={`stat-value${isScaled && recipe.servings ? ' scaled' : ''}`}
+                        >
+                            {recipe.servings ? scaleServings(recipe.servings, scaleStep) : '—'}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="scale-row">
+                    <span className="stat-label" id="scale-label">
+                        scale
+                    </span>
+                    <div className="seg scale-seg" role="radiogroup" aria-labelledby="scale-label">
+                        {SCALE_STEPS.map((s, i) => (
+                            <button
+                                key={s.label}
+                                type="button"
+                                role="radio"
+                                aria-label={s.name}
+                                aria-checked={i === scaleIndex}
+                                className={i === scaleIndex ? 'active' : undefined}
+                                onClick={() => setScaleIndex(i)}
+                            >
+                                {s.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
@@ -294,7 +353,12 @@ export function RecipeDetailPage() {
                                 const status = statusOf(m.pantryItem)
                                 return (
                                     <div className="ingredient-row" key={m.ingredient.id}>
-                                        <span className="text">{m.ingredient.sentence}</span>
+                                        <span className="text">
+                                            {lineFor(m.ingredient.id, m.ingredient.sentence)}
+                                            {scaledLines.get(m.ingredient.id)?.scaled === false && (
+                                                <span className="unscaled"> · not scaled</span>
+                                            )}
+                                        </span>
                                         <button
                                             type="button"
                                             className={`ing-status ${status}`}
@@ -368,6 +432,13 @@ export function RecipeDetailPage() {
                                 </span>
                             ))}
                         </p>
+                        {stepIngredients.length > 0 && (
+                            <ul className="cook-ings" aria-label="ingredients in this step">
+                                {stepIngredients.map((line) => (
+                                    <li key={line}>{line}</li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                     <div className="cook-foot">
                         <button
@@ -381,6 +452,9 @@ export function RecipeDetailPage() {
                         </button>
                         <span className="cook-counter">
                             {stepIndex + 1} / {total}
+                            {isScaled && (
+                                <span className="cook-scale"> · {scaleStep.label} recipe</span>
+                            )}
                         </span>
                         <button
                             type="button"
@@ -505,7 +579,10 @@ export function RecipeDetailPage() {
                                                         {done && <CheckIcon size={15} />}
                                                     </span>
                                                     <span className="label">
-                                                        {m.ingredient.sentence}
+                                                        {lineFor(
+                                                            m.ingredient.id,
+                                                            m.ingredient.sentence,
+                                                        )}
                                                     </span>
                                                 </button>
                                             )

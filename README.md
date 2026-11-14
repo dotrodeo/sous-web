@@ -19,6 +19,8 @@ behind it.
   missing. One tap adds a missing ingredient to the list.
 - Cook mode shows one step at a time in large type, with the step's ingredients
   highlighted.
+- Scale a recipe from ¼ to 3×. Ingredient amounts and servings update, shown as
+  fractions, and cook mode lists each step's ingredients at the chosen scale.
 - "I made this" records a rating, marks the ingredients you used up as out of
   stock, and removes the recipe from the meal plan.
 
