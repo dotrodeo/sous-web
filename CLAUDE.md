@@ -49,6 +49,20 @@ npm run lint
 npm run build        # tsc -b && vite build
 ```
 
+## Workflow
+
+`main` is protected: every change goes through a pull request, CI (`Format, lint, build` and `Docker image builds`) must
+pass, and the branch must be up to date with `main`. The rules apply to admins too,
+so pushing to `main` directly is rejected.
+
+1. Branch off `origin/main` (in a worktree, not the deploy checkout), commit, push,
+   and open a PR.
+2. When CI passes, merge it with a merge commit and delete the branch. If `main`
+   moved in the meantime, run `gh pr update-branch <n> --rebase` and wait for CI
+   again.
+3. Deploy: `git pull --ff-only` in the deploy checkout, then follow
+   [Deploy](#deploy): dev first, verify, then prod.
+
 ## Environment
 
 `VITE_CLERK_PUBLISHABLE_KEY` and `VITE_API_BASE_URL` are **build-time**: Vite inlines
