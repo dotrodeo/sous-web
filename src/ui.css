@@ -667,6 +667,29 @@
     gap: 40px;
     margin-top: 6px;
 }
+.stat-value.scaled {
+    color: var(--accent);
+}
+.scale-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    max-width: 460px;
+}
+.scale-seg {
+    flex: 1;
+    margin-bottom: 0;
+}
+.scale-seg button {
+    padding: 8px 0;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+}
+.ingredient-row .unscaled {
+    color: var(--ink-40);
+    font-size: 0.85em;
+}
 .stat-label {
     font-size: 14px;
     color: var(--ink-40);
@@ -909,6 +932,24 @@
     font-size: clamp(24px, 3.4vw, 34px);
     line-height: 1.4;
     font-weight: 400;
+}
+.cook-ings {
+    list-style: none;
+    margin: 28px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.cook-ings li {
+    font-size: clamp(15px, 2vw, 18px);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+.cook-scale {
+    opacity: 0.85;
 }
 .cook-text .kw {
     border-bottom: 2px solid rgba(255, 255, 255, 0.85);
