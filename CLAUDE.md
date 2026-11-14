@@ -56,11 +56,15 @@ pass, and the branch must be up to date with `main`. The rules apply to admins t
 so pushing to `main` directly is rejected.
 
 1. Branch off `origin/main` (in a worktree, not the deploy checkout), commit, push,
-   and open a PR.
+   and open a PR. Every prod deploy is a release: if the PR will be deployed, bump
+   `version` in `package.json` (semver) in the same PR, with
+   `npm version <x.y.z> --no-git-tag-version` so the lockfile matches.
 2. When CI passes, merge it with a merge commit and delete the branch. If `main`
    moved in the meantime, run `gh pr update-branch <n> --rebase` and wait for CI
    again.
-3. Deploy: `git pull --ff-only` in the deploy checkout, then follow
+3. Release: tag the merge commit and publish it:
+   `git tag vX.Y.Z <merge-sha> && git push origin vX.Y.Z && gh release create vX.Y.Z --generate-notes`.
+4. Deploy: `git pull --ff-only` in the deploy checkout, then follow
    [Deploy](#deploy): dev first, verify, then prod.
 
 ## Environment
@@ -81,8 +85,11 @@ Container names are `sous_web_<env>_{app,tunnel}`.
   command.
 - Rebuild only the app: `docker compose --env-file .env.<env> up -d --build web`.
   Avoid `npm run deploy`, which runs `up -d --build` for the whole stack.
-- Before a prod deploy, tag the current image so it can be rolled back
-  (`docker tag sous-web:prod sous-web:prod-pre-<change>`).
+- After the prod build, tag the image with the release version:
+  `docker tag sous-web:prod sous-web:X.Y.Z`. Keep the last three version images and
+  `docker rmi` older ones. Don't version-tag dev images.
+- Roll back by pointing `prod` at the previous version's image:
+  `docker tag sous-web:<prev> sous-web:prod && docker compose --env-file .env.prod up -d web`.
 - The service worker is `autoUpdate` and precaches only the app shell (API and SSE
   are never cached). nginx serves `sw.js`, `index.html` and the manifest with
   `no-cache`, so clients pick up a new build on their next load.
