@@ -955,6 +955,101 @@
     outline: 2px solid rgba(255, 255, 255, 0.9);
     outline-offset: 3px;
 }
+.cook-text .kw-time {
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    background: none;
+    border: 0;
+    border-bottom: 2px dotted rgba(255, 255, 255, 0.85);
+    border-radius: 0;
+    padding: 0 0 1px;
+    cursor: pointer;
+}
+.cook-text .kw-time:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 3px;
+}
+
+/* Timers: pinned to the top of the screen everywhere, above cook mode. */
+.timers-dock {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 14px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: calc(100vw - 150px);
+}
+.timer-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 12px;
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.45);
+    font-size: 15px;
+    white-space: nowrap;
+}
+.timer-time {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.timer-label {
+    color: var(--ink-60);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.timer-stop {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    background: var(--chip);
+    color: var(--ink-60);
+}
+.timer-chip.ending {
+    background: var(--alert);
+    color: #fff;
+}
+.timer-chip.ending .timer-label,
+.timer-chip.ending .timer-stop {
+    color: #fff;
+}
+.timer-chip.ending .timer-stop {
+    background: rgba(255, 255, 255, 0.22);
+}
+.timer-chip.done {
+    background: var(--alert);
+    color: #fff;
+    animation: timer-done 0.9s ease-in-out infinite alternate;
+}
+.timer-chip.done .timer-label,
+.timer-chip.done .timer-stop {
+    color: #fff;
+}
+.timer-chip.done .timer-stop {
+    background: rgba(255, 255, 255, 0.22);
+}
+@keyframes timer-done {
+    to {
+        box-shadow:
+            0 0 0 6px rgba(251, 113, 99, 0.35),
+            0 8px 20px -10px rgba(0, 0, 0, 0.45);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .timer-chip.done {
+        animation: none;
+    }
+}
 .kw-popover {
     position: fixed;
     z-index: 5;

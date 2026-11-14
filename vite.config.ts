@@ -53,7 +53,7 @@ export default defineConfig({
             workbox: {
                 // Precache the app shell (code, styles, fonts, icons). API/SSE responses
                 // are never cached — the app stays online-only, matching the native app.
-                globPatterns: ['**/*.{js,css,html,svg,png,woff2,ttf}'],
+                globPatterns: ['**/*.{js,css,html,svg,png,woff2,ttf,mp3}'],
                 navigateFallback: '/index.html',
                 cleanupOutdatedCaches: true,
             },

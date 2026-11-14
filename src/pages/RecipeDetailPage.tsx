@@ -20,9 +20,12 @@ import { matchIngredientsToPantry, type PantryMatchedIngredient } from '../lib/r
 import {
     highlight,
     mergeIngredientMentions,
+    splitTimeMentions,
     type HighlightedSegment,
 } from '../lib/instructionHighlighter'
 import { DEFAULT_STEP, SCALE_STEPS, scaleIngredient, scaleServings } from '../lib/scale'
+import { formatDuration, startTimer } from '../lib/timers'
+import { useWakeLock } from '../hooks/useWakeLock'
 import type { PantryItem, Rating, RecipeCompletion } from '../lib/types'
 
 type IngStatus = 'stock' | 'list' | 'add'
@@ -106,10 +109,17 @@ export function RecipeDetailPage() {
 
     const total = instructions.length
     const cookSegments = useMemo(
-        () => mergeIngredientMentions(highlight(ingredientStrings, instructions[stepIndex] ?? '')),
+        () =>
+            splitTimeMentions(
+                mergeIngredientMentions(
+                    highlight(ingredientStrings, instructions[stepIndex] ?? ''),
+                ),
+            ),
         [ingredientStrings, instructions, stepIndex],
     )
     const [popover, setPopover] = useState<IngredientPopover | null>(null)
+    // Keep the screen on for the whole of cook mode.
+    useWakeLock(cookOpen)
     const popoverRef = useRef<HTMLDivElement>(null)
     // The popover belongs to the step it was opened on; changing steps hides it.
     const shownPopover = cookOpen && popover?.step === stepIndex ? popover : null
@@ -479,6 +489,27 @@ export function RecipeDetailPage() {
                         <div className="cook-num">{stepIndex + 1}</div>
                         <p className="cook-text">
                             {cookSegments.map((seg) => {
+                                if (seg.time) {
+                                    const seconds = seg.time.seconds
+                                    return (
+                                        <button
+                                            key={seg.id}
+                                            type="button"
+                                            className="kw-time"
+                                            aria-label={`start a ${seg.text} timer`}
+                                            onClick={() =>
+                                                startTimer({
+                                                    key: `${recipe.id}:${stepIndex}:${seg.text}`,
+                                                    label: `step ${stepIndex + 1} · ${formatDuration(seconds)}`,
+                                                    detail: recipe.name,
+                                                    seconds,
+                                                })
+                                            }
+                                        >
+                                            {seg.text}
+                                        </button>
+                                    )
+                                }
                                 if (!seg.isHighlighted || !seg.match) {
                                     return <span key={seg.id}>{seg.text}</span>
                                 }
