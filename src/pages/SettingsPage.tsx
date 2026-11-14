@@ -6,11 +6,14 @@ import {
     ChevronRightIcon,
     ListLinesIcon,
     LogoutIcon,
+    MoonIcon,
     ScanIcon,
     ShareQrIcon,
 } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
 import { useUser, useActiveHousehold } from '../hooks/useUser'
+import { useSetThemePreference, useThemePreference } from '../hooks/useTheme'
+import type { ThemePreference } from '../lib/theme'
 import { initials } from '../lib/initials'
 
 // Lazy — pulls in html5-qrcode only when the scanner is actually opened.
@@ -18,11 +21,15 @@ const JoinScanner = lazy(() =>
     import('../components/JoinScanner').then((m) => ({ default: m.JoinScanner })),
 )
 
+const THEME_OPTIONS: ThemePreference[] = ['system', 'light', 'dark']
+
 export function SettingsPage() {
     const navigate = useNavigate()
     const { signOut } = useClerk()
     const { data: user } = useUser()
     const household = useActiveHousehold()
+    const theme = useThemePreference()
+    const setTheme = useSetThemePreference()
 
     const [shareOpen, setShareOpen] = useState(false)
     const [joinOpen, setJoinOpen] = useState(false)
@@ -55,6 +62,27 @@ export function SettingsPage() {
                 </div>
 
                 <div className="settings-list">
+                    <div className="settings-row appearance">
+                        <span className="icon">
+                            <MoonIcon size={22} />
+                        </span>
+                        <span className="label">appearance</span>
+                        <div className="seg theme-seg" role="radiogroup" aria-label="appearance">
+                            {THEME_OPTIONS.map((option) => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={theme === option}
+                                    className={theme === option ? 'active' : undefined}
+                                    onClick={() => setTheme.mutate(option)}
+                                >
+                                    {option}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     <button
                         type="button"
                         className="settings-row"

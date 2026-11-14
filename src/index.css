@@ -2,7 +2,8 @@
 :root {
     --brand: #ffc93c;
     --brand-deep: #f2b600;
-    --accent: #3b5bff;
+    --accent: #3b5bff; /* accent text, icons, borders */
+    --accent-fill: #3b5bff; /* accent backgrounds behind white text */
     --accent-soft: #eaeeff;
 
     /* status scale */
@@ -11,6 +12,7 @@
     --out: #d7d8de;
     --alert: #fb7163;
     --alert-soft: #ffe7e3;
+    --alert-faint: #fff5f4;
 
     --ink: #1b1b1f;
     --ink-60: #5c5c66;
@@ -20,10 +22,40 @@
     --surface: #ffffff;
     --canvas: #f3f3f5;
     --chip: #efeff2;
+    --hover: #e4e4e8; /* hover on chip-colored controls */
+    --raised: #ffffff; /* selected option in a segmented control */
+    --inverse: #1b1b1f; /* dark surfaces behind white text, e.g. toasts */
+    --on-brand: #1b1b1f; /* text on the brand yellow, in both themes */
 
     --font: 'Jost', system-ui, -apple-system, sans-serif;
 
     color-scheme: light;
+}
+
+/* Dark theme. data-theme is set on <html> by the inline script in index.html and
+   by lib/theme.ts. The brand yellow and status colors stay as in light mode. */
+:root[data-theme='dark'] {
+    --accent: #8fa3ff;
+    --accent-soft: #222a4d;
+
+    --out: #3a3a41;
+    --alert: #ff7f72;
+    --alert-soft: #3b2321;
+    --alert-faint: #2b1f1e;
+
+    --ink: #f2f2f5;
+    --ink-60: #a6a6b0;
+    --ink-40: #6e6e78;
+
+    --line: #2e2e33;
+    --surface: #1c1c1f;
+    --canvas: #121214;
+    --chip: #2a2a2e;
+    --hover: #34343a;
+    --raised: #3a3a40;
+    --inverse: #2f2f35;
+
+    color-scheme: dark;
 }
 
 *,
