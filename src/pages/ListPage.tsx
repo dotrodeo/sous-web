@@ -121,6 +121,19 @@ export function ListPage() {
     }
 
     const isEdit = draft?.id != null
+    const draftItem = isEdit ? items.find((it) => it.id === draft?.id) : undefined
+
+    /** Takes the item off the list without touching its stock state. */
+    const removeFromList = () => {
+        if (!draftItem || !pantry) return
+        upsert.mutate(
+            {
+                pantryId: pantry.id,
+                patch: { id: draftItem.id, name: draftItem.name, isInShoppingList: false },
+            },
+            { onSuccess: () => setDraft(null) },
+        )
+    }
     const shop = mode === 'shop'
     const progress = onList.length ? Math.round((checkedCount / onList.length) * 100) : 0
 
@@ -344,11 +357,24 @@ export function ListPage() {
                         </>
                     )}
 
+                    {draftItem?.isInShoppingList && (
+                        <button
+                            type="button"
+                            className="sheet-secondary"
+                            style={{ marginTop: 22 }}
+                            disabled={upsert.isPending}
+                            onClick={removeFromList}
+                        >
+                            <MinusCircleIcon size={20} />
+                            remove from list
+                        </button>
+                    )}
+
                     {isEdit && (
                         <button
                             type="button"
                             className="sheet-delete"
-                            style={{ marginTop: 22 }}
+                            style={{ marginTop: draftItem?.isInShoppingList ? 12 : 22 }}
                             onClick={() => setPendingDelete(draft)}
                         >
                             <TrashIcon size={20} />
