@@ -9,9 +9,9 @@ export default defineConfig({
         VitePWA({
             registerType: 'autoUpdate',
             includeAssets: [
-                'assets/favicon-16.png',
-                'assets/favicon-32.png',
-                'assets/apple-touch-icon.png',
+                'icons/favicon-16.png',
+                'icons/favicon-32.png',
+                'icons/apple-touch-icon.png',
             ],
             manifest: {
                 name: 'sous',
@@ -25,25 +25,25 @@ export default defineConfig({
                 start_url: '/',
                 icons: [
                     {
-                        src: 'assets/icon-192.png',
+                        src: 'icons/icon-192.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'any',
                     },
                     {
-                        src: 'assets/icon-512.png',
+                        src: 'icons/icon-512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'any',
                     },
                     {
-                        src: 'assets/icon-maskable-192.png',
+                        src: 'icons/icon-maskable-192.png',
                         sizes: '192x192',
                         type: 'image/png',
                         purpose: 'maskable',
                     },
                     {
-                        src: 'assets/icon-maskable-512.png',
+                        src: 'icons/icon-maskable-512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'maskable',
