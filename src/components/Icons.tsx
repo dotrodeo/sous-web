@@ -254,7 +254,8 @@ export const MoreIcon = ({ size = 22, className, style }: IconProps) => (
     </svg>
 )
 
-/** The sous mark (sunflower squircle + cobalt "s"). */
+/** The sous mark: a chef's hat on a cobalt tile. Same geometry as
+ *  scripts/generate-icons.mjs, which renders the PNG icons; keep them in sync. */
 export function Logo({ size = 40 }: { size?: number }) {
     return (
         <svg
@@ -264,14 +265,25 @@ export function Logo({ size = 40 }: { size?: number }) {
             style={{ flex: 'none' }}
             aria-hidden="true"
         >
-            <rect x="2" y="2" width="96" height="96" rx="26" style={{ fill: 'var(--brand)' }} />
-            <path
-                d="M68 37 C68 25 34 24 34 40 C34 53 67 49 67 61 C67 78 31 77 32 63"
-                style={{ fill: 'none', stroke: 'var(--accent-fill)' }}
-                strokeWidth="11"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <rect
+                x="2"
+                y="2"
+                width="96"
+                height="96"
+                rx="23"
+                style={{ fill: 'var(--accent-fill)' }}
             />
+            <path
+                d="M33.00 66.00 L33.00 55.96 A13 13 0 0 1 34.13 30.00 A16 16 0 0 1 65.87 30.00 A13 13 0 0 1 67.00 55.96 L67.00 66.00 Z"
+                style={{ fill: 'var(--brand)' }}
+            />
+            <path
+                d="M44.5 51 V66 M55.5 51 V66"
+                style={{ stroke: 'var(--accent-fill)' }}
+                strokeWidth="3.5"
+                strokeLinecap="round"
+            />
+            <rect x="31" y="69.5" width="38" height="9" rx="2.5" style={{ fill: 'var(--brand)' }} />
         </svg>
     )
 }
