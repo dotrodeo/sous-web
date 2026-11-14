@@ -96,9 +96,9 @@ const PNGS = [
     ['icon-maskable-512.png', 512, 'square', 0.78],
 ]
 
-const assets = new URL('../public/assets/', import.meta.url)
-await writeFile(new URL('logo-mark.svg', assets), svg(mark('tile'), 100, 100, '0 0 100 100'))
-await writeFile(new URL('logo-wordmark.svg', assets), wordmark())
+const icons = new URL('../public/icons/', import.meta.url)
+await writeFile(new URL('logo-mark.svg', icons), svg(mark('tile'), 100, 100, '0 0 100 100'))
+await writeFile(new URL('logo-wordmark.svg', icons), wordmark())
 console.log('wrote logo-mark.svg, logo-wordmark.svg')
 
 const chrome = process.env.CHROME_PATH
@@ -119,7 +119,7 @@ try {
                 '--hide-scrollbars',
                 '--default-background-color=00000000',
                 `--window-size=${size},${size}`,
-                `--screenshot=${new URL(file, assets).pathname}`,
+                `--screenshot=${new URL(file, icons).pathname}`,
                 `file://${src}`,
             ],
             { stdio: 'ignore' },
