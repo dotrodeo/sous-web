@@ -202,3 +202,30 @@ export function highlight(
     }
     return merged
 }
+
+/**
+ * Joins highlighted segments that refer to the same ingredient and are separated
+ * only by whitespace ("baking" + " " + "soda"), so a multi-word ingredient reads as
+ * one mention.
+ */
+export function mergeIngredientMentions(segments: HighlightedSegment[]): HighlightedSegment[] {
+    const out: HighlightedSegment[] = []
+    for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i]
+        const prev = out[out.length - 1]
+        const next = segments[i + 1]
+        if (
+            prev?.isHighlighted &&
+            !seg.isHighlighted &&
+            /^\s+$/.test(seg.text) &&
+            next?.isHighlighted &&
+            prev.match?.item.fullIngredient === next.match?.item.fullIngredient
+        ) {
+            out[out.length - 1] = { ...prev, text: prev.text + seg.text + next.text }
+            i++
+            continue
+        }
+        out.push(seg)
+    }
+    return out
+}
