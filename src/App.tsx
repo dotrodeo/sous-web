@@ -2,6 +2,7 @@ import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/cl
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
+import { useThemePreference } from './hooks/useTheme'
 import { LoginPage } from './pages/LoginPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipeDetailPage } from './pages/RecipeDetailPage'
@@ -19,6 +20,12 @@ function HouseholdEventsListener() {
     return null
 }
 
+/** Applies the signed-in user's saved theme. */
+function ThemeSync() {
+    useThemePreference()
+    return null
+}
+
 function AuthedApp() {
     return (
         <>
@@ -27,6 +34,7 @@ function AuthedApp() {
             </SignedOut>
             <SignedIn>
                 <HouseholdEventsListener />
+                <ThemeSync />
                 <AppShell>
                     <Routes>
                         <Route index element={<Navigate to="/recipes" replace />} />

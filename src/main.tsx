@@ -4,8 +4,12 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from './lib/api'
+import { applyTheme, cachedTheme, followSystemTheme } from './lib/theme'
 import './index.css'
 import App from './App.tsx'
+
+applyTheme(cachedTheme())
+followSystemTheme()
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 if (!PUBLISHABLE_KEY) {

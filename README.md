@@ -46,6 +46,7 @@ behind it.
   typing it in.
 - Reorder, add, rename and remove categories, and mark categories as non-food.
 - Every change syncs live to the other members.
+- Light, dark, or follow the device. The choice is saved to your account.
 
 Sign-in is by email and password. Sous needs a network connection: only the app
 itself is cached for offline startup, not your data.

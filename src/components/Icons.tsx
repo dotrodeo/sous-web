@@ -215,6 +215,11 @@ export const LogoutIcon = (p: IconProps) => (
         <path d="m16 17 5-5-5-5M21 12H9" />
     </Svg>
 )
+export const MoonIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M20.5 14.5A8.5 8.5 0 1 1 9.5 3.5a6.5 6.5 0 0 0 11 11Z" />
+    </Svg>
+)
 export const CameraOffIcon = (p: IconProps) => (
     <Svg {...p}>
         <path d="m2 2 20 20" />
@@ -262,7 +267,7 @@ export function Logo({ size = 40 }: { size?: number }) {
             <rect x="2" y="2" width="96" height="96" rx="26" style={{ fill: 'var(--brand)' }} />
             <path
                 d="M68 37 C68 25 34 24 34 40 C34 53 67 49 67 61 C67 78 31 77 32 63"
-                style={{ fill: 'none', stroke: 'var(--accent)' }}
+                style={{ fill: 'none', stroke: 'var(--accent-fill)' }}
                 strokeWidth="11"
                 strokeLinecap="round"
                 strokeLinejoin="round"

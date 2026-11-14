@@ -175,7 +175,7 @@ export function LoginPage() {
                         <span
                             className="status-dot"
                             style={{
-                                background: 'var(--accent)',
+                                background: 'var(--accent-fill)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
