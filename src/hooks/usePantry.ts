@@ -38,6 +38,18 @@ export function useUpsertPantryItem() {
     })
 }
 
+/** DELETE /household/{id}/pantry/{pantryId}/items/{itemId} — soft-deletes the item. */
+export function useDeletePantryItem() {
+    const api = useApi()
+    const household = useActiveHousehold()
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({ pantryId, itemId }: { pantryId: number; itemId: number }) =>
+            pantryService.deleteItem(api, household!.id, pantryId, itemId),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['pantry', household?.id] }),
+    })
+}
+
 /** POST /household/{id}/pantry/{pantryId}/category — PantryService.upsertCategory(). */
 export function useUpsertCategory() {
     const api = useApi()
@@ -46,6 +58,21 @@ export function useUpsertCategory() {
     return useMutation({
         mutationFn: ({ pantryId, patch }: { pantryId: number; patch: ItemCategoryPatch }) =>
             pantryService.upsertCategory(api, household!.id, pantryId, patch),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['pantry', household?.id] })
+            qc.invalidateQueries({ queryKey: ['categories', household?.id] })
+        },
+    })
+}
+
+/** DELETE /household/{id}/pantry/{pantryId}/category/{categoryId} — its items become uncategorized. */
+export function useDeleteCategory() {
+    const api = useApi()
+    const household = useActiveHousehold()
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({ pantryId, categoryId }: { pantryId: number; categoryId: number }) =>
+            pantryService.deleteCategory(api, household!.id, pantryId, categoryId),
         onSuccess: () => {
             qc.invalidateQueries({ queryKey: ['pantry', household?.id] })
             qc.invalidateQueries({ queryKey: ['categories', household?.id] })
