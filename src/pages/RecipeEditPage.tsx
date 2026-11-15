@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AlertCircleIcon, LinkIcon, PlusIcon, TrashIcon, XIcon } from '../components/Icons'
-import { useImportRecipe, useRecipe, useUpsertRecipe } from '../hooks/useRecipes'
+import { useImportRecipe, useRecipe, useRecipeTags, useUpsertRecipe } from '../hooks/useRecipes'
+import { hasTag, isNewTag, normalizeTag, resolveTag, suggestTags } from '../lib/tags'
 import type { RecipePatch } from '../lib/types'
 
 interface Row {
@@ -106,6 +107,28 @@ function RecipeEditForm({
     const [tags, setTags] = useState<string[]>(initial.tags)
     const [addingTag, setAddingTag] = useState(false)
     const [newTag, setNewTag] = useState('')
+    const tagInputRef = useRef<HTMLInputElement>(null)
+    const tagSuggestionsRef = useRef<HTMLDivElement>(null)
+    const { data: householdTags } = useRecipeTags()
+    const tagNames = useMemo(() => (householdTags ?? []).map((t) => t.name), [householdTags])
+    const tagSuggestions = addingTag ? suggestTags(newTag, tagNames, tags) : []
+    const canCreateTag = addingTag && isNewTag(newTag, tagNames, tags)
+    // The tag field is at the bottom of the form: bring the suggestions into view
+    // (above the bottom nav and the phone keyboard) when the picker opens.
+    useEffect(() => {
+        if (!addingTag) return
+        const id = window.setTimeout(() => {
+            const el = tagSuggestionsRef.current
+            if (!el) return
+            // Visible bottom: above the phone keyboard (visualViewport) and the bottom nav.
+            const nav = document.querySelector('.bottom-nav')?.getBoundingClientRect()
+            const navHeight = nav && nav.top < window.innerHeight ? window.innerHeight - nav.top : 0
+            const visibleBottom = (window.visualViewport?.height ?? window.innerHeight) - navHeight
+            const overflow = el.getBoundingClientRect().bottom + 16 - visibleBottom
+            if (overflow > 0) window.scrollBy({ top: overflow, behavior: 'smooth' })
+        }, 250)
+        return () => window.clearTimeout(id)
+    }, [addingTag])
 
     const [importOpen, setImportOpen] = useState(false)
     const [importUrl, setImportUrl] = useState('')
@@ -116,12 +139,25 @@ function RecipeEditForm({
     const hasIngredient = ingredients.some((i) => i.text.trim().length > 0)
     const canSave = name.trim().length > 0 && hasIngredient
 
+    /** Adds a tag, reusing the household's spelling when it already exists. */
+    const addTag = (raw: string) => {
+        const v = resolveTag(raw, tagNames)
+        if (v) setTags((prev) => (hasTag(prev, v) ? prev : [...prev, v]))
+    }
     const commitTag = () => {
-        const v = newTag.trim()
-        setTags((prev) => (v && !prev.includes(v) ? [...prev, v] : prev))
+        addTag(newTag)
         setNewTag('')
         setAddingTag(false)
     }
+    /** A suggestion was picked: add it and keep the picker open for more. */
+    const pickTag = (name: string) => {
+        addTag(name)
+        setNewTag('')
+        tagInputRef.current?.focus()
+    }
+    /** Focus moving between the text box and its suggestions isn't leaving the picker. */
+    const leavingTagPicker = (e: FocusEvent) =>
+        !(e.relatedTarget as HTMLElement | null)?.closest('[data-tag-picker]')
 
     const save = () => {
         if (!canSave) return
@@ -387,12 +423,17 @@ function RecipeEditForm({
                         ))}
                         {addingTag ? (
                             <input
+                                ref={tagInputRef}
                                 className="tag-input"
+                                data-tag-picker
                                 autoFocus
                                 value={newTag}
                                 placeholder="tag name"
+                                aria-label="tag name"
                                 onChange={(e) => setNewTag(e.target.value)}
-                                onBlur={commitTag}
+                                onBlur={(e) => {
+                                    if (leavingTagPicker(e)) commitTag()
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
@@ -417,6 +458,42 @@ function RecipeEditForm({
                             </button>
                         )}
                     </div>
+                    {(tagSuggestions.length > 0 || canCreateTag) && (
+                        <div
+                            ref={tagSuggestionsRef}
+                            className="tag-suggestions"
+                            data-tag-picker
+                            role="group"
+                            aria-label="tag suggestions"
+                            onBlur={(e) => {
+                                if (leavingTagPicker(e)) commitTag()
+                            }}
+                        >
+                            {tagSuggestions.map((t) => (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    className="tag-suggest"
+                                    // Keep focus in the text box so it doesn't commit what's typed.
+                                    onPointerDown={(e) => e.preventDefault()}
+                                    onClick={() => pickTag(t)}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                            {canCreateTag && (
+                                <button
+                                    type="button"
+                                    className="tag-suggest create"
+                                    onPointerDown={(e) => e.preventDefault()}
+                                    onClick={() => pickTag(newTag)}
+                                >
+                                    <PlusIcon size={14} />
+                                    create “{normalizeTag(newTag)}”
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 
