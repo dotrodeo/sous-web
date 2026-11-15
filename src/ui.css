@@ -1457,8 +1457,30 @@
 }
 
 /* ── Recipe edit form ── */
-.edit-header {
-    display: none;
+.edit-bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 calc(-1 * var(--content-pad-x)) 18px;
+    padding: 12px var(--content-pad-x);
+    background: var(--canvas);
+    box-shadow: 0 1px 0 var(--line);
+}
+.edit-bar .edit-title {
+    font-size: 30px;
+}
+@media (min-width: 900px) {
+    .edit-bar {
+        padding-block: 16px;
+        margin-bottom: 26px;
+    }
+    .edit-bar .edit-title {
+        font-size: 44px;
+    }
 }
 .edit-title {
     font-size: 48px;
@@ -1467,14 +1489,10 @@
     margin: 0;
     line-height: 1;
 }
-.edit-header-actions,
-.blob-edit-actions {
+.edit-bar-actions {
     display: flex;
     align-items: center;
     gap: 22px;
-}
-.blob-edit-actions {
-    justify-content: flex-end;
 }
 .btn-text {
     cursor: pointer;
@@ -1485,20 +1503,6 @@
     font-weight: 700;
     color: var(--accent);
     padding: 0;
-}
-.btn-save {
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 19px;
-    font-weight: 700;
-    color: var(--accent);
-    padding: 0;
-}
-.btn-save:disabled {
-    opacity: 0.4;
-    cursor: default;
 }
 .form-field {
     margin-bottom: 22px;
@@ -1720,22 +1724,11 @@ textarea.field {
     .toast {
         bottom: 34px;
     }
-    .edit-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 28px;
-    }
-    .edit-mobile-title {
-        display: none;
-    }
     .meta-grid {
         grid-template-columns: 1fr 1fr 1fr;
         gap: 16px;
     }
-    .btn-text,
-    .btn-save {
+    .btn-text {
         font-size: 18px;
     }
 }
@@ -2138,6 +2131,150 @@ textarea.field {
 .sheet-handle .sheet-grabber {
     margin: 0;
 }
+/* ── Save button (components/SaveButton.tsx) ──
+   One filled button for every save. While saving, a rainbow ring (as in the iOS
+   app) runs around the edge: a rotating conic gradient behind a fill inset 3px. */
+.save-btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    flex: none;
+    min-width: 92px;
+    height: 40px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.12s,
+        opacity 0.2s;
+}
+.save-btn::before {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    left: -100%;
+    top: 50%;
+    width: 300%;
+    aspect-ratio: 1;
+    translate: 0 -50%;
+    background: conic-gradient(
+        hsl(0 100% 55%),
+        hsl(60 100% 50%),
+        hsl(120 90% 45%),
+        hsl(180 90% 45%),
+        hsl(240 100% 62%),
+        hsl(300 90% 55%),
+        hsl(360 100% 55%)
+    );
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.save-btn::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--accent-fill);
+    transition:
+        inset 0.2s,
+        background-color 0.25s;
+}
+.save-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+.save-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+.save-btn[data-state='disabled'] {
+    opacity: 0.4;
+    cursor: default;
+}
+.save-btn[data-state='saving'] {
+    cursor: progress;
+}
+.save-btn[data-state='saving']::before {
+    opacity: 1;
+    animation: save-ring 1.4s linear infinite;
+}
+.save-btn[data-state='saving']::after {
+    inset: 3px;
+}
+.save-btn[data-state='saved']::after {
+    background: var(--stocked);
+}
+.save-btn[data-state='error']::after {
+    background: var(--alert);
+}
+.save-btn[data-state='error'] {
+    animation: save-shake 0.35s;
+}
+.save-btn-label,
+.save-btn-check {
+    transition:
+        opacity 0.2s,
+        transform 0.25s;
+}
+.save-btn-check {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transform: scale(0.4);
+}
+.save-btn[data-state='saved'] .save-btn-label {
+    opacity: 0;
+}
+.save-btn[data-state='saved'] .save-btn-check {
+    opacity: 1;
+    transform: scale(1);
+}
+@keyframes save-ring {
+    to {
+        rotate: 360deg;
+    }
+}
+@keyframes save-shake {
+    20%,
+    60% {
+        translate: -4px 0;
+    }
+    40%,
+    80% {
+        translate: 4px 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    /* The ring still shows, but doesn't spin. */
+    .save-btn[data-state='saving']::before,
+    .save-btn[data-state='error'] {
+        animation: none;
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .sheet-head {
     display: flex;
     align-items: center;
@@ -2148,20 +2285,6 @@ textarea.field {
     font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.01em;
-}
-.sheet-save {
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    padding: 0;
-}
-.sheet-save:disabled {
-    opacity: 0.4;
-    cursor: default;
 }
 .sheet-label {
     display: block;

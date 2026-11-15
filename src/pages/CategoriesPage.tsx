@@ -9,6 +9,7 @@ import {
     TrashIcon,
 } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
+import { SaveButton } from '../components/SaveButton'
 import { Switch } from '../components/SheetControls'
 import { usePantry, useUpsertCategory, useUpdateCategorySortOrder } from '../hooks/usePantry'
 import type { ItemCategory, ItemCategoryPatch } from '../lib/types'
@@ -85,15 +86,15 @@ export function CategoriesPage() {
     }
     const update = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d))
 
-    const save = () => {
-        if (!draft || !pantryId || !draft.name.trim()) return
+    const save = async () => {
+        if (!draft || !pantryId || !draft.name.trim()) throw new Error('nothing to save')
         const patch: ItemCategoryPatch = {
             ...(draft.id != null ? { id: draft.id } : {}),
             name: draft.name.trim(),
             icon: draft.icon,
             isNonFood: draft.isNonFood,
         }
-        upsert.mutate({ pantryId, patch }, { onSuccess: () => setDraft(null) })
+        return upsert.mutateAsync({ pantryId, patch })
     }
 
     const confirmDelete = () => {
@@ -228,14 +229,11 @@ export function CategoriesPage() {
                         <span className="sheet-title">
                             {isEdit ? 'edit category' : 'new category'}
                         </span>
-                        <button
-                            type="button"
-                            className="sheet-save"
+                        <SaveButton
+                            onSave={save}
+                            onSaved={() => setDraft(null)}
                             disabled={!draft.name.trim()}
-                            onClick={save}
-                        >
-                            save
-                        </button>
+                        />
                     </div>
 
                     <label className="sheet-label">name</label>

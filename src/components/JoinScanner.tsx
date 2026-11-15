@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
 import { CameraOffIcon, CheckIcon, XIcon } from './Icons'
+import { SaveButton } from './SaveButton'
 import { useJoinHousehold } from '../hooks/useHousehold'
 
 type Scan = 'requesting' | 'scanning' | 'denied' | 'joining' | 'success'
@@ -53,6 +54,20 @@ export function JoinScanner({ onClose }: { onClose: () => void }) {
             },
         })
     }
+
+    /** Manual code entry: the save button shows progress and turns to "retry" on failure. */
+    const joinWithCode = async () => {
+        const value = joinCode.trim()
+        if (!value) throw new Error('no code')
+        setError('')
+        try {
+            return await join.mutateAsync(value)
+        } catch (err) {
+            setError('That code didn’t work. Double-check it and try again.')
+            throw err
+        }
+    }
+    const joinButtonRef = useRef<HTMLButtonElement>(null)
 
     // Camera lifecycle — runs whenever we're not in manual entry.
     useEffect(() => {
@@ -210,14 +225,13 @@ export function JoinScanner({ onClose }: { onClose: () => void }) {
                         <div className="sheet-grabber" />
                         <div className="sheet-head">
                             <span className="sheet-title">enter invite code</span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={!joinCode.trim() || join.isPending}
-                                onClick={() => submitToken(joinCode)}
-                            >
-                                join
-                            </button>
+                            <SaveButton
+                                ref={joinButtonRef}
+                                label="join"
+                                onSave={joinWithCode}
+                                onSaved={(household) => succeed(household.name)}
+                                disabled={!joinCode.trim()}
+                            />
                         </div>
                         <div className="sheet-subtitle">
                             the code someone shared with you, e.g. FERN-2931.
@@ -230,7 +244,7 @@ export function JoinScanner({ onClose }: { onClose: () => void }) {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     e.preventDefault()
-                                    submitToken(joinCode)
+                                    joinButtonRef.current?.click()
                                 }
                             }}
                             placeholder="FERN-2931"

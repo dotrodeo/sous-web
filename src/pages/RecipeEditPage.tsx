@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { SaveButton } from '../components/SaveButton'
 import { AlertCircleIcon, LinkIcon, PlusIcon, TrashIcon, XIcon } from '../components/Icons'
 import { useImportRecipe, useRecipe, useRecipeTags, useUpsertRecipe } from '../hooks/useRecipes'
 import { hasTag, isNewTag, normalizeTag, resolveTag, suggestTags } from '../lib/tags'
@@ -159,8 +160,8 @@ function RecipeEditForm({
     const leavingTagPicker = (e: FocusEvent) =>
         !(e.relatedTarget as HTMLElement | null)?.closest('[data-tag-picker]')
 
-    const save = () => {
-        if (!canSave) return
+    const save = async () => {
+        if (!canSave) throw new Error('nothing to save')
         const patch: RecipePatch = {
             ...(recipeId != null ? { id: recipeId } : {}),
             name: name.trim(),
@@ -171,9 +172,7 @@ function RecipeEditForm({
             instructions: instructions.map((i) => i.text.trim()).filter(Boolean),
             tags: tags.map((t) => ({ name: t })),
         }
-        upsertRecipe.mutate(patch, {
-            onSuccess: (saved) => navigate(`/recipes/${saved.id}`),
-        })
+        return upsertRecipe.mutateAsync(patch)
     }
 
     const runImport = () => {
@@ -214,26 +213,14 @@ function RecipeEditForm({
     return (
         <>
             <div className="blob">
-                <div className="blob-actions blob-edit-actions">
-                    {isNew && (
-                        <button
-                            type="button"
-                            className="btn-text"
-                            onClick={() => setImportOpen(true)}
-                        >
-                            import
-                        </button>
-                    )}
-                    <button type="button" className="btn-save" disabled={!canSave} onClick={save}>
-                        save
-                    </button>
-                </div>
+                <div className="blob-actions" />
             </div>
 
             <div className="content edit">
-                <div className="edit-header">
+                {/* Sticky: the title and save stay reachable however far the form scrolls. */}
+                <div className="edit-bar">
                     <h1 className="edit-title">{title}</h1>
-                    <div className="edit-header-actions">
+                    <div className="edit-bar-actions">
                         {isNew && (
                             <button
                                 type="button"
@@ -243,18 +230,13 @@ function RecipeEditForm({
                                 import
                             </button>
                         )}
-                        <button
-                            type="button"
-                            className="btn-save"
+                        <SaveButton
+                            onSave={save}
+                            onSaved={(saved) => navigate(`/recipes/${saved.id}`)}
                             disabled={!canSave}
-                            onClick={save}
-                        >
-                            save
-                        </button>
+                        />
                     </div>
                 </div>
-
-                <h1 className="detail-mobile-title edit-mobile-title">{title}</h1>
 
                 <div className="form-field">
                     <label className="form-label" htmlFor="r-name">

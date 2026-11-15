@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { CheckIcon, EditIcon, MinusCircleIcon, PlusIcon, TrashIcon } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
+import { SaveButton } from '../components/SaveButton'
 import { CategorySelect } from '../components/SheetControls'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory } from '../lib/pantryHelper'
@@ -86,8 +87,9 @@ export function ListPage() {
 
     const update = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d))
 
-    const saveSheet = () => {
-        if (!draft || !pantry || !draft.name.trim()) return
+    const saveButtonRef = useRef<HTMLButtonElement>(null)
+    const saveSheet = async () => {
+        if (!draft || !pantry || !draft.name.trim()) throw new Error('nothing to save')
         const isNew = draft.id == null
         const patch: PantryItemPatch = {
             ...(draft.id != null ? { id: draft.id } : {}),
@@ -97,7 +99,7 @@ export function ListPage() {
             // New items go straight onto the shopping list.
             ...(isNew ? { isInShoppingList: true, isInStock: false } : {}),
         }
-        upsert.mutate({ pantryId: pantry.id, patch }, { onSuccess: () => setDraft(null) })
+        return upsert.mutateAsync({ pantryId: pantry.id, patch })
     }
 
     const confirmDelete = () => {
@@ -307,14 +309,12 @@ export function ListPage() {
                 <BottomSheet onClose={() => setDraft(null)}>
                     <div className="sheet-head">
                         <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
-                        <button
-                            type="button"
-                            className="sheet-save"
+                        <SaveButton
+                            ref={saveButtonRef}
+                            onSave={saveSheet}
+                            onSaved={() => setDraft(null)}
                             disabled={!draft.name.trim()}
-                            onClick={saveSheet}
-                        >
-                            save
-                        </button>
+                        />
                     </div>
 
                     <div className="sheet-row fields">
@@ -328,7 +328,7 @@ export function ListPage() {
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                         e.preventDefault()
-                                        saveSheet()
+                                        saveButtonRef.current?.click()
                                     }
                                 }}
                                 placeholder="red onion"
