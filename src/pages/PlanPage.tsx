@@ -16,6 +16,7 @@ import {
 } from '../hooks/usePlan'
 import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
+import { SaveButton } from '../components/SaveButton'
 import { getAvailableIngredients } from '../lib/recipeHelper'
 import type { PantryItem, PlanDay, Recipe } from '../lib/types'
 
@@ -134,9 +135,8 @@ export function PlanPage() {
         setAddDateOpen(true)
     }
     const saveNewDate = async () => {
-        if (!plan || !newDate) return
-        await addDay.mutateAsync({ planId: plan.id, date: isoFromKey(newDate) })
-        setAddDateOpen(false)
+        if (!plan || !newDate) throw new Error('nothing to save')
+        return addDay.mutateAsync({ planId: plan.id, date: isoFromKey(newDate) })
     }
 
     const openSchedule = (dayId: number, recipe: Recipe, currentKey: string | null) => {
@@ -165,7 +165,6 @@ export function PlanPage() {
             })
         } finally {
             setBusy(false)
-            setSchedule(null)
         }
     }
 
@@ -392,14 +391,10 @@ export function PlanPage() {
                         <div className="sheet-grabber" />
                         <div className="sheet-head">
                             <span className="sheet-title">select a date</span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={busy}
-                                onClick={() => moveRecipe(schedule, draftDate || null)}
-                            >
-                                save
-                            </button>
+                            <SaveButton
+                                onSave={() => moveRecipe(schedule, draftDate || null)}
+                                onSaved={() => setSchedule(null)}
+                            />
                         </div>
                         <div className="sheet-subtitle">
                             when do you want to make <strong>{schedule.recipe.name}</strong>?
@@ -415,7 +410,11 @@ export function PlanPage() {
                                 type="button"
                                 className="sheet-secondary"
                                 disabled={busy}
-                                onClick={() => moveRecipe(schedule, null)}
+                                onClick={() =>
+                                    moveRecipe(schedule, null)
+                                        .catch(() => {})
+                                        .finally(() => setSchedule(null))
+                                }
                             >
                                 move to “any time”
                             </button>
@@ -431,14 +430,11 @@ export function PlanPage() {
                         <div className="sheet-grabber" />
                         <div className="sheet-head">
                             <span className="sheet-title">add a date</span>
-                            <button
-                                type="button"
-                                className="sheet-save"
-                                disabled={!newDate || addDay.isPending}
-                                onClick={saveNewDate}
-                            >
-                                save
-                            </button>
+                            <SaveButton
+                                onSave={saveNewDate}
+                                onSaved={() => setAddDateOpen(false)}
+                                disabled={!newDate}
+                            />
                         </div>
                         <div className="sheet-subtitle">create a new day to plan meals for.</div>
                         <input

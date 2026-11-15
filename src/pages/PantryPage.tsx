@@ -9,6 +9,7 @@ import {
     TrashIcon,
 } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
+import { SaveButton } from '../components/SaveButton'
 import { CategorySelect, Switch } from '../components/SheetControls'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory, inPantry, isExpiringSoon } from '../lib/pantryHelper'
@@ -88,8 +89,8 @@ export function PantryPage() {
 
     const update = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d))
 
-    const saveSheet = () => {
-        if (!draft || !pantry || !draft.name.trim()) return
+    const saveSheet = async () => {
+        if (!draft || !pantry || !draft.name.trim()) throw new Error('nothing to save')
         const patch: PantryItemPatch = {
             ...(draft.id != null ? { id: draft.id } : {}),
             name: draft.name.trim(),
@@ -100,7 +101,7 @@ export function PantryPage() {
             expiresAt: draft.expiresAt ? new Date(draft.expiresAt).toISOString() : null,
             ...(draft.categoryId != null ? { categoryId: draft.categoryId } : {}),
         }
-        upsert.mutate({ pantryId: pantry.id, patch }, { onSuccess: () => setDraft(null) })
+        return upsert.mutateAsync({ pantryId: pantry.id, patch })
     }
 
     const confirmDelete = () => {
@@ -247,14 +248,11 @@ export function PantryPage() {
                 <BottomSheet onClose={() => setDraft(null)}>
                     <div className="sheet-head">
                         <span className="sheet-title">{isEdit ? 'edit item' : 'add item'}</span>
-                        <button
-                            type="button"
-                            className="sheet-save"
+                        <SaveButton
+                            onSave={saveSheet}
+                            onSaved={() => setDraft(null)}
                             disabled={!draft.name.trim()}
-                            onClick={saveSheet}
-                        >
-                            save
-                        </button>
+                        />
                     </div>
 
                     <label className="sheet-label">name</label>
