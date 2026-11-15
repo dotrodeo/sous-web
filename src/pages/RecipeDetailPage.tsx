@@ -272,6 +272,18 @@ export function RecipeDetailPage() {
                     className="menu-item"
                     onClick={() => {
                         setMenuOpen(false)
+                        setStepIndex(0)
+                        setCookOpen(true)
+                    }}
+                >
+                    <CookIcon size={20} />
+                    cook mode
+                </button>
+                <button
+                    type="button"
+                    className="menu-item"
+                    onClick={() => {
+                        setMenuOpen(false)
                         setMadeOpen(true)
                     }}
                 >
