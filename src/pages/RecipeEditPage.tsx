@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { SaveButton } from '../components/SaveButton'
 import { AlertCircleIcon, LinkIcon, PlusIcon, TrashIcon, XIcon } from '../components/Icons'
+import { SortableList, SortableRow } from '../components/Sortable'
 import { useImportRecipe, useRecipe, useRecipeTags, useUpsertRecipe } from '../hooks/useRecipes'
 import { hasTag, isNewTag, normalizeTag, resolveTag, suggestTags } from '../lib/tags'
 import type { RecipePatch } from '../lib/types'
@@ -10,6 +11,8 @@ interface Row {
     id: string
     text: string
 }
+
+const describeIngredient = (row: Row) => row.text.trim() || 'blank ingredient'
 
 interface FormInitial {
     name: string
@@ -293,36 +296,49 @@ function RecipeEditForm({
                 <div className="form-section">
                     <label className="form-label">ingredients</label>
                     <div className="edit-rows">
-                        {ingredients.map((row) => (
-                            <div className="edit-row" key={row.id}>
-                                <input
-                                    className="field"
-                                    value={row.text}
-                                    onChange={(e) =>
-                                        setIngredients((prev) =>
-                                            prev.map((x) =>
-                                                x.id === row.id
-                                                    ? { ...x, text: e.target.value }
-                                                    : x,
-                                            ),
-                                        )
-                                    }
-                                    placeholder="1 cup flour"
-                                />
-                                <button
-                                    type="button"
-                                    className="btn-remove"
-                                    aria-label="remove ingredient"
-                                    onClick={() =>
-                                        setIngredients((prev) =>
-                                            prev.filter((x) => x.id !== row.id),
-                                        )
-                                    }
+                        <SortableList
+                            items={ingredients}
+                            getId={(row) => row.id}
+                            describe={describeIngredient}
+                            onReorder={setIngredients}
+                        >
+                            {ingredients.map((row) => (
+                                <SortableRow
+                                    key={row.id}
+                                    id={row.id}
+                                    className="edit-row"
+                                    label={describeIngredient(row)}
+                                    disabled={ingredients.length < 2}
                                 >
-                                    <TrashIcon size={22} />
-                                </button>
-                            </div>
-                        ))}
+                                    <input
+                                        className="field"
+                                        value={row.text}
+                                        onChange={(e) =>
+                                            setIngredients((prev) =>
+                                                prev.map((x) =>
+                                                    x.id === row.id
+                                                        ? { ...x, text: e.target.value }
+                                                        : x,
+                                                ),
+                                            )
+                                        }
+                                        placeholder="1 cup flour"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn-remove"
+                                        aria-label="remove ingredient"
+                                        onClick={() =>
+                                            setIngredients((prev) =>
+                                                prev.filter((x) => x.id !== row.id),
+                                            )
+                                        }
+                                    >
+                                        <TrashIcon size={22} />
+                                    </button>
+                                </SortableRow>
+                            ))}
+                        </SortableList>
                         <button
                             type="button"
                             className="btn-dashed"
