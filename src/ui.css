@@ -1611,6 +1611,39 @@ textarea.field {
     padding: 0;
     color: #fff;
 }
+.tag-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+.tag-suggest {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+        border-color 0.12s,
+        color 0.12s;
+}
+.tag-suggest:hover,
+.tag-suggest:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    outline: none;
+}
+.tag-suggest.create {
+    border-style: dashed;
+    border-color: var(--accent);
+    color: var(--accent);
+}
 .tag-input {
     font-size: 16px;
     color: var(--ink);
