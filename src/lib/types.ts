@@ -187,7 +187,6 @@ export interface RecipePatch {
     instructions?: string[]
     tags?: RecipeTagPatch[]
     source?: string
-    deletedAt?: string
 }
 
 /** RecipeModel.swift — RecipeImport (response from /recipes/scrape). */
@@ -227,7 +226,6 @@ export interface PantryItemPatch {
     purchasedAt?: string
     // expiresAt is a real, nullable column (soupi PR #8) — send null to clear it.
     expiresAt?: string | null
-    deletedAt?: string
     categoryId?: number
 }
 
@@ -237,6 +235,5 @@ export interface ItemCategoryPatch {
     name?: string
     icon?: string
     isNonFood?: boolean
-    deletedAt?: string
     pantryId?: number
 }

@@ -11,7 +11,7 @@ import {
 import { BottomSheet } from '../components/BottomSheet'
 import { SaveButton } from '../components/SaveButton'
 import { CategorySelect, Switch } from '../components/SheetControls'
-import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
+import { useDeletePantryItem, usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory, inPantry, isExpiringSoon } from '../lib/pantryHelper'
 import type { ItemCategory, PantryItem, PantryItemPatch } from '../lib/types'
 
@@ -48,6 +48,7 @@ function toDraft(item: PantryItem): Draft {
 export function PantryPage() {
     const { data: pantry } = usePantry()
     const upsert = useUpsertPantryItem()
+    const remove = useDeletePantryItem()
 
     const [query, setQuery] = useState('')
     const [draft, setDraft] = useState<Draft | null>(null)
@@ -115,15 +116,8 @@ export function PantryPage() {
 
     const confirmDelete = () => {
         if (!pendingDelete || !pantry || pendingDelete.id == null) return
-        upsert.mutate(
-            {
-                pantryId: pantry.id,
-                patch: {
-                    id: pendingDelete.id,
-                    name: pendingDelete.name,
-                    deletedAt: new Date().toISOString(),
-                },
-            },
+        remove.mutate(
+            { pantryId: pantry.id, itemId: pendingDelete.id },
             {
                 onSuccess: () => {
                     setPendingDelete(null)
@@ -131,6 +125,10 @@ export function PantryPage() {
                 },
             },
         )
+    }
+    const closeDelete = () => {
+        remove.reset()
+        setPendingDelete(null)
     }
 
     const isEdit = draft?.id != null
@@ -355,7 +353,7 @@ export function PantryPage() {
 
             {pendingDelete && (
                 <div className="modal-backdrop">
-                    <div className="modal-scrim" onClick={() => setPendingDelete(null)} />
+                    <div className="modal-scrim" onClick={closeDelete} />
                     <div className="modal-card">
                         <div className="modal-badge danger">
                             <TrashIcon size={26} />
@@ -364,19 +362,24 @@ export function PantryPage() {
                         <div className="modal-text">
                             <strong>{pendingDelete.name}</strong> will be removed from your pantry.
                         </div>
+                        {remove.isError && (
+                            <p className="form-error modal-error" role="alert">
+                                couldn’t delete — check your connection and try again.
+                            </p>
+                        )}
                         <div className="modal-actions">
                             <button
                                 type="button"
                                 className="btn-chip"
                                 style={{ flex: 1 }}
-                                onClick={() => setPendingDelete(null)}
+                                onClick={closeDelete}
                             >
                                 cancel
                             </button>
                             <button
                                 type="button"
                                 className="btn-danger"
-                                disabled={upsert.isPending}
+                                disabled={remove.isPending}
                                 onClick={confirmDelete}
                             >
                                 delete

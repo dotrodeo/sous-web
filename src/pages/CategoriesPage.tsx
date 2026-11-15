@@ -11,7 +11,12 @@ import {
 import { BottomSheet } from '../components/BottomSheet'
 import { SaveButton } from '../components/SaveButton'
 import { Switch } from '../components/SheetControls'
-import { usePantry, useUpsertCategory, useUpdateCategorySortOrder } from '../hooks/usePantry'
+import {
+    useDeleteCategory,
+    usePantry,
+    useUpsertCategory,
+    useUpdateCategorySortOrder,
+} from '../hooks/usePantry'
 import type { ItemCategory, ItemCategoryPatch } from '../lib/types'
 
 const EMOJIS = [
@@ -52,6 +57,7 @@ export function CategoriesPage() {
     const navigate = useNavigate()
     const { data: pantry } = usePantry()
     const upsert = useUpsertCategory()
+    const remove = useDeleteCategory()
     const updateOrder = useUpdateCategorySortOrder()
 
     const pantryId = pantry?.id
@@ -98,16 +104,9 @@ export function CategoriesPage() {
     }
 
     const confirmDelete = () => {
-        if (!pendingDelete || !pantryId) return
-        upsert.mutate(
-            {
-                pantryId,
-                patch: {
-                    id: pendingDelete.id,
-                    name: pendingDelete.name,
-                    deletedAt: new Date().toISOString(),
-                },
-            },
+        if (!pendingDelete || !pantryId || pendingDelete.id == null) return
+        remove.mutate(
+            { pantryId, categoryId: pendingDelete.id },
             {
                 onSuccess: () => {
                     setPendingDelete(null)
@@ -115,6 +114,10 @@ export function CategoriesPage() {
                 },
             },
         )
+    }
+    const closeDelete = () => {
+        remove.reset()
+        setPendingDelete(null)
     }
 
     const isEdit = draft?.id != null
@@ -309,7 +312,7 @@ export function CategoriesPage() {
 
             {pendingDelete && (
                 <div className="modal-backdrop">
-                    <div className="modal-scrim" onClick={() => setPendingDelete(null)} />
+                    <div className="modal-scrim" onClick={closeDelete} />
                     <div className="modal-card">
                         <div className="modal-badge danger">
                             <TrashIcon size={26} />
@@ -319,19 +322,24 @@ export function CategoriesPage() {
                             <strong>{pendingDelete.name}</strong> will be removed. Items in it
                             become uncategorized.
                         </div>
+                        {remove.isError && (
+                            <p className="form-error modal-error" role="alert">
+                                couldn’t delete — check your connection and try again.
+                            </p>
+                        )}
                         <div className="modal-actions">
                             <button
                                 type="button"
                                 className="btn-chip"
                                 style={{ flex: 1 }}
-                                onClick={() => setPendingDelete(null)}
+                                onClick={closeDelete}
                             >
                                 cancel
                             </button>
                             <button
                                 type="button"
                                 className="btn-danger"
-                                disabled={upsert.isPending}
+                                disabled={remove.isPending}
                                 onClick={confirmDelete}
                             >
                                 delete

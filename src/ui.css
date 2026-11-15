@@ -1209,6 +1209,9 @@
     margin-top: 10px;
     line-height: 1.5;
 }
+.modal-error {
+    margin: 12px 0 0;
+}
 .modal-text strong {
     color: var(--ink);
     font-weight: 600;

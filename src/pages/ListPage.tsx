@@ -3,7 +3,7 @@ import { CheckIcon, EditIcon, MinusCircleIcon, PlusIcon, TrashIcon } from '../co
 import { BottomSheet } from '../components/BottomSheet'
 import { SaveButton } from '../components/SaveButton'
 import { CategorySelect } from '../components/SheetControls'
-import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
+import { useDeletePantryItem, usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory } from '../lib/pantryHelper'
 import type { ItemCategory, PantryItem, PantryItemPatch } from '../lib/types'
 
@@ -28,6 +28,7 @@ function toDraft(item: PantryItem): Draft {
 export function ListPage() {
     const { data: pantry } = usePantry()
     const upsert = useUpsertPantryItem()
+    const remove = useDeletePantryItem()
 
     const [mode, setMode] = useState<Mode>('shop')
     const [draft, setDraft] = useState<Draft | null>(null)
@@ -104,15 +105,8 @@ export function ListPage() {
 
     const confirmDelete = () => {
         if (!pendingDelete || !pantry || pendingDelete.id == null) return
-        upsert.mutate(
-            {
-                pantryId: pantry.id,
-                patch: {
-                    id: pendingDelete.id,
-                    name: pendingDelete.name,
-                    deletedAt: new Date().toISOString(),
-                },
-            },
+        remove.mutate(
+            { pantryId: pantry.id, itemId: pendingDelete.id },
             {
                 onSuccess: () => {
                     setPendingDelete(null)
@@ -120,6 +114,10 @@ export function ListPage() {
                 },
             },
         )
+    }
+    const closeDelete = () => {
+        remove.reset()
+        setPendingDelete(null)
     }
 
     const isEdit = draft?.id != null
@@ -386,7 +384,7 @@ export function ListPage() {
 
             {pendingDelete && (
                 <div className="modal-backdrop">
-                    <div className="modal-scrim" onClick={() => setPendingDelete(null)} />
+                    <div className="modal-scrim" onClick={closeDelete} />
                     <div className="modal-card">
                         <div className="modal-badge danger">
                             <TrashIcon size={26} />
@@ -396,22 +394,27 @@ export function ListPage() {
                             <strong>{pendingDelete.name}</strong> will be permanently deleted from
                             your saved items.
                         </div>
+                        {remove.isError && (
+                            <p className="form-error modal-error" role="alert">
+                                couldn’t delete — check your connection and try again.
+                            </p>
+                        )}
                         <div className="modal-actions">
                             <button
                                 type="button"
                                 className="btn-chip"
                                 style={{ flex: 1 }}
-                                onClick={() => setPendingDelete(null)}
+                                onClick={closeDelete}
                             >
                                 cancel
                             </button>
                             <button
                                 type="button"
                                 className="btn-danger"
-                                disabled={upsert.isPending}
+                                disabled={remove.isPending}
                                 onClick={confirmDelete}
                             >
-                                remove
+                                delete
                             </button>
                         </div>
                     </div>

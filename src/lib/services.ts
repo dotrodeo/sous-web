@@ -40,10 +40,14 @@ export const pantryService = {
     fetch: (api: ApiClient, hid: number) => api.get<Pantry>(`/household/${hid}/pantry`),
     upsertItem: (api: ApiClient, hid: number, pantryId: number, patch: PantryItemPatch) =>
         api.post<PantryItem>(`/household/${hid}/pantry/${pantryId}`, patch),
+    deleteItem: (api: ApiClient, hid: number, pantryId: number, itemId: number) =>
+        api.delete(`/household/${hid}/pantry/${pantryId}/items/${itemId}`),
     categories: (api: ApiClient, hid: number, pantryId: number) =>
         api.get<ItemCategory[]>(`/household/${hid}/pantry/${pantryId}/category`),
     upsertCategory: (api: ApiClient, hid: number, pantryId: number, patch: ItemCategoryPatch) =>
         api.post<ItemCategory>(`/household/${hid}/pantry/${pantryId}/category`, patch),
+    deleteCategory: (api: ApiClient, hid: number, pantryId: number, categoryId: number) =>
+        api.delete(`/household/${hid}/pantry/${pantryId}/category/${categoryId}`),
     updateCategorySortOrder: (
         api: ApiClient,
         hid: number,
