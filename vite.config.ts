@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+
+// The service worker imports push-sw.js; a versioned URL makes each release fetch
+// it afresh (Cloudflare gives .js files a 4-hour browser cache).
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -56,6 +61,8 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,svg,png,woff2,ttf,mp3}'],
                 navigateFallback: '/index.html',
                 cleanupOutdatedCaches: true,
+                // Timer alerts (#22): push and notification-click handlers.
+                importScripts: [`push-sw.js?v=${version}`],
             },
         }),
     ],

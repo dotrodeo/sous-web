@@ -1037,6 +1037,19 @@
     gap: 6px;
     max-width: calc(100vw - 150px);
 }
+.timer-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: 320px;
+    padding: 10px 10px 10px 14px;
+    border-radius: 16px;
+    background: var(--surface);
+    color: var(--ink-60);
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.45);
+}
 .timer-chip {
     display: flex;
     align-items: center;
@@ -3004,6 +3017,32 @@ textarea.field {
     flex: 1;
     font-size: 19px;
     font-weight: 600;
+}
+.settings-row .text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.settings-row .text .label {
+    flex: none;
+}
+.settings-row .desc {
+    font-size: 14px;
+    color: var(--ink-60);
+    line-height: 1.4;
+}
+.settings-row.timer-alerts {
+    cursor: default;
+}
+.settings-row.timer-alerts:hover {
+    transform: none;
+    box-shadow: 0 6px 18px -13px rgba(0, 0, 0, 0.3);
+}
+.switch-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
 }
 .settings-row .chev {
     color: var(--ink-40);
