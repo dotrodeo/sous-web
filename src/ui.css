@@ -1618,6 +1618,45 @@ textarea.field {
     border-radius: 9px;
     transition: background 0.12s;
 }
+/* Drag handle for reorderable rows (Sortable.tsx). touch-action: none lets a
+   touch on the handle start a drag instead of scrolling the page. */
+.btn-grip {
+    flex: none;
+    cursor: grab;
+    touch-action: none;
+    border: none;
+    background: transparent;
+    color: var(--ink-40);
+    padding: 8px 4px;
+    margin-left: -8px;
+    margin-right: -6px;
+    display: flex;
+    border-radius: 9px;
+}
+.btn-grip:hover {
+    color: var(--ink-60);
+}
+.btn-grip:focus-visible {
+    outline: none;
+    color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.btn-grip:disabled {
+    cursor: default;
+    opacity: 0.4;
+}
+.edit-row[data-dragging] {
+    position: relative;
+    z-index: 2;
+}
+.edit-row[data-dragging] .btn-grip {
+    cursor: grabbing;
+    color: var(--accent);
+}
+.edit-row[data-dragging] .field {
+    border-color: var(--accent);
+    box-shadow: 0 14px 30px -14px rgba(27, 27, 31, 0.45);
+}
 .btn-remove.top {
     margin-top: 4px;
 }
