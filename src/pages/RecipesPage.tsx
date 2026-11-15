@@ -1,23 +1,45 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Screen } from '../components/Screen'
-import { SearchIcon } from '../components/Icons'
+import { ChevronDownIcon, SearchIcon } from '../components/Icons'
 import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
 import { getAvailableIngredients } from '../lib/recipeHelper'
+import {
+    DEFAULT_RECIPE_SORT,
+    RECIPE_SORTS,
+    isRecipeSort,
+    madeAgo,
+    readiness,
+    sortRecipes,
+    type RecipeSort,
+} from '../lib/recipeSort'
 import type { PantryItem, Recipe } from '../lib/types'
 
 interface RecipeRow {
     recipe: Recipe
+    name: string
     have: number
     need: number
+    timesMade: number
+    lastMade: string | null
     dotColor: string
     tags: string[]
 }
 
-function statusColor(have: number, need: number): string {
-    if (need <= 0 || have <= 0) return 'var(--out)'
-    return have >= need ? 'var(--stocked)' : 'var(--partial)'
+/** Dot color by readiness: green = all in stock, yellow = some, gray = none. */
+const READINESS_COLOR = ['var(--stocked)', 'var(--partial)', 'var(--out)']
+
+const SORT_KEY = 'sous-recipe-sort'
+
+/** The last sort chosen on this device, or the default. */
+function savedSort(): RecipeSort {
+    try {
+        const v = localStorage.getItem(SORT_KEY)
+        return isRecipeSort(v) ? v : DEFAULT_RECIPE_SORT
+    } catch {
+        return DEFAULT_RECIPE_SORT
+    }
 }
 
 export function RecipesPage() {
@@ -26,6 +48,15 @@ export function RecipesPage() {
     const { data: pantry } = usePantry()
     const [query, setQuery] = useState('')
     const [activeFilters, setActiveFilters] = useState<string[]>([])
+    const [sort, setSort] = useState<RecipeSort>(savedSort)
+    const changeSort = (value: RecipeSort) => {
+        setSort(value)
+        try {
+            localStorage.setItem(SORT_KEY, value)
+        } catch {
+            /* storage unavailable; the choice still applies until reload */
+        }
+    }
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
 
@@ -34,7 +65,16 @@ export function RecipesPage() {
             const need = recipe.ingredients?.length ?? 0
             const have = getAvailableIngredients(recipe, pantryItems).length
             const tags = (recipe.tags ?? []).map((t) => t.name)
-            return { recipe, have, need, dotColor: statusColor(have, need), tags }
+            return {
+                recipe,
+                name: recipe.name,
+                have,
+                need,
+                timesMade: recipe.timesMade ?? 0,
+                lastMade: recipe.lastMade,
+                dotColor: READINESS_COLOR[readiness({ have, need })],
+                tags,
+            }
         })
     }, [recipes, pantryItems])
 
@@ -46,13 +86,14 @@ export function RecipesPage() {
 
     const visible = useMemo(() => {
         const q = query.trim().toLowerCase()
-        return rows.filter((r) => {
+        const matching = rows.filter((r) => {
             if (q && !r.recipe.name.toLowerCase().includes(q)) return false
             if (activeFilters.length && !activeFilters.every((t) => r.tags.includes(t)))
                 return false
             return true
         })
-    }, [rows, query, activeFilters])
+        return sortRecipes(matching, sort)
+    }, [rows, query, activeFilters, sort])
 
     const toggleFilter = (tag: string) =>
         setActiveFilters((prev) =>
@@ -72,6 +113,29 @@ export function RecipesPage() {
                     placeholder="search recipes"
                     aria-label="search recipes"
                 />
+            </div>
+
+            <div className="sort-row">
+                <label htmlFor="recipe-sort" className="sort-label">
+                    sort
+                </label>
+                <div className="sort-select-wrap">
+                    <select
+                        id="recipe-sort"
+                        className="sort-select"
+                        value={sort}
+                        onChange={(e) => {
+                            if (isRecipeSort(e.target.value)) changeSort(e.target.value)
+                        }}
+                    >
+                        {RECIPE_SORTS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                                {o.label}
+                            </option>
+                        ))}
+                    </select>
+                    <ChevronDownIcon size={16} className="sort-chevron" />
+                </div>
             </div>
 
             {filterTags.length > 0 && (
@@ -116,6 +180,14 @@ export function RecipesPage() {
                         >
                             <span className="status-dot" style={{ background: r.dotColor }} />
                             <span className="name">{r.recipe.name}</span>
+                            {sort === 'popular' && (
+                                <span className="meta">
+                                    {r.timesMade ? `made ${r.timesMade}×` : 'never made'}
+                                </span>
+                            )}
+                            {sort === 'recent' && (
+                                <span className="meta">{madeAgo(r.lastMade)}</span>
+                            )}
                             <span className="badge">
                                 {r.have} / {r.need}
                             </span>

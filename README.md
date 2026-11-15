@@ -14,7 +14,8 @@ behind it.
 
 - Import a recipe from a URL, or write one by hand. Imported ingredient lines are
   split into amount, unit and item.
-- Search, filter by tag, and sort by how much of each recipe your pantry covers.
+- Search, filter by tag, and sort: ready to cook (everything in stock first, then
+  partly stocked, A→Z within each), A→Z, most made, or recently made.
 - Tag recipes by picking from your household's tags or creating a new one; tags
   match regardless of capitalization, so there are no near-duplicates.
 - Each ingredient shows whether it's in the pantry, on the shopping list, or
