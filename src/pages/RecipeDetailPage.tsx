@@ -537,6 +537,7 @@ export function RecipeDetailPage() {
                                                     key: `${recipe.id}:${stepIndex}:${seg.text}`,
                                                     label: `step ${stepIndex + 1} · ${formatDuration(seconds)}`,
                                                     detail: recipe.name,
+                                                    recipeId: recipe.id,
                                                     seconds,
                                                 })
                                             }

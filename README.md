@@ -28,6 +28,10 @@ behind it.
   tapped; a range uses the shorter time. Several timers can run at once, they keep
   running when you leave cook mode, and each rings an alarm when it ends. Cook mode
   keeps the screen awake.
+- Timer alerts: with notifications allowed, a timer that ends while Sous is closed
+  sends a notification to the device that started it; tapping it opens the recipe.
+  On iPhone and iPad this needs Sous added to the Home Screen. Needs soupi with web
+  push configured.
 - Scale a recipe from ¼ to 3×. Ingredient amounts and servings update, shown as
   fractions.
 - "I made this" records a rating, marks the ingredients you used up as out of

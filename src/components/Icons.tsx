@@ -120,6 +120,12 @@ export const GripIcon = (p: IconProps) => (
         <circle cx="15" cy="19" r="1" />
     </Svg>
 )
+export const BellIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+    </Svg>
+)
 export const TrashIcon = (p: IconProps) => (
     <Svg {...p}>
         <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />

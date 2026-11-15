@@ -4,6 +4,7 @@ import { AppShell } from './components/AppShell'
 import { TimersDock } from './components/TimersDock'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import { useThemePreference } from './hooks/useTheme'
+import { useTimerAlerts } from './hooks/useTimerAlerts'
 import { LoginPage } from './pages/LoginPage'
 import { RecipesPage } from './pages/RecipesPage'
 import { RecipeDetailPage } from './pages/RecipeDetailPage'
@@ -18,6 +19,12 @@ import './ui.css'
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
 function HouseholdEventsListener() {
     useHouseholdEvents()
+    return null
+}
+
+/** Timer alerts by web push: registration, running timers, notification taps. */
+function TimerAlertsSync() {
+    useTimerAlerts()
     return null
 }
 
@@ -36,6 +43,7 @@ function AuthedApp() {
             <SignedIn>
                 <HouseholdEventsListener />
                 <ThemeSync />
+                <TimerAlertsSync />
                 <TimersDock />
                 <AppShell>
                     <Routes>

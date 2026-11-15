@@ -37,7 +37,7 @@ export function createApiClient(getToken: GetToken) {
     async function request<T>(
         method: string,
         endpoint: string,
-        opts: { query?: Query; body?: unknown } = {},
+        opts: { query?: Query; body?: unknown; keepalive?: boolean } = {},
     ): Promise<T> {
         const token = await getToken()
         if (!token) throw new ApiError(401, 'Not authenticated (no Clerk session token)')
@@ -49,6 +49,8 @@ export function createApiClient(getToken: GetToken) {
             method,
             headers,
             body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+            // Lets a request finish even if the page is being hidden or closed.
+            keepalive: opts.keepalive,
         })
 
         if (!res.ok) {
@@ -64,7 +66,9 @@ export function createApiClient(getToken: GetToken) {
     return {
         get: <T>(endpoint: string, query?: Query) => request<T>('GET', endpoint, { query }),
         post: <T>(endpoint: string, body?: unknown) => request<T>('POST', endpoint, { body }),
+        put: <T>(endpoint: string, body?: unknown) => request<T>('PUT', endpoint, { body }),
         delete: (endpoint: string, query?: Query) => request<void>('DELETE', endpoint, { query }),
+        request,
     }
 }
 

@@ -11,10 +11,13 @@ import {
     ShareQrIcon,
 } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
+import { TimerAlertsRow } from '../components/TimerAlertsRow'
 import { useUser, useActiveHousehold } from '../hooks/useUser'
 import { useSetThemePreference, useThemePreference } from '../hooks/useTheme'
 import type { ThemePreference } from '../lib/theme'
 import { initials } from '../lib/initials'
+import { disableAlerts } from '../lib/push'
+import { clearTimers } from '../lib/timers'
 
 // Lazy — pulls in html5-qrcode only when the scanner is actually opened.
 const JoinScanner = lazy(() =>
@@ -83,6 +86,8 @@ export function SettingsPage() {
                         </div>
                     </div>
 
+                    <TimerAlertsRow />
+
                     <button
                         type="button"
                         className="settings-row"
@@ -129,7 +134,16 @@ export function SettingsPage() {
                     </button>
                 </div>
 
-                <button type="button" className="logout-btn" onClick={() => signOut()}>
+                <button
+                    type="button"
+                    className="logout-btn"
+                    onClick={async () => {
+                        // This device's alerts and timers belong to the signed-in user.
+                        await disableAlerts()
+                        clearTimers()
+                        await signOut()
+                    }}
+                >
                     <LogoutIcon size={20} />
                     log out
                 </button>
