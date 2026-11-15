@@ -15,12 +15,18 @@ import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import { groupByCategory, inPantry, isExpiringSoon } from '../lib/pantryHelper'
 import type { ItemCategory, PantryItem, PantryItemPatch } from '../lib/types'
 
+type Stock = 'in' | 'low' | 'out'
+
+const STOCK_OPTIONS: Stock[] = ['in', 'low', 'out']
+
+const stockOf = (item: PantryItem): Stock => (!item.isInStock ? 'out' : item.isLow ? 'low' : 'in')
+
 interface Draft {
     id: number | null
     name: string
     categoryId: number | null
     quantity: string
-    isInStock: boolean
+    stock: Stock
     isFavorite: boolean
     isInShoppingList: boolean
     expiresAt: string // YYYY-MM-DD or ''
@@ -32,7 +38,7 @@ function toDraft(item: PantryItem): Draft {
         name: item.name,
         categoryId: item.categoryId,
         quantity: item.quantity ?? '',
-        isInStock: item.isInStock,
+        stock: stockOf(item),
         isFavorite: item.isFavorite,
         isInShoppingList: item.isInShoppingList,
         expiresAt: item.expiresAt ? item.expiresAt.slice(0, 10) : '',
@@ -58,7 +64,9 @@ export function PantryPage() {
 
     const summary = useMemo(() => {
         const exp = base.filter(isExpiringSoon).length
+        const low = base.filter((it) => it.isInStock && it.isLow).length
         let s = `${base.length} item${base.length === 1 ? '' : 's'}`
+        if (low) s += ` · ${low} low`
         if (exp) s += ` · ${exp} expiring`
         return s
     }, [base])
@@ -81,7 +89,7 @@ export function PantryPage() {
             name: '',
             categoryId: categories[0]?.id ?? null,
             quantity: '',
-            isInStock: true,
+            stock: 'in',
             isFavorite: false,
             isInShoppingList: false,
             expiresAt: '',
@@ -95,7 +103,8 @@ export function PantryPage() {
             ...(draft.id != null ? { id: draft.id } : {}),
             name: draft.name.trim(),
             quantity: draft.quantity.trim() || null,
-            isInStock: draft.isInStock,
+            isInStock: draft.stock !== 'out',
+            isLow: draft.stock === 'low',
             isFavorite: draft.isFavorite,
             isInShoppingList: draft.isInShoppingList,
             expiresAt: draft.expiresAt ? new Date(draft.expiresAt).toISOString() : null,
@@ -183,11 +192,13 @@ export function PantryPage() {
                                         <div className="cat-row" key={it.id}>
                                             <button
                                                 type="button"
-                                                className={`stock-dot${it.isInStock ? ' stocked' : ''}`}
+                                                className={`stock-dot${it.isInStock ? ' stocked' : ''}${it.isInStock && it.isLow ? ' low' : ''}`}
                                                 aria-label={
-                                                    it.isInStock
-                                                        ? 'in stock — tap to mark out'
-                                                        : 'out — tap to mark in stock'
+                                                    !it.isInStock
+                                                        ? 'out — tap to mark in stock'
+                                                        : it.isLow
+                                                          ? 'running low — tap to mark out'
+                                                          : 'in stock — tap to mark out'
                                                 }
                                                 onClick={() => toggleStock(it)}
                                             >
@@ -202,6 +213,9 @@ export function PantryPage() {
                                             >
                                                 {it.name}
                                             </button>
+                                            {it.isInStock && it.isLow && (
+                                                <span className="low-badge">low</span>
+                                            )}
                                             {it.isInShoppingList && (
                                                 <span
                                                     className="cart-badge"
@@ -297,12 +311,25 @@ export function PantryPage() {
                     </div>
 
                     <div className="toggle-row">
-                        <span>in stock</span>
-                        <Switch
-                            on={draft.isInStock}
-                            label="toggle in stock"
-                            onChange={(on) => update({ isInStock: on })}
-                        />
+                        <span id="stock-label">stock</span>
+                        <div
+                            className="seg stock-seg"
+                            role="radiogroup"
+                            aria-labelledby="stock-label"
+                        >
+                            {STOCK_OPTIONS.map((s) => (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={draft.stock === s}
+                                    className={draft.stock === s ? 'active' : undefined}
+                                    onClick={() => update({ stock: s })}
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                     <div className="toggle-row bordered">
                         <span>in shopping list</span>

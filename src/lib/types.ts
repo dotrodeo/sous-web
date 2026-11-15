@@ -85,6 +85,8 @@ export interface PantryItem {
     name: string
     quantity: string | null
     isInStock: boolean
+    /** In stock but running low (only meaningful while isInStock). */
+    isLow: boolean
     isFavorite: boolean
     isInShoppingList: boolean
     purchasedAt: string | null
@@ -204,6 +206,8 @@ export interface RecipeCompletion {
     recipeId: number
     rating?: Rating
     finishedPantryItems: number[]
+    /** Pantry items now running low (kept in stock). */
+    lowPantryItems?: number[]
 }
 
 /**
@@ -217,6 +221,7 @@ export interface PantryItemPatch {
     name?: string
     quantity?: string | null
     isInStock?: boolean
+    isLow?: boolean
     isFavorite?: boolean
     isInShoppingList?: boolean
     purchasedAt?: string

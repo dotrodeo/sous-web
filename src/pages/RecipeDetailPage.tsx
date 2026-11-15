@@ -28,11 +28,12 @@ import { formatDuration, startTimer } from '../lib/timers'
 import { useWakeLock } from '../hooks/useWakeLock'
 import type { PantryItem, Rating, RecipeCompletion } from '../lib/types'
 
-type IngStatus = 'stock' | 'list' | 'add'
+type IngStatus = 'stock' | 'low' | 'list' | 'add'
 
 function statusOf(item: PantryItem | null): IngStatus {
-    if (item?.isInStock) return 'stock'
+    if (item?.isInStock && !item.isLow) return 'stock'
     if (item?.isInShoppingList) return 'list'
+    if (item?.isInStock && item.isLow) return 'low'
     return 'add'
 }
 
@@ -48,6 +49,7 @@ interface IngredientPopover {
 
 const STATUS_LABEL: Record<IngStatus, string> = {
     stock: 'in stock',
+    low: 'running low — add to shopping list',
     list: 'on shopping list',
     add: 'add to shopping list',
 }
@@ -69,7 +71,15 @@ export function RecipeDetailPage() {
     const [pendingDelete, setPendingDelete] = useState(false)
     const [madeOpen, setMadeOpen] = useState(false)
     const [verdict, setVerdict] = useState<'up' | 'down' | null>(null)
-    const [finishedIds, setFinishedIds] = useState<Record<number, boolean>>({})
+    /** "I made this": pantry items now running low or used up, by pantry item id. */
+    const [usage, setUsage] = useState<Record<number, 'low' | 'out'>>({})
+    const toggleUsage = (pid: number, value: 'low' | 'out') =>
+        setUsage((u) => {
+            const next = { ...u }
+            if (next[pid] === value) delete next[pid]
+            else next[pid] = value
+            return next
+        })
     const [toast, setToast] = useState<string | null>(null)
     // Scale index into SCALE_STEPS. Not persisted: every visit opens at 1×.
     const [scaleIndex, setScaleIndex] = useState(DEFAULT_STEP)
@@ -198,14 +208,15 @@ export function RecipeDetailPage() {
         const status = statusOf(m.pantryItem)
         if (status === 'stock' || !pantry) return
         if (m.pantryItem) {
-            const toList = status === 'add'
+            // A low item goes on the list but stays in stock (there's still some).
+            const toList = status === 'add' || status === 'low'
             upsertItem.mutate({
                 pantryId: pantry.id,
                 patch: {
                     id: m.pantryItem.id,
                     name: m.pantryItem.name,
                     isInShoppingList: toList,
-                    ...(toList ? { isInStock: false } : {}),
+                    ...(status === 'add' ? { isInStock: false } : {}),
                 },
             })
         } else {
@@ -221,7 +232,10 @@ export function RecipeDetailPage() {
 
     const logMade = () => {
         const finished = finishable
-            .filter((m) => m.pantryItem && finishedIds[m.pantryItem.id])
+            .filter((m) => m.pantryItem && usage[m.pantryItem.id] === 'out')
+            .map((m) => m.pantryItem!.id)
+        const low = finishable
+            .filter((m) => m.pantryItem && usage[m.pantryItem.id] === 'low')
             .map((m) => m.pantryItem!.id)
         const rating: Rating | undefined =
             verdict === 'up' ? 1 : verdict === 'down' ? -1 : undefined
@@ -229,17 +243,23 @@ export function RecipeDetailPage() {
             recipeId: recipe.id,
             ...(rating !== undefined ? { rating } : {}),
             finishedPantryItems: finished,
+            ...(low.length ? { lowPantryItems: low } : {}),
         }
         completeRecipe.mutate({ recipeId: recipe.id, completion })
         const emoji = verdict === 'up' ? '👍 · ' : verdict === 'down' ? '👎 · ' : ''
         setToast(
-            `cooked! ${emoji}${finished.length ? `${finished.length} moved to list` : 'logged'}`,
+            `cooked! ${emoji}${
+                [finished.length && `${finished.length} used up`, low.length && `${low.length} low`]
+                    .filter(Boolean)
+                    .join(', ') || 'logged'
+            }`,
         )
         setMadeOpen(false)
+        setUsage({})
         window.setTimeout(() => setToast(null), 3200)
     }
 
-    const finCount = Object.values(finishedIds).filter(Boolean).length
+    const finCount = Object.keys(usage).length
     const ratingLabel =
         verdict === 'up' ? 'loved it' : verdict === 'down' ? 'not for me' : 'tap to react'
 
@@ -423,6 +443,9 @@ export function RecipeDetailPage() {
                                             onClick={() => toggleShop(m)}
                                         >
                                             {status === 'stock' && <CheckIcon size={18} />}
+                                            {status === 'low' && (
+                                                <span className="low-mark">low</span>
+                                            )}
                                             {status === 'list' && <ListIcon size={17} />}
                                             {status === 'add' && <PlusIcon size={18} />}
                                         </button>
@@ -656,41 +679,50 @@ export function RecipeDetailPage() {
                         {finishable.length > 0 && (
                             <div className="made-section">
                                 <div className="finished-head">
-                                    <div className="section-label">used anything up?</div>
+                                    <div className="section-label">running low or used up?</div>
                                     <span className="col-hint">
                                         {finCount === 0 ? 'none yet' : `${finCount} marked`}
                                     </span>
                                 </div>
                                 <div className="finished-sub">
-                                    tick what you finished — we’ll move it to your shopping list.
+                                    mark what’s running low or finished. finished staples go on your
+                                    shopping list.
                                 </div>
                                 <div className="finished-list">
                                     <div className="finished-scroll">
                                         {finishable.map((m) => {
                                             const pid = m.pantryItem!.id
-                                            const done = !!finishedIds[pid]
+                                            const state = usage[pid]
                                             return (
-                                                <button
-                                                    type="button"
+                                                <div
                                                     key={m.ingredient.id}
-                                                    className={`finished-row${done ? ' done' : ''}`}
-                                                    onClick={() =>
-                                                        setFinishedIds((f) => ({
-                                                            ...f,
-                                                            [pid]: !f[pid],
-                                                        }))
-                                                    }
+                                                    className={`finished-row${state ? ` ${state}` : ''}`}
                                                 >
-                                                    <span className="finished-check">
-                                                        {done && <CheckIcon size={15} />}
-                                                    </span>
                                                     <span className="label">
                                                         {lineFor(
                                                             m.ingredient.id,
                                                             m.ingredient.sentence,
                                                         )}
                                                     </span>
-                                                </button>
+                                                    <span className="usage-pills">
+                                                        <button
+                                                            type="button"
+                                                            className={`usage-pill low${state === 'low' ? ' on' : ''}`}
+                                                            aria-pressed={state === 'low'}
+                                                            onClick={() => toggleUsage(pid, 'low')}
+                                                        >
+                                                            low
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={`usage-pill out${state === 'out' ? ' on' : ''}`}
+                                                            aria-pressed={state === 'out'}
+                                                            onClick={() => toggleUsage(pid, 'out')}
+                                                        >
+                                                            used up
+                                                        </button>
+                                                    </span>
+                                                </div>
                                             )
                                         })}
                                     </div>
