@@ -20,22 +20,26 @@ behind it.
   partly stocked, A→Z within each), A→Z, most made, or recently made.
 - Tag recipes by picking from your household's tags or creating a new one; tags
   match regardless of capitalization, so there are no near-duplicates.
-- Each ingredient shows whether it's in the pantry, on the shopping list, or
-  missing. One tap adds a missing ingredient to the list.
-- Cook mode shows one step at a time in large type. Ingredients in the step are
-  underlined; tap one to see its full line and amount at the chosen scale.
+- Each ingredient shows whether it's in the pantry, running low, on the shopping
+  list, or missing. A low ingredient counts as in stock but is flagged. One tap adds
+  a missing or low ingredient to the list.
+- Cook mode (from the recipe page or its ⋯ menu) shows one step at a time in large
+  type. Ingredients in the step are underlined; tap one to see its full line and
+  amount at the chosen scale.
 - Times in a step ("simmer 10 minutes", "bake 25-30 min") start a timer when
   tapped; a range uses the shorter time. Several timers can run at once, they keep
-  running when you leave cook mode, and each rings an alarm when it ends. Cook mode
-  keeps the screen awake.
-- Timer alerts: with notifications allowed, a timer that ends while Sous is closed
-  sends a notification to the device that started it; tapping it opens the recipe.
-  On iPhone and iPad this needs Sous added to the Home Screen. Needs soupi with web
-  push configured.
+  running when you leave cook mode or reload the page (or the phone closes Sous in
+  the background), and each rings an alarm when it ends. Cook mode keeps the screen
+  awake.
+- Timer alerts: a timer that ends while Sous is closed sends a notification to the
+  device that started it; tapping it opens the recipe. The first timer asks for
+  notification permission, and Settings → timer alerts turns them on or off for this
+  device. On iPhone and iPad this needs Sous added to the Home Screen. Needs soupi
+  with web push configured (see [Self-hosting](#self-hosting)).
 - Scale a recipe from ¼ to 3×. Ingredient amounts and servings update, shown as
   fractions.
-- "I made this" records a rating, marks the ingredients you used up as out of
-  stock, and removes the recipe from the meal plan.
+- "I made this" records a rating, marks the ingredients you used up as out of stock
+  or running low, and removes the recipe from the meal plan.
 
 **Meal plan**
 
@@ -44,8 +48,8 @@ behind it.
 
 **Pantry**
 
-- Items grouped by category, with stock status, quantity and expiration date.
-  Items expiring soon are flagged.
+- Items grouped by category, with stock status (in, low or out), quantity and
+  expiration date. Items expiring soon are flagged.
 - Mark items as staples. A staple that runs out goes on the shopping list
   automatically.
 
@@ -135,6 +139,11 @@ with its `ENV`, so several environments can run on one host.
 
 4. Add this URL to soupi's `CORS_ORIGINS` and restart soupi's `api` service.
 
+5. Optional, for timer alerts: set `APP_URL` (this URL) and a VAPID key pair in
+   soupi (see its [configuration](https://github.com/dotrodeo/soupi#configuration)).
+   sous-web needs no extra settings: it reads soupi's public key at runtime, and
+   alerts stay off while soupi has none.
+
 The `VITE_*` values are compiled into the build. Changing them, or pulling new code,
 means rebuilding:
 
@@ -164,7 +173,11 @@ src/hooks/        Data queries and mutations, live-update listener
 src/lib/          API client, endpoint functions, types, helpers
 src/index.css     Design tokens (colors, font)
 src/ui.css        Layout and shared components
+public/push-sw.js Timer alert push handling, imported into the generated service worker
 ```
+
+Timers live in `src/lib/timers.ts` (saved in `localStorage`), and timer alerts
+(push subscription and registration with soupi) in `src/lib/push.ts`.
 
 Data is fetched and cached with TanStack Query, keyed by household. When a live
 update arrives, `src/hooks/useHouseholdEvents.ts` refreshes the matching queries.
