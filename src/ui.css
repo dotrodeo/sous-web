@@ -1685,18 +1685,9 @@ textarea.field {
     display: flex;
     border-radius: 9px;
 }
-/* Steps (tall text boxes): handle and number sit at the top. */
+/* Steps (tall text boxes): the handle sits at the top. */
 .edit-row.top .btn-grip {
     margin-top: 12px;
-}
-.step-num {
-    flex: none;
-    width: 1.4em;
-    margin-top: 15px;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--accent);
-    text-align: center;
 }
 .btn-grip:hover {
     color: var(--ink-60);

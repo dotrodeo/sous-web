@@ -367,7 +367,7 @@ function RecipeEditForm({
                             describe={describeStep}
                             onReorder={setInstructions}
                         >
-                            {instructions.map((row, index) => (
+                            {instructions.map((row) => (
                                 <SortableRow
                                     key={row.id}
                                     id={row.id}
@@ -375,9 +375,6 @@ function RecipeEditForm({
                                     label={describeStep(row)}
                                     disabled={instructions.length < 2}
                                 >
-                                    <span className="step-num" aria-hidden="true">
-                                        {index + 1}
-                                    </span>
                                     <textarea
                                         className="field"
                                         value={row.text}
