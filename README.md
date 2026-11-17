@@ -70,8 +70,15 @@ behind it.
 - Every change syncs live to the other members.
 - Light, dark, or follow the device. The choice is saved to your account.
 
-Sign-in is by email and password. Sous needs a network connection: only the app
-itself is cached for offline startup, not your data.
+Sign-in is by email and password.
+
+**Offline:** your household's data is kept on the device, so it shows at once. If
+the signal drops while Sous is open (in a store, say), the shopping list keeps
+working: checking items off, unchecking them and clearing checked items apply at
+once and sync, in order, when the connection is back, even if the phone closed Sous
+in between. Adding or editing items needs a connection. Starting Sous needs one
+too, because sign-in does; with none, it says so and opens when the signal returns.
+Signing out removes the saved data from the device.
 
 ## How it fits together
 

@@ -17,6 +17,8 @@ import { useSetThemePreference, useThemePreference } from '../hooks/useTheme'
 import type { ThemePreference } from '../lib/theme'
 import { initials } from '../lib/initials'
 import { disableAlerts } from '../lib/push'
+import { clearOfflineCache } from '../lib/offline'
+import { useQueryClient } from '@tanstack/react-query'
 import { clearTimers } from '../lib/timers'
 
 // Lazy — pulls in html5-qrcode only when the scanner is actually opened.
@@ -29,6 +31,7 @@ const THEME_OPTIONS: ThemePreference[] = ['system', 'light', 'dark']
 export function SettingsPage() {
     const navigate = useNavigate()
     const { signOut } = useClerk()
+    const queryClient = useQueryClient()
     const { data: user } = useUser()
     const household = useActiveHousehold()
     const theme = useThemePreference()
@@ -141,6 +144,8 @@ export function SettingsPage() {
                         // This device's alerts and timers belong to the signed-in user.
                         await disableAlerts()
                         clearTimers()
+                        // The saved offline copy is this account's data.
+                        await clearOfflineCache(queryClient)
                         await signOut()
                     }}
                 >

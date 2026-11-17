@@ -2,6 +2,7 @@ import { SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/cl
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
 import { TimersDock } from './components/TimersDock'
+import { OfflineBar, OfflineStartNotice, OfflineSync } from './components/OfflineStatus'
 import { useHouseholdEvents } from './hooks/useHouseholdEvents'
 import { useThemePreference } from './hooks/useTheme'
 import { useTimerAlerts } from './hooks/useTimerAlerts'
@@ -37,6 +38,7 @@ function ThemeSync() {
 function AuthedApp() {
     return (
         <>
+            <OfflineStartNotice />
             <SignedOut>
                 <LoginPage />
             </SignedOut>
@@ -44,6 +46,8 @@ function AuthedApp() {
                 <HouseholdEventsListener />
                 <ThemeSync />
                 <TimerAlertsSync />
+                <OfflineSync />
+                <OfflineBar />
                 <TimersDock />
                 <AppShell>
                     <Routes>

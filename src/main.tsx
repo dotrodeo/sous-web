@@ -1,9 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
-import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MutationCache, QueryClient } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from './lib/api'
+import { CACHE_MAX_AGE_MS, persistOptions } from './lib/offline'
 import { applyTheme, cachedTheme, followSystemTheme } from './lib/theme'
 import './index.css'
 import App from './App.tsx'
@@ -19,6 +21,9 @@ if (!PUBLISHABLE_KEY) {
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
+            // Kept as long as the saved offline copy (lib/offline.ts), so it's
+            // still there to save and restore.
+            gcTime: CACHE_MAX_AGE_MS,
             // Never retry client errors — a 4xx won't fix itself, and retrying a
             // 429 just deepens the rate-limit hole. Allow a couple of retries for
             // genuine transient failures (5xx / network).
@@ -46,11 +51,12 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-            <QueryClientProvider client={queryClient}>
+            {/* Saves the household's data (and queued list changes) to the device. */}
+            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
                 <BrowserRouter>
                     <App />
                 </BrowserRouter>
-            </QueryClientProvider>
+            </PersistQueryClientProvider>
         </ClerkProvider>
     </StrictMode>,
 )
