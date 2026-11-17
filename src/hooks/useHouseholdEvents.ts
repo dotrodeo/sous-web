@@ -35,6 +35,8 @@ export function useHouseholdEvents() {
                     break
                 case 'pantry_update':
                     qc.invalidateQueries({ queryKey: ['pantry', householdId] })
+                    // Ingredient links (#39) change with pantry_update too.
+                    qc.invalidateQueries({ queryKey: ['ingredientLinks', householdId] })
                     break
                 case 'category_update':
                     qc.invalidateQueries({ queryKey: ['pantry', householdId] })

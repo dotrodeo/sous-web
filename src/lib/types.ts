@@ -237,3 +237,15 @@ export interface ItemCategoryPatch {
     isNonFood?: boolean
     pantryId?: number
 }
+
+/** A household's fix for how an ingredient matches the pantry (#39). `name` is the
+ *  ingredient's normalized name; `pantryItemId` null means "always have, don't track". */
+export interface IngredientLink {
+    id: number
+    name: string
+    householdId: number
+    pantryItemId: number | null
+    pantryItem: { id: number; name: string; deletedAt: string | null } | null
+    createdAt: string
+    updatedAt: string
+}

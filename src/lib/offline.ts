@@ -34,6 +34,7 @@ const PERSISTED = new Set([
     'recipe',
     'recipeTags',
     'plan',
+    'ingredientLinks',
 ])
 
 export const persister = createSyncStoragePersister({

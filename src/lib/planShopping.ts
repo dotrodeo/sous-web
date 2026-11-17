@@ -1,7 +1,7 @@
 // "Shop for the plan": what the upcoming meal plan's recipes need that the pantry
 // doesn't have, merged across recipes.
 import { matchIngredientsToPantry } from './recipeHelper'
-import type { PantryItem, PlanDay, Recipe } from './types'
+import type { IngredientLink, PantryItem, PlanDay, Recipe } from './types'
 
 export type PlanShoppingStatus =
     /** Out of stock, or not in the pantry at all: added by default. */
@@ -34,6 +34,7 @@ export function buildPlanShopping(
     days: PlanDay[],
     recipeById: Map<number, Recipe>,
     pantryItems: PantryItem[],
+    links: IngredientLink[] = [],
 ): { rows: PlanShoppingRow[]; recipeCount: number } {
     // A recipe planned on two days is shopped for once.
     const recipes = new Map<number, Recipe>()
@@ -41,7 +42,8 @@ export function buildPlanShopping(
 
     const rows = new Map<string, PlanShoppingRow>()
     for (const recipe of recipes.values()) {
-        for (const m of matchIngredientsToPantry(recipe, pantryItems)) {
+        for (const m of matchIngredientsToPantry(recipe, pantryItems, links)) {
+            if (m.untracked) continue // "always have, don't track"
             const item = m.pantryItem
             const status = item ? statusOf(item) : 'missing'
             if (!status) continue

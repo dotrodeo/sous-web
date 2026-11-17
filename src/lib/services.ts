@@ -6,11 +6,12 @@
 import type { ApiClient } from './api'
 import type {
     Household,
+    IngredientLink,
     ItemCategory,
+    ItemCategoryPatch,
     Pantry,
     PantryItem,
     PantryItemPatch,
-    ItemCategoryPatch,
     Plan,
     Recipe,
     RecipeCompletion,
@@ -65,6 +66,16 @@ export const pantryService = {
             `/household/${hid}/pantry/${pantryId}/category/sort-order`,
             categoryIds,
         ),
+}
+
+/** Ingredient links (#39): fixes for how recipe ingredients match the pantry. */
+export const ingredientLinkService = {
+    list: (api: ApiClient, hid: number) =>
+        api.get<IngredientLink[]>(`/household/${hid}/ingredient-links`),
+    upsert: (api: ApiClient, hid: number, body: { name: string; pantryItemId: number | null }) =>
+        api.put<IngredientLink>(`/household/${hid}/ingredient-links`, body),
+    remove: (api: ApiClient, hid: number, id: number) =>
+        api.delete(`/household/${hid}/ingredient-links/${id}`),
 }
 
 /** PlanService.swift */

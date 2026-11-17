@@ -15,6 +15,7 @@ import { ListPage } from './pages/ListPage'
 import { PlanPage } from './pages/PlanPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { CategoriesPage } from './pages/CategoriesPage'
+import { IngredientMatchesPage } from './pages/IngredientMatchesPage'
 import './ui.css'
 
 /** Lives inside <SignedIn> so the SSE stream only runs when authenticated. */
@@ -61,6 +62,10 @@ function AuthedApp() {
                         <Route path="/list" element={<ListPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/settings/categories" element={<CategoriesPage />} />
+                        <Route
+                            path="/settings/ingredient-matches"
+                            element={<IngredientMatchesPage />}
+                        />
                         <Route path="*" element={<Navigate to="/recipes" replace />} />
                     </Routes>
                 </AppShell>
