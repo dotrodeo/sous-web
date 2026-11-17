@@ -13,6 +13,12 @@ interface Row {
 }
 
 const describeIngredient = (row: Row) => row.text.trim() || 'blank ingredient'
+/** A step for the drag handle's label and screen-reader announcements. */
+const describeStep = (row: Row) => {
+    const text = row.text.trim()
+    if (!text) return 'blank step'
+    return text.length > 40 ? `step “${text.slice(0, 40)}…”` : `step “${text}”`
+}
 
 interface FormInitial {
     name: string
@@ -355,36 +361,52 @@ function RecipeEditForm({
                 <div className="form-section">
                     <label className="form-label">instructions</label>
                     <div className="edit-rows">
-                        {instructions.map((row) => (
-                            <div className="edit-row top" key={row.id}>
-                                <textarea
-                                    className="field"
-                                    value={row.text}
-                                    onChange={(e) =>
-                                        setInstructions((prev) =>
-                                            prev.map((x) =>
-                                                x.id === row.id
-                                                    ? { ...x, text: e.target.value }
-                                                    : x,
-                                            ),
-                                        )
-                                    }
-                                    placeholder="Preheat the oven…"
-                                />
-                                <button
-                                    type="button"
-                                    className="btn-remove top"
-                                    aria-label="remove instruction"
-                                    onClick={() =>
-                                        setInstructions((prev) =>
-                                            prev.filter((x) => x.id !== row.id),
-                                        )
-                                    }
+                        <SortableList
+                            items={instructions}
+                            getId={(row) => row.id}
+                            describe={describeStep}
+                            onReorder={setInstructions}
+                        >
+                            {instructions.map((row, index) => (
+                                <SortableRow
+                                    key={row.id}
+                                    id={row.id}
+                                    className="edit-row top"
+                                    label={describeStep(row)}
+                                    disabled={instructions.length < 2}
                                 >
-                                    <TrashIcon size={22} />
-                                </button>
-                            </div>
-                        ))}
+                                    <span className="step-num" aria-hidden="true">
+                                        {index + 1}
+                                    </span>
+                                    <textarea
+                                        className="field"
+                                        value={row.text}
+                                        onChange={(e) =>
+                                            setInstructions((prev) =>
+                                                prev.map((x) =>
+                                                    x.id === row.id
+                                                        ? { ...x, text: e.target.value }
+                                                        : x,
+                                                ),
+                                            )
+                                        }
+                                        placeholder="Preheat the oven…"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn-remove top"
+                                        aria-label="remove instruction"
+                                        onClick={() =>
+                                            setInstructions((prev) =>
+                                                prev.filter((x) => x.id !== row.id),
+                                            )
+                                        }
+                                    >
+                                        <TrashIcon size={22} />
+                                    </button>
+                                </SortableRow>
+                            ))}
+                        </SortableList>
                         <button
                             type="button"
                             className="btn-dashed"
