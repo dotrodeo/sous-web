@@ -41,6 +41,12 @@ framework. There are no tests; CI runs format, lint, build and a Docker build.
   alarm (`public/sounds/alarm.mp3`) is unlocked on the tap that starts a timer, as
   iOS requires (restored timers unlock on the next tap). Timers are saved in
   localStorage, so they survive a reload or iOS closing the app.
+- Ingredient matching (#39): `src/lib/recipeHelper.ts` matches each recipe
+  ingredient to a pantry item, first by the household's ingredient links (soupi
+  `/ingredient-links`, keyed by `ingredientKey()`: the parsed item or the line,
+  normalized like soupi does), then by fuzzy name. A link with no pantry item means
+  "always have" (`untracked`): counted as available, skipped by "shop for the
+  plan". Pass the links (`useIngredientLinks`) wherever you match or count.
 - Offline (#38): `src/lib/offline.ts` saves the TanStack Query cache to
   localStorage (`PersistQueryClientProvider` in `main.tsx`; household data and the
   user, 24 h) and defines the queued item patch (`PANTRY_PATCH`): optimistic,

@@ -4,7 +4,8 @@ import { Screen } from '../components/Screen'
 import { ChevronDownIcon, SearchIcon } from '../components/Icons'
 import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
-import { getAvailableIngredients } from '../lib/recipeHelper'
+import { useIngredientLinks } from '../hooks/useIngredientLinks'
+import { countAvailable } from '../lib/recipeHelper'
 import {
     DEFAULT_RECIPE_SORT,
     RECIPE_SORTS,
@@ -59,11 +60,13 @@ export function RecipesPage() {
     }
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
+    const { data: linkData } = useIngredientLinks()
+    const links = useMemo(() => linkData ?? [], [linkData])
 
     const rows = useMemo<RecipeRow[]>(() => {
         return (recipes ?? []).map((recipe) => {
             const need = recipe.ingredients?.length ?? 0
-            const have = getAvailableIngredients(recipe, pantryItems).length
+            const have = countAvailable(recipe, pantryItems, links)
             const tags = (recipe.tags ?? []).map((t) => t.name)
             return {
                 recipe,
@@ -76,7 +79,7 @@ export function RecipesPage() {
                 tags,
             }
         })
-    }, [recipes, pantryItems])
+    }, [recipes, pantryItems, links])
 
     const filterTags = useMemo<string[]>(() => {
         const set = new Set<string>()

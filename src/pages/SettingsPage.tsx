@@ -4,6 +4,7 @@ import { useClerk } from '@clerk/clerk-react'
 import { QRCodeSVG } from 'qrcode.react'
 import {
     ChevronRightIcon,
+    LinkIcon,
     ListLinesIcon,
     LogoutIcon,
     MoonIcon,
@@ -100,6 +101,20 @@ export function SettingsPage() {
                             <ListLinesIcon size={22} />
                         </span>
                         <span className="label">categories</span>
+                        <span className="chev">
+                            <ChevronRightIcon size={20} />
+                        </span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="settings-row"
+                        onClick={() => navigate('/settings/ingredient-matches')}
+                    >
+                        <span className="icon">
+                            <LinkIcon size={22} />
+                        </span>
+                        <span className="label">ingredient matches</span>
                         <span className="chev">
                             <ChevronRightIcon size={20} />
                         </span>

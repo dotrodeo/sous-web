@@ -16,7 +16,14 @@ import {
 } from '../components/Icons'
 import { useCompleteRecipe, useDeleteRecipe, useRecipe } from '../hooks/useRecipes'
 import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
-import { matchIngredientsToPantry, type PantryMatchedIngredient } from '../lib/recipeHelper'
+import {
+    ingredientKey,
+    matchIngredientsToPantry,
+    normalizeIngredientName,
+    type PantryMatchedIngredient,
+} from '../lib/recipeHelper'
+import { IngredientMatchSheet } from '../components/IngredientMatchSheet'
+import { useIngredientLinks } from '../hooks/useIngredientLinks'
 import {
     highlight,
     mergeIngredientMentions,
@@ -28,9 +35,11 @@ import { formatDuration, startTimer } from '../lib/timers'
 import { useWakeLock } from '../hooks/useWakeLock'
 import type { PantryItem, Rating, RecipeCompletion } from '../lib/types'
 
-type IngStatus = 'stock' | 'low' | 'list' | 'add'
+type IngStatus = 'stock' | 'low' | 'list' | 'add' | 'untracked'
 
-function statusOf(item: PantryItem | null): IngStatus {
+function statusOf(m: PantryMatchedIngredient): IngStatus {
+    if (m.untracked) return 'untracked'
+    const item = m.pantryItem
     if (item?.isInStock && !item.isLow) return 'stock'
     if (item?.isInShoppingList) return 'list'
     if (item?.isInStock && item.isLow) return 'low'
@@ -52,6 +61,16 @@ const STATUS_LABEL: Record<IngStatus, string> = {
     low: 'running low — add to shopping list',
     list: 'on shopping list',
     add: 'add to shopping list',
+    untracked: 'always have (not tracked)',
+}
+
+/** What a row says about its match when it isn't obvious from its own name. */
+function matchNote(m: PantryMatchedIngredient): string | null {
+    if (m.untracked) return 'always have'
+    if (!m.pantryItem) return null
+    return normalizeIngredientName(m.pantryItem.name) === ingredientKey(m.ingredient)
+        ? null
+        : `pantry: ${m.pantryItem.name}`
 }
 
 export function RecipeDetailPage() {
@@ -66,6 +85,8 @@ export function RecipeDetailPage() {
     const completeRecipe = useCompleteRecipe()
 
     const [menuOpen, setMenuOpen] = useState(false)
+    const [matching, setMatching] = useState<PantryMatchedIngredient | null>(null)
+    const { data: linkData } = useIngredientLinks()
     const [cookOpen, setCookOpen] = useState(false)
     const [stepIndex, setStepIndex] = useState(0)
     const [pendingDelete, setPendingDelete] = useState(false)
@@ -93,8 +114,8 @@ export function RecipeDetailPage() {
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
     const matched = useMemo<PantryMatchedIngredient[]>(
-        () => (recipe ? matchIngredientsToPantry(recipe, pantryItems) : []),
-        [recipe, pantryItems],
+        () => (recipe ? matchIngredientsToPantry(recipe, pantryItems, linkData ?? []) : []),
+        [recipe, pantryItems, linkData],
     )
     const instructions = useMemo<string[]>(() => recipe?.instructions ?? [], [recipe])
     /** Each ingredient's line at the current scale, by ingredient id. */
@@ -205,8 +226,8 @@ export function RecipeDetailPage() {
     }
 
     const toggleShop = (m: PantryMatchedIngredient) => {
-        const status = statusOf(m.pantryItem)
-        if (status === 'stock' || !pantry) return
+        const status = statusOf(m)
+        if (status === 'stock' || status === 'untracked' || !pantry) return
         if (m.pantryItem) {
             // A low item goes on the list but stays in stock (there's still some).
             const toList = status === 'add' || status === 'low'
@@ -438,15 +459,23 @@ export function RecipeDetailPage() {
                                 </div>
                             )}
                             {matched.map((m) => {
-                                const status = statusOf(m.pantryItem)
+                                const status = statusOf(m)
+                                const note = matchNote(m)
                                 return (
                                     <div className="ingredient-row" key={m.ingredient.id}>
-                                        <span className="text">
+                                        {/* Tap to fix how it matches the pantry (#39). */}
+                                        <button
+                                            type="button"
+                                            className="text ing-text"
+                                            aria-label={`${lineFor(m.ingredient.id, m.ingredient.sentence)}: change pantry match`}
+                                            onClick={() => setMatching(m)}
+                                        >
                                             {lineFor(m.ingredient.id, m.ingredient.sentence)}
                                             {scaledLines.get(m.ingredient.id)?.scaled === false && (
                                                 <span className="unscaled"> · not scaled</span>
                                             )}
-                                        </span>
+                                            {note && <span className="ing-match">{note}</span>}
+                                        </button>
                                         <button
                                             type="button"
                                             className={`ing-status ${status}`}
@@ -460,6 +489,7 @@ export function RecipeDetailPage() {
                                             )}
                                             {status === 'list' && <ListIcon size={17} />}
                                             {status === 'add' && <PlusIcon size={18} />}
+                                            {status === 'untracked' && <CheckIcon size={18} />}
                                         </button>
                                     </div>
                                 )
@@ -503,6 +533,15 @@ export function RecipeDetailPage() {
             </div>
 
             {menuOpen && moreMenu}
+
+            {matching && (
+                <IngredientMatchSheet
+                    match={matching}
+                    line={lineFor(matching.ingredient.id, matching.ingredient.sentence)}
+                    pantryItems={pantryItems}
+                    onClose={() => setMatching(null)}
+                />
+            )}
 
             {cookOpen && (
                 <div

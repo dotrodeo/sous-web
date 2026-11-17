@@ -20,7 +20,8 @@ import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
 import { SaveButton } from '../components/SaveButton'
 import { buildPlanShopping } from '../lib/planShopping'
-import { getAvailableIngredients } from '../lib/recipeHelper'
+import { useIngredientLinks } from '../hooks/useIngredientLinks'
+import { countAvailable } from '../lib/recipeHelper'
 import type { PantryItem, PlanDay, Recipe } from '../lib/types'
 
 // ── Date helpers (plan dates are full ISO8601; we group/label by day key) ──
@@ -80,6 +81,8 @@ export function PlanPage() {
     const [shopOpen, setShopOpen] = useState(false)
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
+    const { data: linkData } = useIngredientLinks()
+    const links = useMemo(() => linkData ?? [], [linkData])
     const recipeById = useMemo(() => {
         const m = new Map<number, Recipe>()
         ;(recipes ?? []).forEach((r) => m.set(r.id, r))
@@ -104,8 +107,8 @@ export function PlanPage() {
     const anyTimeDay = useMemo(() => futureDays.find((d) => d.date == null), [futureDays])
 
     const shopping = useMemo(
-        () => buildPlanShopping(futureDays, recipeById, pantryItems),
-        [futureDays, recipeById, pantryItems],
+        () => buildPlanShopping(futureDays, recipeById, pantryItems, links),
+        [futureDays, recipeById, pantryItems, links],
     )
     const missingCount = shopping.rows.filter((r) => r.status === 'missing').length
 
@@ -121,7 +124,7 @@ export function PlanPage() {
     const dotColor = (recipe: Recipe) => {
         const full = recipeById.get(recipe.id) ?? recipe
         const need = full.ingredients?.length ?? 0
-        const have = getAvailableIngredients(full, pantryItems).length
+        const have = countAvailable(full, pantryItems, links)
         return statusColor(have, need)
     }
 

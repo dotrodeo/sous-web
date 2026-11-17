@@ -23,6 +23,10 @@ behind it.
 - Each ingredient shows whether it's in the pantry, running low, on the shopping
   list, or missing. A low ingredient counts as in stock but is flagged. One tap adds
   a missing or low ingredient to the list.
+- Tap an ingredient to fix how it matches the pantry: pick the right item ("scallions"
+  are your "green onions") or mark it as something you always have (water). The fix
+  applies to every recipe with that ingredient; review them in Settings → ingredient
+  matches.
 - Cook mode (from the recipe page or its ⋯ menu) shows one step at a time in large
   type. Ingredients in the step are underlined; tap one to see its full line and
   amount at the chosen scale.

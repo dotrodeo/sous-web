@@ -807,6 +807,26 @@
     background: var(--chip);
     transition: background 0.12s;
 }
+/* Ingredient text opens the "match ingredient" sheet (#39). */
+.ingredient-row .ing-text {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.ingredient-row .ing-match {
+    display: block;
+    margin-top: 3px;
+    font-size: 14px;
+    color: var(--ink-40);
+}
+.ing-status.untracked {
+    color: var(--ink-40);
+    cursor: default;
+}
 .ing-status.stock {
     color: var(--stocked);
     cursor: default;
@@ -3662,4 +3682,97 @@ textarea.field {
 .offline-start-hint {
     color: var(--ink-60);
     font-size: 15px;
+}
+
+/* ── Match ingredient sheet (#39) ── */
+.sheet-card.match-sheet {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+}
+.match-note {
+    margin: -8px 0 14px;
+    font-size: 14px;
+    color: var(--ink-60);
+}
+.match-search {
+    margin-bottom: 8px;
+}
+.match-list {
+    flex: 1;
+    min-height: 120px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.match-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 4px;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 17px;
+    text-align: left;
+    cursor: pointer;
+}
+.match-option.selected {
+    color: var(--accent);
+    font-weight: 600;
+}
+.match-empty {
+    padding: 14px 4px;
+    color: var(--ink-60);
+}
+.match-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+}
+.match-actions .sheet-secondary {
+    margin-top: 0;
+}
+
+/* ── Settings → ingredient matches (#39) ── */
+.match-intro {
+    color: var(--ink-60);
+    font-size: 15px;
+    margin: 0 0 18px;
+    max-width: 560px;
+}
+.match-rows {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 4px 18px;
+    max-width: 560px;
+}
+.match-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+}
+.match-row:last-child {
+    border-bottom: none;
+}
+.match-row-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.match-row-name {
+    font-size: 17px;
+    font-weight: 600;
+}
+.match-row-target {
+    font-size: 15px;
+    color: var(--ink-60);
 }
