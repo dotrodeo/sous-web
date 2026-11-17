@@ -38,6 +38,25 @@ export function useUpsertPantryItem() {
     })
 }
 
+/** POST /household/{id}/pantry/{pantryId}/shopping-list — several items onto the list at once. */
+export function useAddToShoppingList() {
+    const api = useApi()
+    const household = useActiveHousehold()
+    const qc = useQueryClient()
+    return useMutation({
+        mutationFn: ({
+            pantryId,
+            itemIds,
+            names,
+        }: {
+            pantryId: number
+            itemIds: number[]
+            names: string[]
+        }) => pantryService.addToList(api, household!.id, pantryId, { itemIds, names }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['pantry', household?.id] }),
+    })
+}
+
 /** DELETE /household/{id}/pantry/{pantryId}/items/{itemId} — soft-deletes the item. */
 export function useDeletePantryItem() {
     const api = useApi()

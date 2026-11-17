@@ -3510,3 +3510,77 @@ textarea.field {
         max-width: 420px;
     }
 }
+
+/* ── Plan: "shop for the plan" button and review sheet ── */
+.plan-shop-btn {
+    width: 100%;
+    max-width: 560px;
+    justify-content: center;
+    margin: 4px 0 18px;
+}
+.plan-shop-count {
+    min-width: 24px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent-fill);
+    color: #fff;
+    font-size: 14px;
+}
+.plan-shop-empty {
+    color: var(--ink-60);
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+.plan-shop-section + .plan-shop-section {
+    margin-top: 18px;
+}
+.plan-shop-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-60);
+    margin-bottom: 4px;
+}
+.plan-shop-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 10px 2px;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.plan-shop-row.listed {
+    cursor: default;
+    color: var(--ink-60);
+}
+.plan-shop-row.listed .check-circle.checked .ring {
+    background: var(--out);
+}
+.plan-shop-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.plan-shop-name {
+    font-size: 17px;
+    font-weight: 600;
+}
+.plan-shop-recipes {
+    font-size: 14px;
+    color: var(--ink-60);
+}
+.plan-shop-new {
+    flex: none;
+    font-size: 13px;
+    color: var(--ink-60);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 8px;
+}

@@ -40,6 +40,13 @@ export const pantryService = {
     fetch: (api: ApiClient, hid: number) => api.get<Pantry>(`/household/${hid}/pantry`),
     upsertItem: (api: ApiClient, hid: number, pantryId: number, patch: PantryItemPatch) =>
         api.post<PantryItem>(`/household/${hid}/pantry/${pantryId}`, patch),
+    /** Puts several items on the list at once (existing ids, plus names for new items). */
+    addToList: (
+        api: ApiClient,
+        hid: number,
+        pantryId: number,
+        items: { itemIds: number[]; names: string[] },
+    ) => api.post<{ added: number }>(`/household/${hid}/pantry/${pantryId}/shopping-list`, items),
     deleteItem: (api: ApiClient, hid: number, pantryId: number, itemId: number) =>
         api.delete(`/household/${hid}/pantry/${pantryId}/items/${itemId}`),
     categories: (api: ApiClient, hid: number, pantryId: number) =>

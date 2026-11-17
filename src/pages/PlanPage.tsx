@@ -6,8 +6,10 @@ import {
     PlanIcon,
     PlusIcon,
     SearchIcon,
+    ShoppingCartIcon,
     XIcon,
 } from '../components/Icons'
+import { PlanShoppingSheet } from '../components/PlanShoppingSheet'
 import {
     useAddPlanDay,
     useAddRecipesToPlan,
@@ -17,6 +19,7 @@ import {
 import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
 import { SaveButton } from '../components/SaveButton'
+import { buildPlanShopping } from '../lib/planShopping'
 import { getAvailableIngredients } from '../lib/recipeHelper'
 import type { PantryItem, PlanDay, Recipe } from '../lib/types'
 
@@ -74,6 +77,7 @@ export function PlanPage() {
     const [newDate, setNewDate] = useState('')
     const [pendingRemove, setPendingRemove] = useState<ScheduleTarget | null>(null)
     const [busy, setBusy] = useState(false)
+    const [shopOpen, setShopOpen] = useState(false)
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
     const recipeById = useMemo(() => {
@@ -98,6 +102,11 @@ export function PlanPage() {
     }, [plan])
 
     const anyTimeDay = useMemo(() => futureDays.find((d) => d.date == null), [futureDays])
+
+    const shopping = useMemo(
+        () => buildPlanShopping(futureDays, recipeById, pantryItems),
+        [futureDays, recipeById, pantryItems],
+    )
 
     const totalMeals = futureDays.reduce((n, d) => n + d.recipes.length, 0)
     const scheduledMeals = futureDays
@@ -214,6 +223,22 @@ export function PlanPage() {
                     <div className="summary">{summary}</div>
                 </div>
 
+                {totalMeals > 0 && pantry && (
+                    <button
+                        type="button"
+                        className="btn-outline plan-shop-btn"
+                        onClick={() => setShopOpen(true)}
+                    >
+                        <ShoppingCartIcon size={20} />
+                        shop for the plan
+                        {shopping.rows.some((r) => r.status === 'missing') && (
+                            <span className="plan-shop-count">
+                                {shopping.rows.filter((r) => r.status === 'missing').length}
+                            </span>
+                        )}
+                    </button>
+                )}
+
                 {futureDays.length === 0 ? (
                     <div className="empty-state">
                         <div className="emoji">🗓️</div>
@@ -327,6 +352,15 @@ export function PlanPage() {
                     </div>
                 )}
             </div>
+
+            {shopOpen && pantry && (
+                <PlanShoppingSheet
+                    pantryId={pantry.id}
+                    rows={shopping.rows}
+                    recipeCount={shopping.recipeCount}
+                    onClose={() => setShopOpen(false)}
+                />
+            )}
 
             {picker && (
                 <div className="sheet-overlay">
