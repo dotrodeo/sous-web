@@ -34,7 +34,8 @@ behind it.
 - Times in a step ("simmer 10 minutes", "bake 25-30 min") start a timer when
   tapped; a range uses the shorter time. Several timers can run at once, they keep
   running when you leave cook mode or reload the page (or the phone closes Sous in
-  the background), and each rings an alarm when it ends. Cook mode keeps the screen
+  the background), and each rings an alarm when it ends. Tap a timer to add a
+  minute or pause it; "+1 min" on a finished timer runs it one more minute. Cook mode keeps the screen
   awake.
 - Timer alerts: a timer that ends while Sous is closed sends a notification to the
   device that started it; tapping it opens the recipe. The first timer asks for

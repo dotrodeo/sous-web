@@ -1088,7 +1088,7 @@
 }
 .timer-chip {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
     padding: 6px 6px 6px 12px;
     border-radius: 999px;
@@ -1097,6 +1097,58 @@
     box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.45);
     font-size: 15px;
     white-space: nowrap;
+}
+/* Time, label and stop on one row; controls (#42) on a second row when open. */
+.timer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.timer-main .timer-label {
+    min-width: 0;
+}
+/* The time and label are one button that shows the timer's controls (#42). */
+.timer-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.timer-chip.open {
+    border-radius: 20px;
+}
+.timer-actions {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0 2px;
+}
+.timer-action {
+    flex: 1;
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.timer-chip.ending .timer-action,
+.timer-chip.done .timer-action {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+.timer-chip.paused .timer-time {
+    color: var(--ink-40);
 }
 .timer-time {
     font-weight: 700;
