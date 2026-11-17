@@ -41,6 +41,15 @@ framework. There are no tests; CI runs format, lint, build and a Docker build.
   alarm (`public/sounds/alarm.mp3`) is unlocked on the tap that starts a timer, as
   iOS requires (restored timers unlock on the next tap). Timers are saved in
   localStorage, so they survive a reload or iOS closing the app.
+- Offline (#38): `src/lib/offline.ts` saves the TanStack Query cache to
+  localStorage (`PersistQueryClientProvider` in `main.tsx`; household data and the
+  user, 24 h) and defines the queued item patch (`PANTRY_PATCH`): optimistic,
+  paused offline, run one at a time in order, retried on network errors, saved
+  across reloads. Its mutationFn is registered by `OfflineSync`
+  (`components/OfflineStatus.tsx`), so use `useMutation({ mutationKey:
+PANTRY_PATCH })` for list check-offs. Sign-in (Clerk) needs the network, so a
+  cold start offline shows `OfflineStartNotice`. Sign-out and an account change
+  clear the saved copy.
 - Timer alerts (web push, #22): `src/lib/push.ts` subscribes the device (on the
   first timer tap, or the Settings switch) and registers it with soupi;
   `timers.ts` registers each running timer (`PUT /timers/:id`) and cancels it when

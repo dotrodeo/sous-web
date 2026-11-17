@@ -1,9 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { CheckIcon, EditIcon, MinusCircleIcon, PlusIcon, TrashIcon } from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
 import { SaveButton } from '../components/SaveButton'
 import { CategorySelect } from '../components/SheetControls'
 import { useDeletePantryItem, usePantry, useUpsertPantryItem } from '../hooks/usePantry'
+import { useActiveHousehold } from '../hooks/useUser'
+import { PANTRY_PATCH, useOnline, type PantryPatchVars } from '../lib/offline'
 import { groupByCategory } from '../lib/pantryHelper'
 import type { ItemCategory, PantryItem, PantryItemPatch } from '../lib/types'
 
@@ -29,6 +32,11 @@ export function ListPage() {
     const { data: pantry } = usePantry()
     const upsert = useUpsertPantryItem()
     const remove = useDeletePantryItem()
+    const household = useActiveHousehold()
+    const online = useOnline()
+    // Quick changes to existing items (check off, put on or take off the list)
+    // work offline: they show at once and sync when the connection is back.
+    const quickPatch = useMutation<unknown, Error, PantryPatchVars>({ mutationKey: PANTRY_PATCH })
 
     const [mode, setMode] = useState<Mode>('shop')
     const [draft, setDraft] = useState<Draft | null>(null)
@@ -67,20 +75,20 @@ export function ListPage() {
                 : `${onList.length} item${onList.length === 1 ? '' : 's'} · ${remaining} to buy`
             : `${items.length} item${items.length === 1 ? '' : 's'} in your catalog`
 
-    const patchItem = (item: PantryItem, patch: PantryItemPatch) =>
-        pantry &&
-        upsert.mutate({ pantryId: pantry.id, patch: { id: item.id, name: item.name, ...patch } })
+    const patchItem = (item: PantryItem, patch: PantryItemPatch, onDone?: () => void) => {
+        if (!pantry || !household) return
+        quickPatch.mutate({
+            householdId: household.id,
+            pantryId: pantry.id,
+            patch: { id: item.id, name: item.name, ...patch },
+        })
+        onDone?.()
+    }
 
     const clearChecked = () => {
-        if (!pantry) return
         onList
             .filter((it) => it.isInStock)
-            .forEach((it) =>
-                upsert.mutate({
-                    pantryId: pantry.id,
-                    patch: { id: it.id, name: it.name, isInShoppingList: false },
-                }),
-            )
+            .forEach((it) => patchItem(it, { isInShoppingList: false }))
     }
 
     const openAdd = () =>
@@ -125,14 +133,8 @@ export function ListPage() {
 
     /** Takes the item off the list without touching its stock state. */
     const removeFromList = () => {
-        if (!draftItem || !pantry) return
-        upsert.mutate(
-            {
-                pantryId: pantry.id,
-                patch: { id: draftItem.id, name: draftItem.name, isInShoppingList: false },
-            },
-            { onSuccess: () => setDraft(null) },
-        )
+        if (!draftItem) return
+        patchItem(draftItem, { isInShoppingList: false }, () => setDraft(null))
     }
     const shop = mode === 'shop'
     const progress = onList.length ? Math.round((checkedCount / onList.length) * 100) : 0
@@ -311,9 +313,15 @@ export function ListPage() {
                             ref={saveButtonRef}
                             onSave={saveSheet}
                             onSaved={() => setDraft(null)}
-                            disabled={!draft.name.trim()}
+                            disabled={!draft.name.trim() || !online}
                         />
                     </div>
+                    {!online && (
+                        <p className="sheet-offline" role="note">
+                            you’re offline. {isEdit ? 'editing' : 'adding'} items needs a
+                            connection; checking items off still works.
+                        </p>
+                    )}
 
                     <div className="sheet-row fields">
                         <div className="grow">
@@ -360,7 +368,6 @@ export function ListPage() {
                             type="button"
                             className="sheet-secondary"
                             style={{ marginTop: 22 }}
-                            disabled={upsert.isPending}
                             onClick={removeFromList}
                         >
                             <MinusCircleIcon size={20} />
@@ -373,6 +380,7 @@ export function ListPage() {
                             type="button"
                             className="sheet-delete"
                             style={{ marginTop: draftItem?.isInShoppingList ? 12 : 22 }}
+                            disabled={!online}
                             onClick={() => setPendingDelete(draft)}
                         >
                             <TrashIcon size={20} />
