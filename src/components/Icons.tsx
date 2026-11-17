@@ -140,6 +140,12 @@ export const PauseIcon = (p: IconProps) => (
         <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
     </Svg>
 )
+export const NoteIcon = (p: IconProps) => (
+    <Svg {...p}>
+        <path d="M6 3h9l4 4v14H6z" />
+        <path d="M9 11h7M9 15h7M9 7h4" />
+    </Svg>
+)
 export const XIcon = (p: IconProps) => (
     <Svg {...p}>
         <path d="M6 6l12 12M18 6L6 18" />

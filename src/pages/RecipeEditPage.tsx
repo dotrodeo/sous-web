@@ -27,6 +27,7 @@ interface FormInitial {
     servings: string
     ingredients: Row[]
     instructions: Row[]
+    notes: string
     tags: string[]
 }
 
@@ -49,6 +50,7 @@ export function RecipeEditPage() {
                     servings: '',
                     ingredients: [{ id: 'ing0', text: '' }],
                     instructions: [{ id: 'ins0', text: '' }],
+                    notes: '',
                     tags: [],
                 }}
             />
@@ -82,6 +84,7 @@ export function RecipeEditPage() {
                     id: `ins${n}`,
                     text: t,
                 })),
+                notes: recipe.notes ?? '',
                 tags: (recipe.tags ?? []).map((t) => t.name),
             }}
         />
@@ -114,6 +117,7 @@ function RecipeEditForm({
     const [instructions, setInstructions] = useState<Row[]>(
         initial.instructions.length ? initial.instructions : [{ id: 'ins0', text: '' }],
     )
+    const [notes, setNotes] = useState(initial.notes)
     const [tags, setTags] = useState<string[]>(initial.tags)
     const [addingTag, setAddingTag] = useState(false)
     const [newTag, setNewTag] = useState('')
@@ -179,6 +183,7 @@ function RecipeEditForm({
             servings: servings.trim(),
             ingredients: ingredients.map((i) => i.text.trim()).filter(Boolean),
             instructions: instructions.map((i) => i.text.trim()).filter(Boolean),
+            notes: notes.trim() || null,
             tags: tags.map((t) => ({ name: t })),
         }
         return upsertRecipe.mutateAsync(patch)
@@ -418,6 +423,19 @@ function RecipeEditForm({
                             add instruction
                         </button>
                     </div>
+                </div>
+
+                <div className="form-section">
+                    <label className="form-label" htmlFor="r-notes">
+                        notes
+                    </label>
+                    <textarea
+                        id="r-notes"
+                        className="field notes-field"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Use half the chili, double the garlic…"
+                    />
                 </div>
 
                 <div className="form-section">

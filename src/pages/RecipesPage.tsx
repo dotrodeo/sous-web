@@ -88,16 +88,20 @@ export function RecipesPage() {
         return [...set].sort((a, b) => a.localeCompare(b))
     }, [rows])
 
-    // Search covers names and ingredients (#40); `via` says which ingredients matched.
+    // Search covers names, ingredients (#40) and notes (#43); `via` says which
+    // ingredients matched, or that the notes did.
     const { visible, via } = useMemo(() => {
         const words = searchWords(query)
-        const via = new Map<number, string[]>()
+        const via = new Map<number, string>()
         const matching = rows.filter((r) => {
             if (activeFilters.length && !activeFilters.every((t) => r.tags.includes(t)))
                 return false
             const hit = searchRecipe(r.recipe, words, links)
             if (!hit) return false
-            if (hit.via.length) via.set(r.recipe.id, hit.via)
+            const hint = [hit.via.length && `has ${hit.via.join(', ')}`, hit.inNotes && 'in notes']
+                .filter(Boolean)
+                .join(' · ')
+            if (hint) via.set(r.recipe.id, hint)
             return true
         })
         return { visible: sortRecipes(matching, sort), via }
@@ -190,9 +194,7 @@ export function RecipesPage() {
                             <span className="name-col">
                                 <span className="name">{r.recipe.name}</span>
                                 {via.has(r.recipe.id) && (
-                                    <span className="search-hint">
-                                        has {via.get(r.recipe.id)!.join(', ')}
-                                    </span>
+                                    <span className="search-hint">{via.get(r.recipe.id)}</span>
                                 )}
                             </span>
                             {sort === 'popular' && (

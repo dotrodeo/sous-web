@@ -51,6 +51,8 @@ export interface Recipe {
     cookTime: string | null
     servings: string | null
     instructions: string[] | null
+    /** Free-text notes (#43). */
+    notes: string | null
     createdAt: string
     updatedAt: string
     deletedAt: string | null
@@ -185,6 +187,7 @@ export interface RecipePatch {
     servings?: string
     ingredients?: string[]
     instructions?: string[]
+    notes?: string | null
     tags?: RecipeTagPatch[]
     source?: string
 }
@@ -207,6 +210,8 @@ export interface RecipeCompletion {
     finishedPantryItems: number[]
     /** Pantry items now running low (kept in stock). */
     lowPantryItems?: number[]
+    /** A dated line added to the end of the recipe's notes, like "Nov 17: more salt". */
+    note?: string
 }
 
 /**
