@@ -107,6 +107,7 @@ export function PlanPage() {
         () => buildPlanShopping(futureDays, recipeById, pantryItems),
         [futureDays, recipeById, pantryItems],
     )
+    const missingCount = shopping.rows.filter((r) => r.status === 'missing').length
 
     const totalMeals = futureDays.reduce((n, d) => n + d.recipes.length, 0)
     const scheduledMeals = futureDays
@@ -226,15 +227,13 @@ export function PlanPage() {
                 {totalMeals > 0 && pantry && (
                     <button
                         type="button"
-                        className="btn-outline plan-shop-btn"
+                        className="btn-pill plan-shop-btn"
                         onClick={() => setShopOpen(true)}
                     >
-                        <ShoppingCartIcon size={20} />
+                        <ShoppingCartIcon size={18} />
                         shop for the plan
-                        {shopping.rows.some((r) => r.status === 'missing') && (
-                            <span className="plan-shop-count">
-                                {shopping.rows.filter((r) => r.status === 'missing').length}
-                            </span>
+                        {missingCount > 0 && (
+                            <span className="plan-shop-count">· {missingCount}</span>
                         )}
                     </button>
                 )}

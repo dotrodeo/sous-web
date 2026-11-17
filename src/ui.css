@@ -834,7 +834,9 @@
 }
 
 /* ── Instructions / steps ── */
-.btn-cook-mobile {
+/* Compact accent pill for secondary actions. */
+.btn-cook-mobile,
+.btn-pill {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -3513,18 +3515,35 @@ textarea.field {
 
 /* ── Plan: "shop for the plan" button and review sheet ── */
 .plan-shop-btn {
-    width: 100%;
-    max-width: 560px;
-    justify-content: center;
-    margin: 4px 0 18px;
+    margin: 14px 0 18px;
 }
 .plan-shop-count {
-    min-width: 24px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: var(--accent-fill);
-    color: #fff;
-    font-size: 14px;
+    font-weight: 700;
+}
+/* Tall sheet: capped to the screen, with only the list scrolling. */
+.sheet-card.plan-shop {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+    padding-bottom: 0;
+}
+.plan-shop-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0 -22px;
+    padding: 0 22px calc(30px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 900px) {
+    .sheet-card.plan-shop {
+        max-height: calc(100dvh - 48px);
+    }
+    .plan-shop-list {
+        margin: 0 -28px;
+        padding: 0 28px 28px;
+    }
 }
 .plan-shop-empty {
     color: var(--ink-60);

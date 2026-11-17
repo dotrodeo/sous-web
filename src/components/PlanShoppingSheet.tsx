@@ -61,7 +61,7 @@ export function PlanShoppingSheet({
     }
 
     return (
-        <BottomSheet onClose={onClose}>
+        <BottomSheet onClose={onClose} className="plan-shop">
             <div className="sheet-head">
                 <span className="sheet-title">shop for the plan</span>
                 <SaveButton
@@ -76,44 +76,51 @@ export function PlanShoppingSheet({
                 upcoming plan
             </div>
 
-            {!actionable && (
-                <div className="plan-shop-empty">
-                    everything the plan needs is in stock
-                    {shown.length ? ' or already on the list' : ''}.
-                </div>
-            )}
+            {/* The list scrolls; the title and add button stay in view. */}
+            <div className="plan-shop-list">
+                {!actionable && (
+                    <div className="plan-shop-empty">
+                        everything the plan needs is in stock
+                        {shown.length ? ' or already on the list' : ''}.
+                    </div>
+                )}
 
-            {sections.map(({ status, rows: sectionRows }) => (
-                <div className="plan-shop-section" key={status}>
-                    <div className="plan-shop-label">{SECTION[status]}</div>
-                    {sectionRows.map((row) => {
-                        const listed = row.status === 'listed'
-                        const on = listed || checked.has(row.key)
-                        return (
-                            <button
-                                key={row.key}
-                                type="button"
-                                role="checkbox"
-                                aria-checked={on}
-                                aria-disabled={listed}
-                                className={`plan-shop-row${listed ? ' listed' : ''}`}
-                                onClick={() => !listed && toggle(row.key)}
-                            >
-                                <span className={`check-circle${on ? ' checked' : ''}`}>
-                                    <span className="ring">{on && <CheckIcon size={15} />}</span>
-                                </span>
-                                <span className="plan-shop-text">
-                                    <span className="plan-shop-name">{row.name}</span>
-                                    <span className="plan-shop-recipes">
-                                        {row.recipes.join(' · ')}
+                {sections.map(({ status, rows: sectionRows }) => (
+                    <div className="plan-shop-section" key={status}>
+                        <div className="plan-shop-label">{SECTION[status]}</div>
+                        {sectionRows.map((row) => {
+                            const listed = row.status === 'listed'
+                            const on = listed || checked.has(row.key)
+                            return (
+                                <button
+                                    key={row.key}
+                                    type="button"
+                                    role="checkbox"
+                                    aria-checked={on}
+                                    aria-disabled={listed}
+                                    className={`plan-shop-row${listed ? ' listed' : ''}`}
+                                    onClick={() => !listed && toggle(row.key)}
+                                >
+                                    <span className={`check-circle${on ? ' checked' : ''}`}>
+                                        <span className="ring">
+                                            {on && <CheckIcon size={15} />}
+                                        </span>
                                     </span>
-                                </span>
-                                {row.itemId == null && <span className="plan-shop-new">new</span>}
-                            </button>
-                        )
-                    })}
-                </div>
-            ))}
+                                    <span className="plan-shop-text">
+                                        <span className="plan-shop-name">{row.name}</span>
+                                        <span className="plan-shop-recipes">
+                                            {row.recipes.join(' · ')}
+                                        </span>
+                                    </span>
+                                    {row.itemId == null && (
+                                        <span className="plan-shop-new">new</span>
+                                    )}
+                                </button>
+                            )
+                        })}
+                    </div>
+                ))}
+            </div>
         </BottomSheet>
     )
 }
