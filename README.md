@@ -14,8 +14,8 @@ behind it.
 
 - Import a recipe from a URL, or write one by hand. Imported ingredient lines are
   split into amount, unit and item.
-- Reorder ingredients in the editor by dragging their handles, or from the
-  keyboard.
+- Reorder ingredients and steps in the editor by dragging their handles, or from
+  the keyboard.
 - Search by name or ingredient (every word must match, so "chickpeas spinach" finds
   recipes with both; ingredient matches count too), filter by tag, and sort: ready to cook (everything in stock first, then
   partly stocked, A→Z within each), A→Z, most made, or recently made.

@@ -1685,6 +1685,10 @@ textarea.field {
     display: flex;
     border-radius: 9px;
 }
+/* Steps (tall text boxes): the handle sits at the top. */
+.edit-row.top .btn-grip {
+    margin-top: 12px;
+}
 .btn-grip:hover {
     color: var(--ink-60);
 }
