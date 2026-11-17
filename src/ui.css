@@ -624,6 +624,20 @@
     transform: translateY(-2px);
     box-shadow: 0 14px 26px -14px rgba(0, 0, 0, 0.35);
 }
+.recipe-card .name-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.recipe-card .search-hint {
+    font-size: 13px;
+    color: var(--ink-40);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .recipe-card .name {
     font-size: 16px;
     font-weight: 500;

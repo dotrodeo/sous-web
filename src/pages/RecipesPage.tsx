@@ -6,6 +6,7 @@ import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
 import { countAvailable } from '../lib/recipeHelper'
+import { searchRecipe, searchWords } from '../lib/recipeSearch'
 import {
     DEFAULT_RECIPE_SORT,
     RECIPE_SORTS,
@@ -87,16 +88,20 @@ export function RecipesPage() {
         return [...set].sort((a, b) => a.localeCompare(b))
     }, [rows])
 
-    const visible = useMemo(() => {
-        const q = query.trim().toLowerCase()
+    // Search covers names and ingredients (#40); `via` says which ingredients matched.
+    const { visible, via } = useMemo(() => {
+        const words = searchWords(query)
+        const via = new Map<number, string[]>()
         const matching = rows.filter((r) => {
-            if (q && !r.recipe.name.toLowerCase().includes(q)) return false
             if (activeFilters.length && !activeFilters.every((t) => r.tags.includes(t)))
                 return false
+            const hit = searchRecipe(r.recipe, words, links)
+            if (!hit) return false
+            if (hit.via.length) via.set(r.recipe.id, hit.via)
             return true
         })
-        return sortRecipes(matching, sort)
-    }, [rows, query, activeFilters, sort])
+        return { visible: sortRecipes(matching, sort), via }
+    }, [rows, query, activeFilters, sort, links])
 
     const toggleFilter = (tag: string) =>
         setActiveFilters((prev) =>
@@ -113,7 +118,7 @@ export function RecipesPage() {
                 <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="search recipes"
+                    placeholder="search recipes or ingredients"
                     aria-label="search recipes"
                 />
             </div>
@@ -182,7 +187,14 @@ export function RecipesPage() {
                             onClick={() => navigate(`/recipes/${r.recipe.id}`)}
                         >
                             <span className="status-dot" style={{ background: r.dotColor }} />
-                            <span className="name">{r.recipe.name}</span>
+                            <span className="name-col">
+                                <span className="name">{r.recipe.name}</span>
+                                {via.has(r.recipe.id) && (
+                                    <span className="search-hint">
+                                        has {via.get(r.recipe.id)!.join(', ')}
+                                    </span>
+                                )}
+                            </span>
                             {sort === 'popular' && (
                                 <span className="meta">
                                     {r.timesMade ? `made ${r.timesMade}×` : 'never made'}
