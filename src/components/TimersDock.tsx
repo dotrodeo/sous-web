@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { XIcon } from './Icons'
+import { PauseIcon, XIcon } from './Icons'
 import { useNow, useTimers } from '../hooks/useTimers'
 import { useAlertsState } from '../hooks/useTimerAlerts'
 import {
@@ -88,10 +88,9 @@ export function TimersDock() {
                                 aria-label={`${t.label} timer, ${paused ? `paused at ${time}` : time}: ${open ? 'hide' : 'show'} controls`}
                                 onClick={() => setOpenId(open ? null : t.id)}
                             >
+                                {paused && <PauseIcon size={14} className="timer-paused-icon" />}
                                 <span className="timer-time">{time}</span>
-                                <span className="timer-label">
-                                    {paused ? `paused · ${t.label}` : t.label}
-                                </span>
+                                <span className="timer-label">{t.label}</span>
                             </button>
                             <button
                                 type="button"

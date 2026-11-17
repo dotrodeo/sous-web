@@ -1147,8 +1147,13 @@
     background: rgba(255, 255, 255, 0.22);
     color: #fff;
 }
-.timer-chip.paused .timer-time {
+.timer-chip.paused .timer-time,
+.timer-paused-icon {
     color: var(--ink-40);
+}
+.timer-paused-icon {
+    flex: none;
+    margin-right: -3px;
 }
 .timer-time {
     font-weight: 700;

@@ -133,6 +133,13 @@ export const TrashIcon = (p: IconProps) => (
         <path d="M10 11v6M14 11v6" />
     </Svg>
 )
+export const PauseIcon = (p: IconProps) => (
+    <Svg {...p}>
+        {/* Solid, so it reads as "paused" at chip size. */}
+        <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+        <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor" stroke="none" />
+    </Svg>
+)
 export const XIcon = (p: IconProps) => (
     <Svg {...p}>
         <path d="M6 6l12 12M18 6L6 18" />
