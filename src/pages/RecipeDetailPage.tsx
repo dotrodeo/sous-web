@@ -8,6 +8,7 @@ import {
     EditIcon,
     ListIcon,
     MoreIcon,
+    NoteIcon,
     PlusIcon,
     ThumbDownIcon,
     ThumbUpIcon,
@@ -23,6 +24,7 @@ import {
     type PantryMatchedIngredient,
 } from '../lib/recipeHelper'
 import { IngredientMatchSheet } from '../components/IngredientMatchSheet'
+import { datedNote } from '../lib/notes'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
 import {
     highlight,
@@ -92,6 +94,10 @@ export function RecipeDetailPage() {
     const [pendingDelete, setPendingDelete] = useState(false)
     const [madeOpen, setMadeOpen] = useState(false)
     const [verdict, setVerdict] = useState<'up' | 'down' | null>(null)
+    /** "I made this": an optional line for the recipe's notes. */
+    const [madeNote, setMadeNote] = useState('')
+    /** Cook mode: the recipe's notes are shown over the step. */
+    const [cookNotesOpen, setCookNotesOpen] = useState(false)
     /** "I made this": pantry items now running low or used up, by pantry item id. */
     const [usage, setUsage] = useState<Record<number, 'low' | 'out'>>({})
     const toggleUsage = (pid: number, value: 'low' | 'out') =>
@@ -203,6 +209,7 @@ export function RecipeDetailPage() {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 if (shownPopover) setPopover(null)
+                else if (cookOpen && cookNotesOpen) setCookNotesOpen(false)
                 else if (pendingDelete) setPendingDelete(false)
                 else if (madeOpen) setMadeOpen(false)
                 else if (cookOpen) setCookOpen(false)
@@ -213,7 +220,7 @@ export function RecipeDetailPage() {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [shownPopover, pendingDelete, madeOpen, cookOpen, menuOpen, step])
+    }, [shownPopover, pendingDelete, madeOpen, cookOpen, cookNotesOpen, menuOpen, step])
 
     if (!recipe) {
         return (
@@ -265,18 +272,24 @@ export function RecipeDetailPage() {
             ...(rating !== undefined ? { rating } : {}),
             finishedPantryItems: finished,
             ...(low.length ? { lowPantryItems: low } : {}),
+            ...(madeNote.trim() ? { note: datedNote(madeNote) } : {}),
         }
         completeRecipe.mutate({ recipeId: recipe.id, completion })
         const emoji = verdict === 'up' ? '👍 · ' : verdict === 'down' ? '👎 · ' : ''
         setToast(
             `cooked! ${emoji}${
-                [finished.length && `${finished.length} used up`, low.length && `${low.length} low`]
+                [
+                    finished.length && `${finished.length} used up`,
+                    low.length && `${low.length} low`,
+                    madeNote.trim() && 'note added',
+                ]
                     .filter(Boolean)
                     .join(', ') || 'logged'
             }`,
         )
         setMadeOpen(false)
         setUsage({})
+        setMadeNote('')
         window.setTimeout(() => setToast(null), 3200)
     }
 
@@ -495,6 +508,14 @@ export function RecipeDetailPage() {
                                 )
                             })}
                         </div>
+                        {recipe.notes && (
+                            <section className="notes-block" aria-labelledby="notes-head">
+                                <div className="col-head">
+                                    <h2 id="notes-head">notes</h2>
+                                </div>
+                                <p className="notes-card">{recipe.notes}</p>
+                            </section>
+                        )}
                     </div>
 
                     <div>
@@ -551,14 +572,43 @@ export function RecipeDetailPage() {
                         if (shownPopover && !target.closest('.kw, .kw-popover')) setPopover(null)
                     }}
                 >
-                    <button
-                        type="button"
-                        className="cook-close"
-                        aria-label="close"
-                        onClick={() => setCookOpen(false)}
-                    >
-                        <XIcon size={22} />
-                    </button>
+                    <div className="cook-top">
+                        {recipe.notes ? (
+                            <button
+                                type="button"
+                                className={`cook-notes-btn${cookNotesOpen ? ' on' : ''}`}
+                                aria-expanded={cookNotesOpen}
+                                aria-controls="cook-notes"
+                                onClick={() => setCookNotesOpen((o) => !o)}
+                            >
+                                <NoteIcon size={18} />
+                                notes
+                            </button>
+                        ) : (
+                            <span />
+                        )}
+                        <button
+                            type="button"
+                            className="cook-close"
+                            aria-label="close"
+                            onClick={() => {
+                                setCookOpen(false)
+                                setCookNotesOpen(false)
+                            }}
+                        >
+                            <XIcon size={22} />
+                        </button>
+                    </div>
+                    {cookNotesOpen && recipe.notes && (
+                        <div
+                            id="cook-notes"
+                            className="cook-notes"
+                            role="region"
+                            aria-label="notes"
+                        >
+                            {recipe.notes}
+                        </div>
+                    )}
                     <div className="cook-body">
                         <div className="cook-num">{stepIndex + 1}</div>
                         <p className="cook-text">
@@ -725,6 +775,24 @@ export function RecipeDetailPage() {
                                     <ThumbDownIcon size={24} />
                                 </button>
                                 <span className="rating-label">{ratingLabel}</span>
+                            </div>
+                        </div>
+
+                        <div className="made-section">
+                            <label className="section-label" htmlFor="made-note">
+                                anything to remember?
+                            </label>
+                            <textarea
+                                id="made-note"
+                                className="field made-note"
+                                rows={2}
+                                maxLength={900}
+                                value={madeNote}
+                                onChange={(e) => setMadeNote(e.target.value)}
+                                placeholder="needed 5 more minutes…"
+                            />
+                            <div className="finished-sub">
+                                added to the recipe’s notes, with today’s date.
                             </div>
                         </div>
 

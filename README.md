@@ -16,8 +16,8 @@ behind it.
   split into amount, unit and item.
 - Reorder ingredients and steps in the editor by dragging their handles, or from
   the keyboard.
-- Search by name or ingredient (every word must match, so "chickpeas spinach" finds
-  recipes with both; ingredient matches count too), filter by tag, and sort: ready to cook (everything in stock first, then
+- Search by name, ingredient or notes (every word must match, so "chickpeas spinach"
+  finds recipes with both; the results say which ingredients or notes matched), filter by tag, and sort: ready to cook (everything in stock first, then
   partly stocked, A→Z within each), A→Z, most made, or recently made.
 - Tag recipes by picking from your household's tags or creating a new one; tags
   match regardless of capitalization, so there are no near-duplicates.
@@ -28,8 +28,10 @@ behind it.
   are your "green onions") or mark it as something you always have (water). The fix
   applies to every recipe with that ingredient; review them in Settings → ingredient
   matches.
+- Notes: free text kept with each recipe ("use half the chili"), written in the
+  editor and shown on the recipe page.
 - Cook mode (from the recipe page or its ⋯ menu) shows one step at a time in large
-  type. Ingredients in the step are underlined; tap one to see its full line and
+  type, with the recipe's notes a tap away. Ingredients in the step are underlined; tap one to see its full line and
   amount at the chosen scale.
 - Times in a step ("simmer 10 minutes", "bake 25-30 min") start a timer when
   tapped; a range uses the shorter time. Several timers can run at once, they keep
@@ -45,7 +47,8 @@ behind it.
 - Scale a recipe from ¼ to 3×. Ingredient amounts and servings update, shown as
   fractions.
 - "I made this" records a rating, marks the ingredients you used up as out of stock
-  or running low, and removes the recipe from the meal plan.
+  or running low, can add a dated line to the recipe's notes ("Nov 17: needed 5 more
+  minutes"), and removes the recipe from the meal plan. Notes need soupi 2.6.0 or later.
 
 **Meal plan**
 
