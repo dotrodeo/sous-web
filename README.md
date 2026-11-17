@@ -16,7 +16,8 @@ behind it.
   split into amount, unit and item.
 - Reorder ingredients in the editor by dragging their handles, or from the
   keyboard.
-- Search, filter by tag, and sort: ready to cook (everything in stock first, then
+- Search by name or ingredient (every word must match, so "chickpeas spinach" finds
+  recipes with both; ingredient matches count too), filter by tag, and sort: ready to cook (everything in stock first, then
   partly stocked, A→Z within each), A→Z, most made, or recently made.
 - Tag recipes by picking from your household's tags or creating a new one; tags
   match regardless of capitalization, so there are no near-duplicates.
