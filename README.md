@@ -45,6 +45,9 @@ behind it.
 
 - Add days and put recipes on them. Each recipe shows how much of it the pantry
   covers.
+- "Shop for the plan" gathers what the upcoming recipes need and the pantry
+  doesn't have, merged across recipes. Missing items start checked and running-low
+  ones unchecked; add them all to the shopping list in one tap.
 
 **Pantry**
 
