@@ -12,6 +12,12 @@ import { ApiError, type ApiClient } from './api'
 import { pantryService } from './services'
 import type { Pantry, PantryItem, PantryItemPatch } from './types'
 
+// TanStack assumes online until an 'offline' event, which never fires for a page
+// that starts without signal; start from what the browser knows.
+if (typeof navigator !== 'undefined' && 'onLine' in navigator) {
+    onlineManager.setOnline(navigator.onLine)
+}
+
 const STORAGE_KEY = 'sous-cache'
 /** Bump only when the cached data's shape changes; it discards queued changes too. */
 const CACHE_VERSION = '1'
