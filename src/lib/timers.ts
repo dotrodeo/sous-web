@@ -21,7 +21,22 @@ export interface Timer {
     recipeId?: number
     endsAt: number
     done: boolean
+    /** Set while paused: the time that was left. `endsAt` is stale until resumed. */
+    pausedRemainingMs?: number | null
 }
+
+/** Paused timers don't count down, ring or alert. */
+export function isPaused(t: Timer): boolean {
+    return t.pausedRemainingMs != null
+}
+
+/** Time left now: the frozen remainder while paused. */
+export function remainingMs(t: Timer, now = Date.now()): number {
+    return isPaused(t) ? t.pausedRemainingMs! : t.endsAt - now
+}
+
+/** Running: not finished and not paused. */
+const running = (t: Timer) => !t.done && !isPaused(t)
 
 const STORAGE_KEY = 'sous-timers'
 /** Timers that ended longer ago than this aren't restored on load. */
@@ -39,7 +54,10 @@ function loadTimers(): Timer[] {
     try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]') as Timer[]
         const cutoff = Date.now() - FORGET_AFTER_MS
-        return Array.isArray(saved) ? saved.filter((t) => t && t.endsAt > cutoff) : []
+        // Paused timers stay however long ago their stale end time was.
+        return Array.isArray(saved)
+            ? saved.filter((t) => t && (isPaused(t) || t.endsAt > cutoff))
+            : []
     } catch {
         return []
     }
@@ -137,7 +155,7 @@ function cancelAlert(id: string) {
 
 /** Registers every running timer; call when alerts turn on or the app starts. */
 export function registerRunningAlerts() {
-    timers.filter((t) => !t.done && t.endsAt > Date.now()).forEach(registerAlert)
+    timers.filter((t) => running(t) && t.endsAt > Date.now()).forEach(registerAlert)
 }
 
 // --- in-page notifications (when push alerts are off) ---------------------
@@ -171,7 +189,7 @@ function check() {
     const visible = document.visibilityState === 'visible'
     let changed = false
     timers = timers.map((t) => {
-        if (t.done || t.endsAt > now) return t
+        if (!running(t) || t.endsAt > now) return t
         changed = true
         const finished = { ...t, done: true }
         if (pushOn && now - t.endsAt > LATE_RING_MS) return finished // the push alerted
@@ -186,7 +204,7 @@ function check() {
         }
         return finished
     })
-    if (!timers.some((t) => !t.done) && tick !== undefined) {
+    if (!timers.some(running) && tick !== undefined) {
         window.clearInterval(tick)
         tick = undefined
     }
@@ -194,13 +212,13 @@ function check() {
 }
 
 function startTicking() {
-    if (tick === undefined && timers.some((t) => !t.done)) tick = window.setInterval(check, 500)
+    if (tick === undefined && timers.some(running)) tick = window.setInterval(check, 500)
 }
 
 /** Timers restored after a reload had no tap to unlock sound; the next tap
  *  anywhere does it, so they can still ring. */
 function unlockAlarmOnNextTap() {
-    if (alarmUnlocked || !timers.some((t) => !t.done)) return
+    if (alarmUnlocked || !timers.some(running)) return
     document.addEventListener('pointerdown', unlockAlarm, { capture: true, once: true })
 }
 
@@ -256,9 +274,59 @@ export function startTimer({
 /** Removes a timer: cancels it if running, or dismisses it (and its alarm) if done. */
 export function stopTimer(id: string) {
     const timer = timers.find((t) => t.id === id)
-    if (timer && !timer.done) cancelAlert(id)
+    if (timer && running(timer)) cancelAlert(id)
     timers = timers.filter((t) => t.id !== id)
     if (!timers.some((t) => t.done)) silenceAlarm()
+    emit()
+}
+
+function update(id: string, change: (t: Timer) => Timer) {
+    timers = timers.map((t) => (t.id === id ? change(t) : t))
+}
+
+/**
+ * Adds a minute. A finished timer runs again for one more minute (and its alarm
+ * stops); a paused one keeps the extra minute for when it resumes.
+ */
+export function addMinute(id: string) {
+    const timer = timers.find((t) => t.id === id)
+    if (!timer) return
+    unlockAlarm()
+    if (isPaused(timer)) {
+        update(id, (t) => ({ ...t, pausedRemainingMs: t.pausedRemainingMs! + 60_000 }))
+    } else if (timer.done) {
+        update(id, (t) => ({ ...t, done: false, endsAt: Date.now() + 60_000 }))
+        if (!timers.some((t) => t.done)) silenceAlarm()
+    } else {
+        update(id, (t) => ({ ...t, endsAt: t.endsAt + 60_000 }))
+    }
+    const changed = timers.find((t) => t.id === id)!
+    if (running(changed)) registerAlert(changed)
+    startTicking()
+    emit()
+}
+
+/** Freezes a running timer and cancels its push alert. */
+export function pauseTimer(id: string) {
+    const timer = timers.find((t) => t.id === id)
+    if (!timer || !running(timer)) return
+    update(id, (t) => ({ ...t, pausedRemainingMs: Math.max(0, t.endsAt - Date.now()) }))
+    cancelAlert(id)
+    emit()
+}
+
+/** Carries on from the time that was left, and alerts again. */
+export function resumeTimer(id: string) {
+    const timer = timers.find((t) => t.id === id)
+    if (!timer || !isPaused(timer)) return
+    unlockAlarm()
+    update(id, (t) => ({
+        ...t,
+        endsAt: Date.now() + t.pausedRemainingMs!,
+        pausedRemainingMs: null,
+    }))
+    registerAlert(timers.find((t) => t.id === id)!)
+    startTicking()
     emit()
 }
 
