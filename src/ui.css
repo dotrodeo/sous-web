@@ -3655,6 +3655,10 @@ textarea.field {
     font-size: 30px;
     font-weight: 700;
 }
+.offline-start-retry {
+    align-self: flex-start;
+    margin-top: 10px;
+}
 .offline-start-hint {
     color: var(--ink-60);
     font-size: 15px;

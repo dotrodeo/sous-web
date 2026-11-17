@@ -9,6 +9,7 @@ import { CACHE_MAX_AGE_MS, persistOptions } from './lib/offline'
 import { applyTheme, cachedTheme, followSystemTheme } from './lib/theme'
 import './index.css'
 import App from './App.tsx'
+import { StartupErrorBoundary } from './components/StartupErrorBoundary'
 
 applyTheme(cachedTheme())
 followSystemTheme()
@@ -50,13 +51,15 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-            {/* Saves the household's data (and queued list changes) to the device. */}
-            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-                <BrowserRouter>
-                    <App />
-                </BrowserRouter>
-            </PersistQueryClientProvider>
-        </ClerkProvider>
+        <StartupErrorBoundary>
+            <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+                {/* Saves the household's data (and queued list changes) to the device. */}
+                <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+                    <BrowserRouter>
+                        <App />
+                    </BrowserRouter>
+                </PersistQueryClientProvider>
+            </ClerkProvider>
+        </StartupErrorBoundary>
     </StrictMode>,
 )
