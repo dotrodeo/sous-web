@@ -105,9 +105,9 @@
 .blob {
     color: var(--on-brand);
     background: var(--brand);
-    /* Extend the yellow up into the status-bar / notch safe area so the region
-       above the header isn't the gray canvas (viewport-fit=cover + PWA). */
-    padding: calc(16px + env(safe-area-inset-top)) 20px 0;
+    /* The yellow runs up under the status bar (viewport-fit=cover + PWA), and the
+       buttons start right below it, or 12px from the top without one. */
+    padding: max(12px, env(safe-area-inset-top, 0px)) 20px 0;
     border-radius: 0 0 50% 50% / 0 0 44px 44px;
     /* Holds the negative margin below, so the yellow ends inside the buttons. */
     display: flow-root;
