@@ -62,7 +62,7 @@ export function SettingsPage() {
                 </div>
             </div>
 
-            <div className="content">
+            <div className="content narrow">
                 <div className="settings-head">
                     <h1>settings</h1>
                     <div className="summary">household settings</div>
