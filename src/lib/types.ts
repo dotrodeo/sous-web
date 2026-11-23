@@ -37,6 +37,8 @@ export interface Ingredient {
     amount: PrismaDecimal | null
     unit: string | null
     preparation: string | null
+    /** Doesn't count as missing when it's not in stock (#60). Absent from soupi < 2.7.0. */
+    optional?: boolean
     createdAt: string
     updatedAt: string
     deletedAt: string | null
@@ -185,7 +187,8 @@ export interface RecipePatch {
     prepTime?: string
     cookTime?: string
     servings?: string
-    ingredients?: string[]
+    /** Plain lines, or with the optional flag (soupi 2.7.0+). */
+    ingredients?: (string | { sentence: string; optional: boolean })[]
     instructions?: string[]
     notes?: string | null
     tags?: RecipeTagPatch[]

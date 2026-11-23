@@ -5,7 +5,7 @@ import { ChevronDownIcon, SearchIcon } from '../components/Icons'
 import { useRecipes } from '../hooks/useRecipes'
 import { usePantry } from '../hooks/usePantry'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
-import { countAvailable } from '../lib/recipeHelper'
+import { recipeAvailability } from '../lib/recipeHelper'
 import { searchRecipe, searchWords } from '../lib/recipeSearch'
 import {
     DEFAULT_RECIPE_SORT,
@@ -66,8 +66,7 @@ export function RecipesPage() {
 
     const rows = useMemo<RecipeRow[]>(() => {
         return (recipes ?? []).map((recipe) => {
-            const need = recipe.ingredients?.length ?? 0
-            const have = countAvailable(recipe, pantryItems, links)
+            const { have, need } = recipeAvailability(recipe, pantryItems, links)
             const tags = (recipe.tags ?? []).map((t) => t.name)
             return {
                 recipe,

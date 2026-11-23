@@ -21,7 +21,7 @@ import { usePantry } from '../hooks/usePantry'
 import { SaveButton } from '../components/SaveButton'
 import { buildPlanShopping } from '../lib/planShopping'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
-import { countAvailable } from '../lib/recipeHelper'
+import { recipeAvailability } from '../lib/recipeHelper'
 import type { PantryItem, PlanDay, Recipe } from '../lib/types'
 
 // ── Date helpers (plan dates are full ISO8601; we group/label by day key) ──
@@ -123,8 +123,7 @@ export function PlanPage() {
 
     const dotColor = (recipe: Recipe) => {
         const full = recipeById.get(recipe.id) ?? recipe
-        const need = full.ingredients?.length ?? 0
-        const have = countAvailable(full, pantryItems, links)
+        const { have, need } = recipeAvailability(full, pantryItems, links)
         return statusColor(have, need)
     }
 

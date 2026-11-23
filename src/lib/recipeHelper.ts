@@ -62,25 +62,34 @@ export function matchIngredientsToPantry(
     })
 }
 
-/** How many of the recipe's ingredients are covered: in stock, or untracked. */
-export function countAvailable(
+/** Whether an ingredient line says it's optional ("parsley, optional"); soupi's rule. */
+export function mentionsOptional(sentence: string): boolean {
+    return /\boptional\b/i.test(sentence)
+}
+
+/** How many of the recipe's required ingredients there are (need) and how many are
+ *  covered: in stock, or untracked (have). Optional ingredients count for neither,
+ *  so one that's out of stock never makes a recipe look short (#60). */
+export function recipeAvailability(
     recipe: Recipe,
     pantryItems: PantryItem[] | null | undefined,
     links: IngredientLink[] = [],
-): number {
-    if (!recipe.ingredients?.length) return 0
-    return matchIngredientsToPantry(recipe, pantryItems ?? [], links).filter(
-        (m) => m.untracked || m.pantryItem?.isInStock,
-    ).length
+): { have: number; need: number } {
+    const required = matchIngredientsToPantry(recipe, pantryItems ?? [], links).filter(
+        (m) => !m.ingredient.optional,
+    )
+    return {
+        have: required.filter((m) => m.untracked || m.pantryItem?.isInStock).length,
+        need: required.length,
+    }
 }
 
-/** Fraction of the recipe's ingredients available in the pantry (0…1). */
+/** Fraction of the recipe's required ingredients available in the pantry (0…1). */
 export function recipeRatio(
     recipe: Recipe,
     pantryItems: PantryItem[],
     links: IngredientLink[] = [],
 ): number {
-    const ingredients = recipe.ingredients
-    if (!ingredients || ingredients.length === 0) return 0
-    return countAvailable(recipe, pantryItems, links) / ingredients.length
+    const { have, need } = recipeAvailability(recipe, pantryItems, links)
+    return need === 0 ? 0 : have / need
 }
