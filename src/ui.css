@@ -105,16 +105,24 @@
 .blob {
     color: var(--on-brand);
     background: var(--brand);
-    /* Extend the yellow up into the status-bar / notch safe area so the region
-       above the header isn't the gray canvas (viewport-fit=cover + PWA). */
-    padding: calc(16px + env(safe-area-inset-top)) 20px 30px;
+    /* The yellow runs up under the status bar (viewport-fit=cover + PWA), and the
+       buttons start right below it, or 12px from the top without one. */
+    padding: max(12px, env(safe-area-inset-top, 0px)) 20px 0;
     border-radius: 0 0 50% 50% / 0 0 44px 44px;
+    /* Holds the negative margin below, so the yellow ends inside the buttons. */
+    display: flow-root;
 }
 .blob-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
     min-height: 50px;
+    /* The curved edge crosses the corner buttons at their middle: the curve sits
+       about 16px above the blob's bottom where the buttons are, so they hang 9px
+       below it. Above the page content, which starts right after. */
+    margin-bottom: -9px;
+    position: relative;
+    z-index: 1;
 }
 
 .fab {
@@ -983,7 +991,13 @@
     color: #fff;
     display: flex;
     flex-direction: column;
-    padding: 28px 26px 26px;
+    /* Clear the iPhone status bar and home indicator (viewport-fit=cover). */
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 26px
+        calc(26px + env(safe-area-inset-bottom, 0px));
+}
+/* The status-bar strip (index.css) matches cook mode instead of staying yellow. */
+body:has(.cook-overlay)::before {
+    background: var(--accent-fill);
 }
 .cook-close {
     align-self: flex-end;
@@ -3919,7 +3933,7 @@ textarea.field.made-note {
 .cook-notes {
     position: absolute;
     z-index: 4;
-    top: 84px;
+    top: calc(84px + env(safe-area-inset-top, 0px));
     left: 26px;
     right: 26px;
     max-width: 760px;
