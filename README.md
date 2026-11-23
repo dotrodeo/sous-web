@@ -70,6 +70,8 @@ behind it.
 - Grouped by category. Add items directly or pick them from the pantry.
 - Shopping mode: check items off as you get them (which marks them in stock), then
   clear the checked ones.
+- Edit mode lists everything you've ever bought, with a search. If what you typed
+  isn't there yet, "add" opens the new-item sheet with the name filled in.
 
 **Household**
 
