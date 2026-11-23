@@ -4020,3 +4020,99 @@ textarea.field.made-note {
     border-color: transparent;
     color: var(--accent);
 }
+.ing-field {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+/* Hangs under the text box, so the row's handle and buttons stay centred on the box. */
+.opt-caption {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 17px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--accent);
+}
+.edit-row:has(.opt-caption) {
+    padding-bottom: 18px;
+}
+/* Phones: the toggle lives in a ⋯ menu; the caption shows the state. */
+.opt-toggle {
+    display: none;
+}
+.opt-menu-wrap {
+    position: relative;
+    flex: none;
+}
+.opt-menu-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-40);
+    cursor: pointer;
+}
+.opt-menu-btn[aria-expanded='true'] {
+    background: var(--chip);
+    color: var(--ink);
+}
+.opt-menu {
+    position: absolute;
+    z-index: 41;
+    top: calc(100% + 6px);
+    right: -8px;
+    width: 240px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 20px 50px -16px rgba(0, 0, 0, 0.4);
+}
+.opt-menu .menu-item {
+    border-radius: 11px;
+    text-align: left;
+}
+.opt-menu-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.opt-menu-text .hint {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-40);
+}
+.opt-check {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    color: #fff;
+}
+.opt-check.on {
+    background: var(--accent-fill);
+    border-color: transparent;
+}
+@media (min-width: 900px) {
+    .opt-toggle {
+        display: block;
+    }
+    .opt-menu-wrap,
+    .opt-caption {
+        display: none;
+    }
+    .edit-row:has(.opt-caption) {
+        padding-bottom: 0;
+    }
+}

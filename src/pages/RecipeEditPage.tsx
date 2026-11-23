@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { SaveButton } from '../components/SaveButton'
-import { AlertCircleIcon, LinkIcon, PlusIcon, TrashIcon, XIcon } from '../components/Icons'
+import {
+    AlertCircleIcon,
+    CheckIcon,
+    LinkIcon,
+    MoreIcon,
+    PlusIcon,
+    TrashIcon,
+    XIcon,
+} from '../components/Icons'
 import { SortableList, SortableRow } from '../components/Sortable'
 import { useImportRecipe, useRecipe, useRecipeTags, useUpsertRecipe } from '../hooks/useRecipes'
 import { hasTag, isNewTag, normalizeTag, resolveTag, suggestTags } from '../lib/tags'
@@ -134,6 +142,21 @@ function RecipeEditForm({
     )
     const [notes, setNotes] = useState(initial.notes)
     const [tags, setTags] = useState<string[]>(initial.tags)
+    /** Phones: the ingredient whose ⋯ menu (optional toggle) is open. */
+    const [optMenu, setOptMenu] = useState<string | null>(null)
+    useEffect(() => {
+        if (!optMenu) return
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOptMenu(null)
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [optMenu])
+    /** Sets an ingredient optional (or not) by hand; it no longer follows the text. */
+    const toggleOptional = (id: string) =>
+        setIngredients((prev) =>
+            prev.map((x) => (x.id === id ? { ...x, optional: !x.optional, optionalSet: true } : x)),
+        )
     const [addingTag, setAddingTag] = useState(false)
     const [newTag, setNewTag] = useState('')
     const tagInputRef = useRef<HTMLInputElement>(null)
@@ -338,51 +361,98 @@ function RecipeEditForm({
                                     label={describeIngredient(row)}
                                     disabled={ingredients.length < 2}
                                 >
-                                    <input
-                                        className="field"
-                                        value={row.text}
-                                        onChange={(e) =>
-                                            setIngredients((prev) =>
-                                                prev.map((x) =>
-                                                    x.id !== row.id
-                                                        ? x
-                                                        : {
-                                                              ...x,
-                                                              text: e.target.value,
-                                                              // Follows the text until set by hand.
-                                                              optional: x.optionalSet
-                                                                  ? x.optional
-                                                                  : mentionsOptional(
-                                                                        e.target.value,
-                                                                    ),
-                                                          },
-                                                ),
-                                            )
-                                        }
-                                        placeholder="1 cup flour"
-                                    />
+                                    <div className="ing-field">
+                                        <input
+                                            className="field"
+                                            value={row.text}
+                                            onChange={(e) =>
+                                                setIngredients((prev) =>
+                                                    prev.map((x) =>
+                                                        x.id !== row.id
+                                                            ? x
+                                                            : {
+                                                                  ...x,
+                                                                  text: e.target.value,
+                                                                  // Follows the text until set by hand.
+                                                                  optional: x.optionalSet
+                                                                      ? x.optional
+                                                                      : mentionsOptional(
+                                                                            e.target.value,
+                                                                        ),
+                                                              },
+                                                    ),
+                                                )
+                                            }
+                                            placeholder="1 cup flour"
+                                        />
+                                        {/* Phones show the state here; desktop has the pill. */}
+                                        {row.optional && (
+                                            <span className="opt-caption">optional</span>
+                                        )}
+                                    </div>
+                                    {/* Desktop: the toggle itself. */}
                                     <button
                                         type="button"
                                         className={`opt-toggle${row.optional ? ' on' : ''}`}
                                         aria-pressed={!!row.optional}
                                         aria-label={`optional: ${describeIngredient(row)}`}
                                         title="optional: doesn't count as missing"
-                                        onClick={() =>
-                                            setIngredients((prev) =>
-                                                prev.map((x) =>
-                                                    x.id === row.id
-                                                        ? {
-                                                              ...x,
-                                                              optional: !x.optional,
-                                                              optionalSet: true,
-                                                          }
-                                                        : x,
-                                                ),
-                                            )
-                                        }
+                                        onClick={() => toggleOptional(row.id)}
                                     >
                                         optional
                                     </button>
+                                    {/* Phones: behind a ⋯ menu, to leave room for the text. */}
+                                    <div className="opt-menu-wrap">
+                                        <button
+                                            type="button"
+                                            className="opt-menu-btn"
+                                            aria-label={`options: ${describeIngredient(row)}`}
+                                            aria-haspopup="menu"
+                                            aria-expanded={optMenu === row.id}
+                                            onClick={() =>
+                                                setOptMenu((open) =>
+                                                    open === row.id ? null : row.id,
+                                                )
+                                            }
+                                        >
+                                            <MoreIcon size={20} />
+                                        </button>
+                                        {optMenu === row.id && (
+                                            <>
+                                                <div
+                                                    className="menu-backdrop"
+                                                    onClick={() => setOptMenu(null)}
+                                                />
+                                                <div className="opt-menu" role="menu">
+                                                    <button
+                                                        type="button"
+                                                        role="menuitemcheckbox"
+                                                        aria-checked={!!row.optional}
+                                                        className="menu-item"
+                                                        autoFocus
+                                                        onClick={() => {
+                                                            toggleOptional(row.id)
+                                                            setOptMenu(null)
+                                                        }}
+                                                    >
+                                                        <span className="opt-menu-text">
+                                                            optional
+                                                            <span className="hint">
+                                                                doesn’t count as missing
+                                                            </span>
+                                                        </span>
+                                                        <span
+                                                            className={`opt-check${row.optional ? ' on' : ''}`}
+                                                        >
+                                                            {row.optional && (
+                                                                <CheckIcon size={16} />
+                                                            )}
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                     <button
                                         type="button"
                                         className="btn-remove"
