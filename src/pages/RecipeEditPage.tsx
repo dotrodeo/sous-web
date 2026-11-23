@@ -249,8 +249,19 @@ function RecipeEditForm({
                 if (data.cookTime) setCook(data.cookTime)
                 if (data.servings) setServings(data.servings)
                 if (data.ingredients?.length) {
-                    setIngredients(data.ingredients.map((t) => ingredientRow(nextId('ing'), t)))
+                    const optional = new Set(data.optionalIngredients ?? [])
+                    setIngredients(
+                        data.ingredients.map((t, i) =>
+                            // An "Optional:" section marks its lines; others go by their text.
+                            ingredientRow(nextId('ing'), t, optional.has(i) ? true : undefined),
+                        ),
+                    )
                 }
+                // Keep anything already typed in the notes.
+                if (data.notes)
+                    setNotes((prev) =>
+                        prev.trim() ? `${prev.trim()}\n${data.notes}` : data.notes!,
+                    )
                 if (data.instructions?.length) {
                     setInstructions(data.instructions.map((t) => ({ id: nextId('ins'), text: t })))
                 }

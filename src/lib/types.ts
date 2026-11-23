@@ -203,6 +203,11 @@ export interface RecipeImport {
     servings: string | null
     ingredients: string[] | null
     instructions: string[] | null
+    /** Links kept from the page (the video, the full recipe) when the steps aren't
+     *  written out. soupi 2.8.0+. */
+    notes?: string | null
+    /** Indexes into `ingredients` of optional ones (an "Optional:" section). soupi 2.8.0+. */
+    optionalIngredients?: number[]
 }
 
 /** RecipeModel.swift — RecipeCompletion (POST /recipes/{id}/made).
