@@ -98,6 +98,10 @@ in between. Adding or editing items needs a connection. Starting Sous needs one
 too, because sign-in does; with none, it says so and opens when the signal returns.
 Signing out removes the saved data from the device.
 
+**Known issue:** since iOS 27.2, the app added to the Home Screen shows a frosted,
+dark band over the status bar. That's an iOS bug
+([WebKit 301994](https://bugs.webkit.org/show_bug.cgi?id=301994)), tracked in #58.
+
 ## How it fits together
 
 ```
