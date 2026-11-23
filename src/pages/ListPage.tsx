@@ -1,6 +1,13 @@
 import { useMemo, useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { CheckIcon, EditIcon, MinusCircleIcon, PlusIcon, TrashIcon } from '../components/Icons'
+import {
+    CheckIcon,
+    EditIcon,
+    MinusCircleIcon,
+    PlusIcon,
+    SearchIcon,
+    TrashIcon,
+} from '../components/Icons'
 import { BottomSheet } from '../components/BottomSheet'
 import { SaveButton } from '../components/SaveButton'
 import { CategorySelect } from '../components/SheetControls'
@@ -41,6 +48,8 @@ export function ListPage() {
     const [mode, setMode] = useState<Mode>('shop')
     const [draft, setDraft] = useState<Draft | null>(null)
     const [pendingDelete, setPendingDelete] = useState<Draft | null>(null)
+    /** Edit mode: filters the catalog by name. */
+    const [query, setQuery] = useState('')
 
     const items = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
     const categories = useMemo<ItemCategory[]>(
@@ -60,13 +69,22 @@ export function ListPage() {
                       (a, b) =>
                           Number(a.isInStock) - Number(b.isInStock) || a.name.localeCompare(b.name),
                   )
-                : [...items].sort(
-                      (a, b) =>
-                          Number(b.isInShoppingList) - Number(a.isInShoppingList) ||
-                          a.name.localeCompare(b.name),
-                  )
+                : items
+                      .filter((it) => matchesSearch(it.name, query))
+                      .sort(
+                          (a, b) =>
+                              Number(b.isInShoppingList) - Number(a.isInShoppingList) ||
+                              a.name.localeCompare(b.name),
+                      )
         return groupByCategory(source)
-    }, [mode, items, onList])
+    }, [mode, items, onList, query])
+
+    // Offer to create what was typed unless an item already has exactly that name.
+    const typed = query.trim()
+    const canCreate =
+        mode === 'edit' &&
+        typed.length > 0 &&
+        !items.some((it) => it.name.trim().toLowerCase() === typed.toLowerCase())
 
     const summary =
         mode === 'shop'
@@ -91,8 +109,8 @@ export function ListPage() {
             .forEach((it) => patchItem(it, { isInShoppingList: false }))
     }
 
-    const openAdd = () =>
-        setDraft({ id: null, name: '', categoryId: categories[0]?.id ?? null, quantity: '' })
+    const openAdd = (name = '') =>
+        setDraft({ id: null, name, categoryId: categories[0]?.id ?? null, quantity: '' })
 
     const update = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d))
 
@@ -143,7 +161,12 @@ export function ListPage() {
         <>
             <div className="blob">
                 <div className="blob-actions">
-                    <button type="button" className="fab" aria-label="add item" onClick={openAdd}>
+                    <button
+                        type="button"
+                        className="fab"
+                        aria-label="add item"
+                        onClick={() => openAdd()}
+                    >
                         <PlusIcon size={24} />
                     </button>
                 </div>
@@ -155,7 +178,7 @@ export function ListPage() {
                         <h1 className="page-title">list</h1>
                         <div className="summary">{summary}</div>
                     </div>
-                    <button type="button" className="btn-primary" onClick={openAdd}>
+                    <button type="button" className="btn-primary" onClick={() => openAdd()}>
                         <PlusIcon size={20} />
                         add item
                     </button>
@@ -171,7 +194,10 @@ export function ListPage() {
                         <button
                             type="button"
                             className={`mode-tab${shop ? ' active' : ''}`}
-                            onClick={() => setMode('shop')}
+                            onClick={() => {
+                                setMode('shop')
+                                setQuery('')
+                            }}
                         >
                             shop
                         </button>
@@ -191,13 +217,42 @@ export function ListPage() {
                     )}
                 </div>
 
+                {!shop && (
+                    <div className="search-bar list-search">
+                        <SearchIcon size={22} />
+                        <input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Escape') setQuery('')
+                                if (e.key === 'Enter' && canCreate) openAdd(typed)
+                            }}
+                            placeholder="search items"
+                            aria-label="search items"
+                            enterKeyHint={canCreate ? 'done' : 'search'}
+                        />
+                    </div>
+                )}
+                {canCreate && (
+                    <button type="button" className="create-row" onClick={() => openAdd(typed)}>
+                        <PlusIcon size={18} />
+                        <span>
+                            add “<strong>{typed}</strong>”
+                        </span>
+                    </button>
+                )}
+
                 {shop && onList.length > 0 && (
                     <div className="progress-track">
                         <div className="progress-fill" style={{ width: `${progress}%` }} />
                     </div>
                 )}
 
-                {groups.length === 0 ? (
+                {groups.length === 0 && !shop && typed ? (
+                    <div className="empty-state compact">
+                        <div>No items match “{typed}”.</div>
+                    </div>
+                ) : groups.length === 0 ? (
                     <div className="empty-state">
                         <div className="emoji">{shop ? '🛒' : '📦'}</div>
                         <div className="title">{shop ? 'your list is empty' : 'no items yet'}</div>
@@ -312,7 +367,10 @@ export function ListPage() {
                         <SaveButton
                             ref={saveButtonRef}
                             onSave={saveSheet}
-                            onSaved={() => setDraft(null)}
+                            onSaved={() => {
+                                if (draft?.id == null) setQuery('')
+                                setDraft(null)
+                            }}
                             disabled={!draft.name.trim() || !online}
                         />
                     </div>
@@ -430,4 +488,11 @@ export function ListPage() {
             )}
         </>
     )
+}
+
+/** Every word typed appears in the name, ignoring case. */
+function matchesSearch(name: string, query: string): boolean {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+    const n = name.toLowerCase()
+    return words.every((w) => n.includes(w))
 }
