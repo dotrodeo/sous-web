@@ -141,6 +141,8 @@ function RecipeEditForm({
         initial.instructions.length ? initial.instructions : [{ id: 'ins0', text: '' }],
     )
     const [notes, setNotes] = useState(initial.notes)
+    /** A new recipe's imported page, saved as its source. */
+    const [source, setSource] = useState<string | null>(null)
     const [tags, setTags] = useState<string[]>(initial.tags)
     /** Phones: the ingredient whose ⋯ menu (optional toggle) is open. */
     const [optMenu, setOptMenu] = useState<string | null>(null)
@@ -225,6 +227,7 @@ function RecipeEditForm({
             instructions: instructions.map((i) => i.text.trim()).filter(Boolean),
             notes: notes.trim() || null,
             tags: tags.map((t) => ({ name: t })),
+            ...(source ? { source } : {}),
         }
         return upsertRecipe.mutateAsync(patch)
     }
@@ -265,6 +268,7 @@ function RecipeEditForm({
                 if (data.instructions?.length) {
                     setInstructions(data.instructions.map((t) => ({ id: nextId('ins'), text: t })))
                 }
+                setSource(data.source || url)
                 setImportOpen(false)
                 setImportUrl('')
             },

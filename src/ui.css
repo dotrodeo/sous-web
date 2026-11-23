@@ -4181,3 +4181,21 @@ textarea.field.made-note {
         padding-block: 16px;
     }
 }
+
+/* Recipe page: where the recipe was imported from */
+.recipe-source {
+    margin: 36px 0 8px;
+    font-size: 15px;
+    color: var(--ink-40);
+}
+.recipe-source a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+.recipe-source a:hover {
+    text-decoration: underline;
+}

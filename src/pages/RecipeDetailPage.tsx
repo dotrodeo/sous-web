@@ -6,6 +6,7 @@ import {
     ChevronRightIcon,
     CookIcon,
     EditIcon,
+    LinkIcon,
     ListIcon,
     MoreIcon,
     NoteIcon,
@@ -26,6 +27,7 @@ import {
 } from '../lib/recipeHelper'
 import { IngredientMatchSheet } from '../components/IngredientMatchSheet'
 import { datedNote } from '../lib/notes'
+import { sourceLink } from '../lib/recipeSource'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
 import {
     highlight,
@@ -298,6 +300,8 @@ export function RecipeDetailPage() {
     const ratingLabel =
         verdict === 'up' ? 'loved it' : verdict === 'down' ? 'not for me' : 'tap to react'
 
+    const source = sourceLink(recipe.source)
+
     const moreMenu = (
         <>
             <div className="menu-backdrop" onClick={() => setMenuOpen(false)} />
@@ -556,6 +560,16 @@ export function RecipeDetailPage() {
                         </div>
                     </div>
                 </div>
+
+                {source && (
+                    <p className="recipe-source">
+                        from{' '}
+                        <a href={source.href} target="_blank" rel="noopener noreferrer">
+                            {source.site}
+                            <LinkIcon size={14} />
+                        </a>
+                    </p>
+                )}
             </div>
 
             {menuOpen && moreMenu}

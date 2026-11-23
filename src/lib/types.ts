@@ -192,7 +192,8 @@ export interface RecipePatch {
     instructions?: string[]
     notes?: string | null
     tags?: RecipeTagPatch[]
-    source?: string
+    /** The page a recipe was imported from. */
+    source?: string | null
 }
 
 /** RecipeModel.swift — RecipeImport (response from /recipes/scrape). */
@@ -208,6 +209,8 @@ export interface RecipeImport {
     notes?: string | null
     /** Indexes into `ingredients` of optional ones (an "Optional:" section). soupi 2.8.0+. */
     optionalIngredients?: number[]
+    /** The page the recipe came from (after following a link, the linked page). */
+    source?: string | null
 }
 
 /** RecipeModel.swift — RecipeCompletion (POST /recipes/{id}/made).

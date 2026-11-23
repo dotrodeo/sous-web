@@ -16,6 +16,8 @@ behind it.
   split into amount, unit and item. Recipe sites and blog posts both work; an
   "Optional:" section imports as optional ingredients, and when a post keeps its
   steps in a video, the video and full-recipe links go into the notes (soupi 2.8.0+).
+  An imported recipe remembers the page it came from; a "from site.com" link at the
+  bottom of the recipe page opens it.
 - Reorder ingredients and steps in the editor by dragging their handles, or from
   the keyboard.
 - Search by name, ingredient or notes (every word must match, so "chickpeas spinach"
