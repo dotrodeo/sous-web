@@ -93,6 +93,25 @@ body::before {
     pointer-events: none;
 }
 
+/* iOS 27.2 frosts the status bar of Home Screen web apps with a shadow based on
+   the page background (WebKit bugs 301994 and 305546), which painted a dark smear
+   over the yellow header. In the installed app the page background behind
+   everything is brand yellow (blue in cook mode), and the body paints the canvas
+   over it. Bouncing past the end is off so the yellow never shows through. */
+@media (display-mode: standalone) {
+    html {
+        background: var(--brand);
+        overscroll-behavior: none;
+    }
+    html:has(.cook-overlay) {
+        background: var(--accent-fill);
+    }
+    body {
+        min-height: 100lvh;
+        overscroll-behavior: none;
+    }
+}
+
 #root {
     min-height: 100svh;
 }
