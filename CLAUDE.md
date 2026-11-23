@@ -47,6 +47,21 @@ framework. There are no tests; CI runs format, lint, build and a Docker build.
   normalized like soupi does), then by fuzzy name. A link with no pantry item means
   "always have" (`untracked`): counted as available, skipped by "shop for the
   plan". Pass the links (`useIngredientLinks`) wherever you match or count.
+- Optional ingredients (#60): `Ingredient.optional`. Count availability with
+  `recipeAvailability()` (have/need over required ingredients only), never
+  `ingredients.length`; `lib/planShopping.ts` skips optional and untracked ones. In
+  the editor a row's flag follows its text ("…, optional") until set by hand
+  (`optionalSet`); phones toggle it from a ⋯ menu, desktop from a pill.
+- Search (#40, #43): `lib/recipeSearch.ts`. Every word must appear in the name, an
+  ingredient (or the pantry item it's linked to) or the notes.
+- Recipe import: `GET /recipes/scrape` fills the editor (`RecipeImport`, including
+  `notes`, `optionalIngredients` and `source`). A new recipe saves `source`; edits
+  never send it, so it isn't cleared. `lib/recipeSource.ts` turns it into the
+  "from site.com" link, for http(s) addresses only.
+- Notes (#43): one free-text field per recipe, edited in the editor. "I made this"
+  sends a dated line (`lib/notes.ts`) that soupi appends.
+- `src/components/Sortable.tsx`: drag-and-drop reordering (dnd-kit) for the
+  editor's ingredient and step rows, with keyboard support.
 - Offline (#38): `src/lib/offline.ts` saves the TanStack Query cache to
   localStorage (`PersistQueryClientProvider` in `main.tsx`; household data and the
   user, 24 h) and defines the queued item patch (`PANTRY_PATCH`): optimistic,
@@ -73,7 +88,15 @@ PANTRY_PATCH })` for list check-offs. Sign-in (Clerk) needs the network, so a
   saving ring, double-submit blocking, the error ("retry") state and screen
   reader announcements. For Enter-to-save, click it through a ref.
 - `src/index.css`: design tokens (`--brand`, `--ink`, `--canvas`, …).
-  `src/ui.css`: layout and shared primitives. Mobile-first.
+  `src/ui.css`: layout and shared primitives. Mobile-first. On desktop (900px and
+  up) every page's `.content` is 900px wide, and the settings pages add
+  `.content.narrow` (a centred 600px column). Page headers share one block of
+  rules at the end of `ui.css` ("Desktop layout (#61)"): 44px titles, 48px header
+  buttons on the title line. Use those classes for a new page rather than its own
+  sizes.
+- iPhone safe areas: the yellow header (`.blob`) and the status-bar strip
+  (`body::before`, blue while cook mode is open) pad for `safe-area-inset-top`;
+  full-screen overlays must too.
 
 Conventions: Prettier with 4-space indent and no semicolons (2 spaces for
 JSON/YAML/Markdown), single quotes, 100-char lines. UI copy is lowercase.
