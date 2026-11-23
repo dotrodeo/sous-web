@@ -145,7 +145,7 @@ export function CategoriesPage() {
                 </div>
             </div>
 
-            <div className="content">
+            <div className="content narrow">
                 <div className="detail-header">
                     <div className="detail-header-left">
                         <button
