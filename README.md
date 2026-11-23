@@ -21,6 +21,9 @@ behind it.
   partly stocked, A→Z within each), A→Z, most made, or recently made.
 - Tag recipes by picking from your household's tags or creating a new one; tags
   match regardless of capitalization, so there are no near-duplicates.
+- Mark ingredients optional in the editor (lines that say "optional" start marked).
+  Optional ingredients don't count as missing, so they don't hold back "ready to
+  cook", and "shop for the plan" leaves them out. Needs soupi 2.7.0 or later.
 - Each ingredient shows whether it's in the pantry, running low, on the shopping
   list, or missing. A low ingredient counts as in stock but is flagged. One tap adds
   a missing or low ingredient to the list.

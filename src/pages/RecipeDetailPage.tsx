@@ -20,6 +20,7 @@ import { usePantry, useUpsertPantryItem } from '../hooks/usePantry'
 import {
     ingredientKey,
     matchIngredientsToPantry,
+    mentionsOptional,
     normalizeIngredientName,
     type PantryMatchedIngredient,
 } from '../lib/recipeHelper'
@@ -487,6 +488,10 @@ export function RecipeDetailPage() {
                                             {scaledLines.get(m.ingredient.id)?.scaled === false && (
                                                 <span className="unscaled"> · not scaled</span>
                                             )}
+                                            {m.ingredient.optional &&
+                                                !mentionsOptional(m.ingredient.sentence) && (
+                                                    <span className="ing-optional">optional</span>
+                                                )}
                                             {note && <span className="ing-match">{note}</span>}
                                         </button>
                                         <button

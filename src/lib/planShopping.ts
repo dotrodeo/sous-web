@@ -44,6 +44,7 @@ export function buildPlanShopping(
     for (const recipe of recipes.values()) {
         for (const m of matchIngredientsToPantry(recipe, pantryItems, links)) {
             if (m.untracked) continue // "always have, don't track"
+            if (m.ingredient.optional) continue // optional: added from the recipe page if wanted
             const item = m.pantryItem
             const status = item ? statusOf(item) : 'missing'
             if (!status) continue

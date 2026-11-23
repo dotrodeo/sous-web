@@ -5,11 +5,27 @@ import { AlertCircleIcon, LinkIcon, PlusIcon, TrashIcon, XIcon } from '../compon
 import { SortableList, SortableRow } from '../components/Sortable'
 import { useImportRecipe, useRecipe, useRecipeTags, useUpsertRecipe } from '../hooks/useRecipes'
 import { hasTag, isNewTag, normalizeTag, resolveTag, suggestTags } from '../lib/tags'
+import { mentionsOptional } from '../lib/recipeHelper'
 import type { RecipePatch } from '../lib/types'
 
 interface Row {
     id: string
     text: string
+    /** Ingredients only (#60): doesn't count as missing when it's out of stock. */
+    optional?: boolean
+    /** The owner set `optional` by hand; until then it follows the text ("…, optional"). */
+    optionalSet?: boolean
+}
+
+/** An ingredient row; optional follows the text unless the saved flag disagrees with it. */
+const ingredientRow = (id: string, text: string, optional?: boolean): Row => {
+    const detected = mentionsOptional(text)
+    return {
+        id,
+        text,
+        optional: optional ?? detected,
+        optionalSet: optional != null && optional !== detected,
+    }
 }
 
 const describeIngredient = (row: Row) => row.text.trim() || 'blank ingredient'
@@ -76,10 +92,9 @@ export function RecipeEditPage() {
                 prep: recipe.prepTime ?? '',
                 cook: recipe.cookTime ?? '',
                 servings: recipe.servings ?? '',
-                ingredients: (recipe.ingredients ?? []).map((i, n) => ({
-                    id: `ing${n}`,
-                    text: i.sentence,
-                })),
+                ingredients: (recipe.ingredients ?? []).map((i, n) =>
+                    ingredientRow(`ing${n}`, i.sentence, i.optional),
+                ),
                 instructions: (recipe.instructions ?? []).map((t, n) => ({
                     id: `ins${n}`,
                     text: t,
@@ -181,7 +196,9 @@ function RecipeEditForm({
             prepTime: prep.trim(),
             cookTime: cook.trim(),
             servings: servings.trim(),
-            ingredients: ingredients.map((i) => i.text.trim()).filter(Boolean),
+            ingredients: ingredients
+                .filter((i) => i.text.trim())
+                .map((i) => ({ sentence: i.text.trim(), optional: !!i.optional })),
             instructions: instructions.map((i) => i.text.trim()).filter(Boolean),
             notes: notes.trim() || null,
             tags: tags.map((t) => ({ name: t })),
@@ -209,7 +226,7 @@ function RecipeEditForm({
                 if (data.cookTime) setCook(data.cookTime)
                 if (data.servings) setServings(data.servings)
                 if (data.ingredients?.length) {
-                    setIngredients(data.ingredients.map((t) => ({ id: nextId('ing'), text: t })))
+                    setIngredients(data.ingredients.map((t) => ingredientRow(nextId('ing'), t)))
                 }
                 if (data.instructions?.length) {
                     setInstructions(data.instructions.map((t) => ({ id: nextId('ins'), text: t })))
@@ -327,14 +344,45 @@ function RecipeEditForm({
                                         onChange={(e) =>
                                             setIngredients((prev) =>
                                                 prev.map((x) =>
-                                                    x.id === row.id
-                                                        ? { ...x, text: e.target.value }
-                                                        : x,
+                                                    x.id !== row.id
+                                                        ? x
+                                                        : {
+                                                              ...x,
+                                                              text: e.target.value,
+                                                              // Follows the text until set by hand.
+                                                              optional: x.optionalSet
+                                                                  ? x.optional
+                                                                  : mentionsOptional(
+                                                                        e.target.value,
+                                                                    ),
+                                                          },
                                                 ),
                                             )
                                         }
                                         placeholder="1 cup flour"
                                     />
+                                    <button
+                                        type="button"
+                                        className={`opt-toggle${row.optional ? ' on' : ''}`}
+                                        aria-pressed={!!row.optional}
+                                        aria-label={`optional: ${describeIngredient(row)}`}
+                                        title="optional: doesn't count as missing"
+                                        onClick={() =>
+                                            setIngredients((prev) =>
+                                                prev.map((x) =>
+                                                    x.id === row.id
+                                                        ? {
+                                                              ...x,
+                                                              optional: !x.optional,
+                                                              optionalSet: true,
+                                                          }
+                                                        : x,
+                                                ),
+                                            )
+                                        }
+                                    >
+                                        optional
+                                    </button>
                                     <button
                                         type="button"
                                         className="btn-remove"
