@@ -9,6 +9,7 @@ import {
     ShoppingCartIcon,
     XIcon,
 } from '../components/Icons'
+import { MealSheet } from '../components/MealSheet'
 import { PlanShoppingSheet } from '../components/PlanShoppingSheet'
 import {
     useAddPlanDay,
@@ -17,12 +18,19 @@ import {
     useRemoveRecipeFromPlan,
 } from '../hooks/usePlan'
 import { useRecipes } from '../hooks/useRecipes'
+import {
+    useAddMealsToPlan,
+    useDeleteMeal,
+    useMeals,
+    useRemoveMealFromPlan,
+} from '../hooks/useMeals'
+import { mealAvailability, mealSuggestions, plannedMealIds } from '../lib/meals'
 import { usePantry } from '../hooks/usePantry'
 import { SaveButton } from '../components/SaveButton'
 import { buildPlanShopping } from '../lib/planShopping'
 import { useIngredientLinks } from '../hooks/useIngredientLinks'
 import { recipeAvailability } from '../lib/recipeHelper'
-import type { PantryItem, PlanDay, Recipe } from '../lib/types'
+import type { ItemCategory, Meal, PantryItem, PlanDay, Recipe } from '../lib/types'
 
 // ── Date helpers (plan dates are full ISO8601; we group/label by day key) ──
 const dayKey = (date: string | null): string | null => (date ? date.slice(0, 10) : null)
@@ -52,9 +60,12 @@ function statusColor(have: number, need: number): string {
     return have >= need ? 'var(--stocked)' : 'var(--partial)'
 }
 
+/** A recipe or a meal (#67) on a plan day. */
 interface ScheduleTarget {
     dayId: number
-    recipe: Recipe
+    kind: 'meal' | 'recipe'
+    id: number
+    name: string
 }
 interface PickerTarget {
     dayId: number | null
@@ -69,6 +80,15 @@ export function PlanPage() {
     const addDay = useAddPlanDay()
     const addRecipes = useAddRecipesToPlan()
     const removeRecipe = useRemoveRecipeFromPlan()
+    const { data: mealData } = useMeals()
+    const addMeals = useAddMealsToPlan()
+    const removeMeal = useRemoveMealFromPlan()
+    const deleteMeal = useDeleteMeal()
+    const [pickerTab, setPickerTab] = useState<'meal' | 'recipe'>('recipe')
+    /** The meal sheet: an existing meal (by id, so it shows fresh data) or a new one for a day. */
+    const [mealSheet, setMealSheet] = useState<{ mealId: number | null; dayId?: number } | null>(
+        null,
+    )
 
     const [picker, setPicker] = useState<PickerTarget | null>(null)
     const [pickerQuery, setPickerQuery] = useState('')
@@ -81,6 +101,10 @@ export function PlanPage() {
     const [shopOpen, setShopOpen] = useState(false)
 
     const pantryItems = useMemo<PantryItem[]>(() => pantry?.pantryItems ?? [], [pantry])
+    const categories = useMemo<ItemCategory[]>(
+        () => [...(pantry?.itemCategories ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+        [pantry],
+    )
     const { data: linkData } = useIngredientLinks()
     const links = useMemo(() => linkData ?? [], [linkData])
     const recipeById = useMemo(() => {
@@ -112,14 +136,34 @@ export function PlanPage() {
     )
     const missingCount = shopping.rows.filter((r) => r.status === 'missing').length
 
-    const totalMeals = futureDays.reduce((n, d) => n + d.recipes.length, 0)
+    const entryCount = (d: PlanDay) => d.recipes.length + (d.meals?.length ?? 0)
+    const totalMeals = futureDays.reduce((n, d) => n + entryCount(d), 0)
     const scheduledMeals = futureDays
         .filter((d) => d.date != null)
-        .reduce((n, d) => n + d.recipes.length, 0)
+        .reduce((n, d) => n + entryCount(d), 0)
+    const suggestions = useMemo(
+        () => mealSuggestions(mealData ?? [], plannedMealIds(plan?.planDays ?? [])),
+        [mealData, plan],
+    )
+    /** The meal the sheet shows, fresh from the plan or the meal list. */
+    const sheetMeal = useMemo<Meal | null>(() => {
+        if (mealSheet?.mealId == null) return null
+        const id = mealSheet.mealId
+        return (
+            (plan?.planDays ?? []).flatMap((d) => d.meals ?? []).find((m) => m.id === id) ??
+            (mealData ?? []).find((m) => m.id === id) ??
+            null
+        )
+    }, [mealSheet, plan, mealData])
     const summary =
         totalMeals === 0
             ? 'nothing planned yet'
             : `${totalMeals} meal${totalMeals === 1 ? '' : 's'}${scheduledMeals ? ` · ${scheduledMeals} scheduled` : ''}`
+
+    const mealDot = (meal: Meal) => {
+        const { have, need } = mealAvailability(meal, pantryItems)
+        return need === 0 ? 'var(--out)' : statusColor(have, need)
+    }
 
     const dotColor = (recipe: Recipe) => {
         const full = recipeById.get(recipe.id) ?? recipe
@@ -129,6 +173,7 @@ export function PlanPage() {
 
     const openPicker = (dayId: number | null, label: string) => {
         setPickerQuery('')
+        setPickerTab('recipe')
         setPicker({ dayId, label })
     }
     const onTopAdd = () => {
@@ -141,6 +186,16 @@ export function PlanPage() {
         await addRecipes.mutateAsync({ planDayId: picker.dayId, recipeIds: [recipeId] })
         setPicker(null)
     }
+    const addMealToTarget = async (mealId: number) => {
+        if (!picker || picker.dayId == null) return
+        await addMeals.mutateAsync({ planDayId: picker.dayId, mealIds: [mealId] })
+        setPicker(null)
+    }
+    const newMeal = () => {
+        if (!picker || picker.dayId == null) return
+        setMealSheet({ mealId: null, dayId: picker.dayId })
+        setPicker(null)
+    }
 
     const openAddDate = () => {
         setNewDate(todayKey())
@@ -151,12 +206,21 @@ export function PlanPage() {
         return addDay.mutateAsync({ planId: plan.id, date: isoFromKey(newDate) })
     }
 
-    const openSchedule = (dayId: number, recipe: Recipe, currentKey: string | null) => {
+    const openSchedule = (target: ScheduleTarget, currentKey: string | null) => {
         setDraftDate(currentKey ?? todayKey())
-        setSchedule({ dayId, recipe })
+        setSchedule(target)
     }
 
-    /** Move a recipe to a date (creating the day if needed) or to "any time". */
+    const addEntry = (dayId: number, target: ScheduleTarget) =>
+        target.kind === 'recipe'
+            ? addRecipes.mutateAsync({ planDayId: dayId, recipeIds: [target.id] })
+            : addMeals.mutateAsync({ planDayId: dayId, mealIds: [target.id] })
+    const removeEntry = (target: ScheduleTarget) =>
+        target.kind === 'recipe'
+            ? removeRecipe.mutateAsync({ planDayId: target.dayId, recipeId: target.id })
+            : removeMeal.mutateAsync({ planDayId: target.dayId, mealId: target.id })
+
+    /** Move a recipe or meal to a date (creating the day if needed) or to "any time". */
     const moveRecipe = async (target: ScheduleTarget, toKey: string | null) => {
         if (!plan) return
         setBusy(true)
@@ -170,11 +234,8 @@ export function PlanPage() {
                 day = updated.planDays.find((d) => dayKey(d.date) === toKey)
             }
             if (!day || day.id === target.dayId) return
-            await addRecipes.mutateAsync({ planDayId: day.id, recipeIds: [target.recipe.id] })
-            await removeRecipe.mutateAsync({
-                planDayId: target.dayId,
-                recipeId: target.recipe.id,
-            })
+            await addEntry(day.id, target)
+            await removeEntry(target)
         } finally {
             setBusy(false)
         }
@@ -182,10 +243,7 @@ export function PlanPage() {
 
     const confirmRemove = async () => {
         if (!pendingRemove) return
-        await removeRecipe.mutateAsync({
-            planDayId: pendingRemove.dayId,
-            recipeId: pendingRemove.recipe.id,
-        })
+        await removeEntry(pendingRemove)
         setPendingRemove(null)
     }
 
@@ -201,7 +259,7 @@ export function PlanPage() {
                     <button
                         type="button"
                         className="fab"
-                        aria-label="add a recipe"
+                        aria-label="add to plan"
                         onClick={onTopAdd}
                     >
                         <CalendarPlusIcon size={23} />
@@ -217,7 +275,7 @@ export function PlanPage() {
                     </div>
                     <button type="button" className="btn-primary" onClick={onTopAdd}>
                         <PlusIcon size={20} />
-                        add a recipe
+                        add to plan
                     </button>
                 </div>
 
@@ -244,7 +302,7 @@ export function PlanPage() {
                     <div className="empty-state">
                         <div className="emoji">🗓️</div>
                         <div className="title">no meals planned</div>
-                        <div>Add a date, then drop in a recipe.</div>
+                        <div>Add a date, then drop in a recipe or a meal.</div>
                         <button
                             type="button"
                             className="btn-primary"
@@ -259,9 +317,25 @@ export function PlanPage() {
                     <div style={{ marginTop: 4 }}>
                         {futureDays.map((day) => {
                             const key = dayKey(day.date)
-                            const meals = [...day.recipes].sort((a, b) =>
-                                a.name.localeCompare(b.name),
-                            )
+                            const entries: (ScheduleTarget & { dot: string; open: () => void })[] =
+                                [
+                                    ...day.recipes.map((recipe) => ({
+                                        dayId: day.id,
+                                        kind: 'recipe' as const,
+                                        id: recipe.id,
+                                        name: recipe.name,
+                                        dot: dotColor(recipe),
+                                        open: () => navigate(`/recipes/${recipe.id}`),
+                                    })),
+                                    ...(day.meals ?? []).map((meal) => ({
+                                        dayId: day.id,
+                                        kind: 'meal' as const,
+                                        id: meal.id,
+                                        name: meal.name,
+                                        dot: mealDot(meal),
+                                        open: () => setMealSheet({ mealId: meal.id }),
+                                    })),
+                                ].sort((a, b) => a.name.localeCompare(b.name))
                             return (
                                 <div className="plan-group" key={day.id}>
                                     <div className="plan-group-head">
@@ -269,28 +343,32 @@ export function PlanPage() {
                                             className={`plan-group-title${key === todayKey() ? ' today' : ''}`}
                                         >
                                             <span className="label">{labelForKey(key)}</span>
-                                            <span className="count">{meals.length}</span>
+                                            <span className="count">{entries.length}</span>
                                         </div>
                                     </div>
 
-                                    {meals.length === 0 ? (
+                                    {entries.length === 0 ? (
                                         <div className="meal-empty">nothing planned here</div>
                                     ) : (
                                         <div className="meal-list">
-                                            {meals.map((recipe) => (
-                                                <div className="meal-row" key={recipe.id}>
+                                            {entries.map((entry) => (
+                                                <div
+                                                    className={`meal-row${entry.kind === 'meal' ? ' is-meal' : ''}`}
+                                                    key={`${entry.kind}-${entry.id}`}
+                                                >
                                                     <span
                                                         className="status-dot"
-                                                        style={{ background: dotColor(recipe) }}
+                                                        style={{ background: entry.dot }}
                                                     />
                                                     <button
                                                         type="button"
                                                         className="name"
-                                                        onClick={() =>
-                                                            navigate(`/recipes/${recipe.id}`)
-                                                        }
+                                                        onClick={entry.open}
                                                     >
-                                                        {recipe.name}
+                                                        {entry.name}
+                                                        {entry.kind === 'meal' && (
+                                                            <span className="meal-tag">meal</span>
+                                                        )}
                                                     </button>
                                                     <div className="meal-actions">
                                                         <button
@@ -298,9 +376,7 @@ export function PlanPage() {
                                                             className="meal-btn sched"
                                                             aria-label="schedule"
                                                             title="schedule"
-                                                            onClick={() =>
-                                                                openSchedule(day.id, recipe, key)
-                                                            }
+                                                            onClick={() => openSchedule(entry, key)}
                                                         >
                                                             <PlanIcon size={21} />
                                                         </button>
@@ -309,22 +385,19 @@ export function PlanPage() {
                                                             className="meal-btn remove"
                                                             aria-label="remove from plan"
                                                             title="remove from plan"
-                                                            onClick={() =>
-                                                                setPendingRemove({
-                                                                    dayId: day.id,
-                                                                    recipe,
-                                                                })
-                                                            }
+                                                            onClick={() => setPendingRemove(entry)}
                                                         >
                                                             <XIcon size={20} />
                                                         </button>
                                                         <button
                                                             type="button"
                                                             className="meal-btn open"
-                                                            aria-label="open recipe"
-                                                            onClick={() =>
-                                                                navigate(`/recipes/${recipe.id}`)
+                                                            aria-label={
+                                                                entry.kind === 'meal'
+                                                                    ? 'open meal'
+                                                                    : 'open recipe'
                                                             }
+                                                            onClick={entry.open}
                                                         >
                                                             <ChevronRightIcon size={20} />
                                                         </button>
@@ -340,7 +413,7 @@ export function PlanPage() {
                                         onClick={() => openPicker(day.id, labelForKey(key))}
                                     >
                                         <PlusIcon size={17} />
-                                        add a recipe
+                                        add a recipe or meal
                                     </button>
                                 </div>
                             )
@@ -370,8 +443,8 @@ export function PlanPage() {
                         <div className="sheet-grabber" />
                         <div className="picker-head">
                             <div>
-                                <div className="picker-title">add a recipe</div>
-                                <div className="picker-target">add to {picker.label}</div>
+                                <div className="picker-title">add to plan</div>
+                                <div className="picker-target">for {picker.label}</div>
                             </div>
                             <button
                                 type="button"
@@ -382,41 +455,141 @@ export function PlanPage() {
                                 <XIcon size={18} />
                             </button>
                         </div>
-                        <div className="picker-search">
-                            <SearchIcon size={20} />
-                            <input
-                                value={pickerQuery}
-                                onChange={(e) => setPickerQuery(e.target.value)}
-                                placeholder="search recipes"
-                                aria-label="search recipes"
-                            />
+                        <div className="seg picker-tabs" role="tablist">
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={pickerTab === 'recipe'}
+                                className={pickerTab === 'recipe' ? 'active' : ''}
+                                onClick={() => setPickerTab('recipe')}
+                            >
+                                a recipe
+                            </button>
+                            <button
+                                type="button"
+                                role="tab"
+                                aria-selected={pickerTab === 'meal'}
+                                className={pickerTab === 'meal' ? 'active' : ''}
+                                onClick={() => setPickerTab('meal')}
+                            >
+                                a meal
+                            </button>
                         </div>
-                        <div className="picker-list">
-                            {pickerRecipes.length === 0 ? (
-                                <div className="picker-empty">no recipes match</div>
-                            ) : (
-                                pickerRecipes.map((r) => (
-                                    <div className="picker-row" key={r.id}>
-                                        <span
-                                            className="status-dot"
-                                            style={{ background: dotColor(r) }}
-                                        />
-                                        <span className="name">{r.name}</span>
-                                        <button
-                                            type="button"
-                                            className="add-pill"
-                                            disabled={addRecipes.isPending}
-                                            onClick={() => addToTarget(r.id)}
-                                        >
-                                            <PlusIcon size={16} />
-                                            add
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                        {pickerTab === 'recipe' ? (
+                            <>
+                                <div className="picker-search">
+                                    <SearchIcon size={20} />
+                                    <input
+                                        value={pickerQuery}
+                                        onChange={(e) => setPickerQuery(e.target.value)}
+                                        placeholder="search recipes"
+                                        aria-label="search recipes"
+                                    />
+                                </div>
+                                <div className="picker-list">
+                                    {pickerRecipes.length === 0 ? (
+                                        <div className="picker-empty">no recipes match</div>
+                                    ) : (
+                                        pickerRecipes.map((r) => (
+                                            <div className="picker-row" key={r.id}>
+                                                <span
+                                                    className="status-dot"
+                                                    style={{ background: dotColor(r) }}
+                                                />
+                                                <span className="name">{r.name}</span>
+                                                <button
+                                                    type="button"
+                                                    className="add-pill"
+                                                    disabled={addRecipes.isPending}
+                                                    onClick={() => addToTarget(r.id)}
+                                                >
+                                                    <PlusIcon size={16} />
+                                                    add
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    type="button"
+                                    className="btn-dashed picker-new-meal"
+                                    onClick={newMeal}
+                                >
+                                    <PlusIcon size={18} />
+                                    new meal
+                                </button>
+                                <div className="picker-hint">
+                                    a meal is a name and what you need from the pantry, no recipe.
+                                </div>
+                                {suggestions.length > 0 && (
+                                    <>
+                                        <div className="section-label picker-section">
+                                            recent meals
+                                        </div>
+                                        <div className="picker-list">
+                                            {suggestions.map((m) => (
+                                                <div className="picker-row" key={m.id}>
+                                                    <span
+                                                        className="status-dot"
+                                                        style={{ background: mealDot(m) }}
+                                                    />
+                                                    <span className="name">
+                                                        {m.name}
+                                                        <span className="picker-sub">
+                                                            {m.items.length} item
+                                                            {m.items.length === 1 ? '' : 's'}
+                                                        </span>
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        className="add-pill"
+                                                        disabled={addMeals.isPending}
+                                                        onClick={() => addMealToTarget(m.id)}
+                                                    >
+                                                        <PlusIcon size={16} />
+                                                        add
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="picker-dismiss"
+                                                        aria-label={`don’t suggest ${m.name} again`}
+                                                        title="don’t suggest again"
+                                                        disabled={deleteMeal.isPending}
+                                                        onClick={() => deleteMeal.mutate(m.id)}
+                                                    >
+                                                        <XIcon size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
+            )}
+
+            {mealSheet && pantry && (mealSheet.mealId == null || sheetMeal) && (
+                <MealSheet
+                    key={mealSheet.mealId ?? 'new'}
+                    meal={sheetMeal}
+                    pantryId={pantry.id}
+                    pantryItems={pantryItems}
+                    categories={categories}
+                    onClose={() => setMealSheet(null)}
+                    onCreated={(meal) =>
+                        mealSheet.dayId != null
+                            ? addMeals.mutateAsync({
+                                  planDayId: mealSheet.dayId,
+                                  mealIds: [meal.id],
+                              })
+                            : undefined
+                    }
+                />
             )}
 
             {schedule && (
@@ -432,7 +605,7 @@ export function PlanPage() {
                             />
                         </div>
                         <div className="sheet-subtitle">
-                            when do you want to make <strong>{schedule.recipe.name}</strong>?
+                            when do you want to make <strong>{schedule.name}</strong>?
                         </div>
                         <input
                             className="field"
@@ -491,8 +664,9 @@ export function PlanPage() {
                         </div>
                         <div className="modal-title">remove from plan?</div>
                         <div className="modal-text">
-                            <strong>{pendingRemove.recipe.name}</strong> will be taken off your meal
-                            plan.
+                            <strong>{pendingRemove.name}</strong> will be taken off your meal plan.
+                            {pendingRemove.kind === 'meal' &&
+                                ' You can add it again from “recent meals”.'}
                         </div>
                         <div className="modal-actions">
                             <button
@@ -506,7 +680,7 @@ export function PlanPage() {
                             <button
                                 type="button"
                                 className="btn-danger"
-                                disabled={removeRecipe.isPending}
+                                disabled={removeRecipe.isPending || removeMeal.isPending}
                                 onClick={confirmRemove}
                             >
                                 remove

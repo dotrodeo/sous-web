@@ -61,7 +61,12 @@ behind it.
 
 - Add days and put recipes on them. Each recipe shows how much of it the pantry
   covers.
-- "Shop for the plan" gathers what the upcoming recipes need and the pantry
+- Plan a meal without a recipe ("tacos this week"): give it a name and pick what it
+  needs from the pantry, or add new pantry items on the spot. No amounts; items can
+  be optional. It shows on the plan like a recipe, counts toward "shop for the plan",
+  and "I made this" updates the pantry. Afterwards it's offered again under "recent
+  meals" (dismiss one you don't want). Needs soupi 2.9.0 or later.
+- "Shop for the plan" gathers what the upcoming recipes and meals need and the pantry
   doesn't have, merged across recipes. Missing items start checked and running-low
   ones unchecked; add them all to the shopping list in one tap.
 

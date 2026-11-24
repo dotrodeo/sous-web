@@ -126,6 +126,8 @@ export interface PlanDay {
     updatedAt: string
     deletedAt: string | null
     recipes: Recipe[]
+    /** Planned meals that aren't recipes (#67). Absent from soupi < 2.9.0. */
+    meals?: Meal[]
     plan?: Plan | null
     planId: number
 }
@@ -264,4 +266,39 @@ export interface IngredientLink {
     pantryItem: { id: number; name: string; deletedAt: string | null } | null
     createdAt: string
     updatedAt: string
+}
+
+/** A planned meal that isn't a recipe (#67): a name and the pantry items it needs,
+ *  no amounts. Kept after it's made or taken off the plan, so it can be planned again. */
+export interface Meal {
+    id: number
+    name: string
+    lastMade: string | null
+    createdAt: string
+    updatedAt: string
+    deletedAt: string | null
+    householdId: number
+    items: MealItem[]
+}
+
+export interface MealItem {
+    id: number
+    mealId: number
+    pantryItemId: number
+    /** Doesn't count as missing; "shop for the plan" leaves it out. */
+    optional: boolean
+    pantryItem: PantryItem
+}
+
+/** POST /household/{id}/meals: create, or with `id`, replace the name and items. */
+export interface MealPatch {
+    id?: number
+    name: string
+    items: { pantryItemId: number; optional: boolean }[]
+}
+
+/** POST /household/{id}/meals/{mealId}/made */
+export interface MealCompletion {
+    finishedPantryItems: number[]
+    lowPantryItems: number[]
 }

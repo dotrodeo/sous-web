@@ -58,6 +58,12 @@ framework. There are no tests; CI runs format, lint, build and a Docker build.
   `notes`, `optionalIngredients` and `source`). A new recipe saves `source`; edits
   never send it, so it isn't cleared. `lib/recipeSource.ts` turns it into the
   "from site.com" link, for http(s) addresses only.
+- Plan meals (#67): planned meals that aren't recipes (`Meal`: a name and
+  `MealItem`s pointing at pantry items, with `optional`). They come on `PlanDay.meals`
+  (absent from older soupi, so use `?? []`); `hooks/useMeals.ts` and
+  `components/MealSheet.tsx` (view, edit or create, and "I made this").
+  `lib/meals.ts` counts availability (required items; low counts as in stock) and
+  picks suggestions (meals not on the plan). `lib/planShopping.ts` includes meals.
 - Notes (#43): one free-text field per recipe, edited in the editor. "I made this"
   sends a dated line (`lib/notes.ts`) that soupi appends.
 - `src/components/Sortable.tsx`: drag-and-drop reordering (dnd-kit) for the

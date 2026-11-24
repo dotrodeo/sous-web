@@ -34,6 +34,7 @@ const PERSISTED = new Set([
     'recipe',
     'recipeTags',
     'plan',
+    'meals',
     'ingredientLinks',
 ])
 

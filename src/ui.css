@@ -4199,3 +4199,193 @@ textarea.field.made-note {
 .recipe-source a:hover {
     text-decoration: underline;
 }
+
+/* ── Plan meals (#67): meals that aren't recipes ── */
+.meal-row .meal-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--chip);
+    color: var(--ink-60);
+    font-size: 12px;
+    font-weight: 600;
+    vertical-align: 2px;
+}
+.picker-tabs {
+    margin-bottom: 16px;
+}
+.picker-new-meal {
+    width: 100%;
+    justify-content: center;
+}
+.picker-hint {
+    margin: 10px 2px 4px;
+    font-size: 14px;
+    color: var(--ink-40);
+}
+.picker-section {
+    margin: 18px 2px 4px;
+}
+.picker-row .picker-sub {
+    display: block;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-40);
+}
+.picker-dismiss {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-40);
+    cursor: pointer;
+}
+.picker-dismiss:hover {
+    background: var(--chip);
+    color: var(--ink);
+}
+
+/* The meal sheet: a header that stays, a body that scrolls. */
+.sheet-card.meal-sheet {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+    padding-bottom: 0;
+}
+.meal-sheet-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0 -22px;
+    padding: 4px 22px calc(30px + env(safe-area-inset-bottom, 0px));
+}
+.meal-sheet .sheet-head .btn-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.meal-items {
+    margin-top: 4px;
+}
+.meal-items .ing-status:disabled {
+    cursor: default;
+}
+.meal-made-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 18px;
+}
+.meal-items-label {
+    margin-top: 20px;
+}
+.meal-edit-items {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    margin-bottom: 12px;
+}
+.meal-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px 9px 16px;
+    border-bottom: 1px solid var(--line);
+}
+.meal-edit-row:last-child {
+    border-bottom: none;
+}
+.meal-edit-row .name {
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    overflow-wrap: anywhere;
+}
+.meal-edit-row .opt-toggle {
+    display: block;
+}
+.meal-remove {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-40);
+    cursor: pointer;
+}
+.meal-remove:hover {
+    background: var(--chip);
+    color: var(--alert);
+}
+.meal-search {
+    padding: 11px 18px;
+}
+.meal-search input {
+    font-size: 16px;
+}
+.meal-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+.meal-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+.meal-create {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: var(--chip);
+}
+.meal-create-text {
+    font-size: 15px;
+    color: var(--ink-60);
+    margin-bottom: 10px;
+}
+.meal-create-text strong {
+    color: var(--ink);
+}
+.meal-create-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+.meal-create-row > :first-child {
+    flex: 1;
+    min-width: 0;
+}
+.meal-create-btn {
+    flex: none;
+}
+@media (min-width: 900px) {
+    .sheet-card.meal-sheet {
+        max-height: calc(100dvh - 48px);
+    }
+    .meal-sheet-body {
+        margin: 0 -28px;
+        padding: 4px 28px 28px;
+    }
+}

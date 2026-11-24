@@ -72,7 +72,7 @@ export function PlanShoppingSheet({
                 />
             </div>
             <div className="sheet-subtitle">
-                for the <strong>{recipeCount}</strong> recipe{recipeCount === 1 ? '' : 's'} on your
+                for the <strong>{recipeCount}</strong> meal{recipeCount === 1 ? '' : 's'} on your
                 upcoming plan
             </div>
 
