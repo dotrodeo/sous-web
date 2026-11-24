@@ -100,6 +100,11 @@ PANTRY_PATCH })` for list check-offs. Sign-in (Clerk) needs the network, so a
   rules at the end of `ui.css` ("Desktop layout (#61)"): 44px titles, 48px header
   buttons on the title line. Use those classes for a new page rather than its own
   sizes.
+- On-screen keyboard: `lib/viewport.ts` tracks the visible part of the screen
+  (`visualViewport`) as `--vv-top`/`--vv-height` and sets `html[data-keyboard]`.
+  Every `.sheet-overlay`, `.made-overlay` and `.modal-backdrop` is sized to it, so a
+  new sheet or pop-up gets this by using those classes; the focused field is
+  scrolled into view.
 - iPhone safe areas: the yellow header (`.blob`) and the status-bar strip
   (`body::before`, blue while cook mode is open) pad for `safe-area-inset-top`;
   full-screen overlays must too.

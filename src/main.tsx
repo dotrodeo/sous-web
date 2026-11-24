@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from './lib/api'
 import { CACHE_MAX_AGE_MS, persistOptions } from './lib/offline'
 import { applyTheme, cachedTheme, followSystemTheme } from './lib/theme'
+import { trackVisibleViewport } from './lib/viewport'
 import './index.css'
 import App from './App.tsx'
 import { StartupErrorBoundary } from './components/StartupErrorBoundary'
@@ -48,6 +49,8 @@ const queryClient = new QueryClient({
         },
     }),
 })
+
+trackVisibleViewport()
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
