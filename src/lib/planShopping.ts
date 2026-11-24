@@ -1,7 +1,8 @@
-// "Shop for the plan": what the upcoming meal plan's recipes need that the pantry
+// "Shop for the plan": what the upcoming meal plan's recipes and meals need that the pantry
 // doesn't have, merged across recipes.
+import { mealItemPantry } from './meals'
 import { matchIngredientsToPantry } from './recipeHelper'
-import type { IngredientLink, PantryItem, PlanDay, Recipe } from './types'
+import type { IngredientLink, Meal, PantryItem, PlanDay, Recipe } from './types'
 
 export type PlanShoppingStatus =
     /** Out of stock, or not in the pantry at all: added by default. */
@@ -17,7 +18,7 @@ export interface PlanShoppingRow {
     /** The pantry item, or null for an ingredient not in the pantry yet (added by name). */
     itemId: number | null
     status: PlanShoppingStatus
-    /** Names of the planned recipes that need it. */
+    /** Names of the planned recipes and meals that need it. */
     recipes: string[]
 }
 
@@ -41,28 +42,37 @@ export function buildPlanShopping(
     days.forEach((d) => d.recipes.forEach((r) => recipes.set(r.id, recipeById.get(r.id) ?? r)))
 
     const rows = new Map<string, PlanShoppingRow>()
+    const addRow = (item: PantryItem | null, fallbackName: string, recipeName: string) => {
+        const status = item ? statusOf(item) : 'missing'
+        if (!status) return
+        const name = (item?.name ?? fallbackName).trim()
+        if (!name) return
+        const key = item ? `item:${item.id}` : `name:${name.toLowerCase()}`
+        const row = rows.get(key)
+        if (row) {
+            if (!row.recipes.includes(recipeName)) row.recipes.push(recipeName)
+        } else {
+            rows.set(key, { key, name, itemId: item?.id ?? null, status, recipes: [recipeName] })
+        }
+    }
+
     for (const recipe of recipes.values()) {
         for (const m of matchIngredientsToPantry(recipe, pantryItems, links)) {
             if (m.untracked) continue // "always have, don't track"
             if (m.ingredient.optional) continue // optional: added from the recipe page if wanted
-            const item = m.pantryItem
-            const status = item ? statusOf(item) : 'missing'
-            if (!status) continue
-            const name = (item?.name ?? m.ingredient.item ?? m.ingredient.sentence).trim()
-            if (!name) continue
-            const key = item ? `item:${item.id}` : `name:${name.toLowerCase()}`
-            const row = rows.get(key)
-            if (row) {
-                if (!row.recipes.includes(recipe.name)) row.recipes.push(recipe.name)
-            } else {
-                rows.set(key, {
-                    key,
-                    name,
-                    itemId: item?.id ?? null,
-                    status,
-                    recipes: [recipe.name],
-                })
-            }
+            addRow(m.pantryItem, m.ingredient.item ?? m.ingredient.sentence, recipe.name)
+        }
+    }
+
+    // Planned meals (#67): their required pantry items. A meal on two days counts once.
+    const meals = new Map<number, Meal>()
+    days.forEach((d) => (d.meals ?? []).forEach((m) => meals.set(m.id, m)))
+    for (const meal of meals.values()) {
+        for (const mi of meal.items) {
+            if (mi.optional) continue
+            const item = mealItemPantry(mi, pantryItems)
+            if (item.deletedAt) continue
+            addRow(item, item.name, meal.name)
         }
     }
 
@@ -72,5 +82,5 @@ export function buildPlanShopping(
             a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
     )
     sorted.forEach((r) => r.recipes.sort((a, b) => a.localeCompare(b)))
-    return { rows: sorted, recipeCount: recipes.size }
+    return { rows: sorted, recipeCount: recipes.size + meals.size }
 }

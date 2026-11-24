@@ -9,6 +9,9 @@ import type {
     IngredientLink,
     ItemCategory,
     ItemCategoryPatch,
+    Meal,
+    MealCompletion,
+    MealPatch,
     Pantry,
     PantryItem,
     PantryItemPatch,
@@ -87,10 +90,25 @@ export const planService = {
         api.post<void>(`/household/${hid}/plan/day/${planDayId}/recipes`, recipeIds),
     removeRecipe: (api: ApiClient, hid: number, planDayId: number, recipeId: number) =>
         api.delete(`/household/${hid}/plan/day/${planDayId}/recipes/${recipeId}`),
+    addMeals: (api: ApiClient, hid: number, planDayId: number, mealIds: number[]) =>
+        api.post<void>(`/household/${hid}/plan/day/${planDayId}/meals`, mealIds),
+    removeMeal: (api: ApiClient, hid: number, planDayId: number, mealId: number) =>
+        api.delete(`/household/${hid}/plan/day/${planDayId}/meals/${mealId}`),
 }
 
 /** HouseholdService.swift */
 export const householdService = {
     join: (api: ApiClient, hid: number, joinToken: string) =>
         api.post<Household>(`/household/${hid}/join`, { joinToken }),
+}
+
+/** Planned meals that aren't recipes (#67, soupi 2.9.0+). */
+export const mealService = {
+    list: (api: ApiClient, hid: number) => api.get<Meal[]>(`/household/${hid}/meals`),
+    upsert: (api: ApiClient, hid: number, patch: MealPatch) =>
+        api.post<Meal>(`/household/${hid}/meals`, patch),
+    remove: (api: ApiClient, hid: number, id: number) =>
+        api.delete(`/household/${hid}/meals/${id}`),
+    complete: (api: ApiClient, hid: number, id: number, completion: MealCompletion) =>
+        api.post<void>(`/household/${hid}/meals/${id}/made`, completion),
 }
