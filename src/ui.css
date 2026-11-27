@@ -4389,3 +4389,36 @@ textarea.field.made-note {
         padding: 4px 28px 28px;
     }
 }
+
+/* ── On-screen keyboard (lib/viewport.ts) ──
+   Sheets and pop-ups fill the part of the screen that's visible, so with the
+   keyboard up they sit above it instead of under it. While it's up, a sheet
+   that no longer fits scrolls, and the focused field is scrolled into view. */
+.sheet-overlay,
+.made-overlay,
+.modal-backdrop {
+    top: var(--vv-top, 0px);
+    bottom: auto;
+    height: var(--vv-height, 100%);
+}
+html[data-keyboard='open'] .sheet-card,
+html[data-keyboard='open'] .made-card {
+    max-height: calc(var(--vv-height) - env(safe-area-inset-top, 0px) - 8px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* The home indicator is under the keyboard now. */
+    padding-bottom: 16px;
+}
+html[data-keyboard='open'] .modal-card {
+    max-height: calc(var(--vv-height) - 32px);
+    overflow-y: auto;
+}
+/* Sheets that scroll their own body keep their header; give the body the room. */
+html[data-keyboard='open'] .sheet-card.plan-shop,
+html[data-keyboard='open'] .sheet-card.meal-sheet {
+    overflow-y: hidden;
+}
+html[data-keyboard='open'] .plan-shop-list,
+html[data-keyboard='open'] .meal-sheet-body {
+    padding-bottom: 16px;
+}
